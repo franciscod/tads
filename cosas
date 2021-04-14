@@ -1,0 +1,27 @@
+ver que este bien escrito el tad
+    que las variables cuantificadas para los axiomas se usen bien
+        o sea, que si escribo esto se rompa:
+            if 4 then true else <> fi
+                - porque 4 no es bool
+                - porque true y <> no pueden ser el mismo "alpha"
+
+            forall x, y: bool
+            if y then x else z fi
+                - z no esta entre las variables libres del tad
+
+    chequear restricciones
+        que si trato de evaluar una expresion y pero no estoy cumpliendo la
+        restriccion, sea un error
+
+    chequear completitud de los observadores:
+        todos los observadores tienen que estar bien definidos para todos
+        los generadores
+
+evaluar una expresion
+    > false v true v false v true
+    true
+
+    > mitad([1,2,3,4,5,6])
+    [1,2,3]
+
+export a latex
