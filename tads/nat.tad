@@ -1,0 +1,48 @@
+TAD Nat
+
+géneros nat
+
+exporta nat, generadores, observadores, +, -, ×, <, ≤, mín, máx
+
+usa     Bool
+
+igualdad observacional
+    (∀n, m : nat) (n =obs m ⇔ (  (n =0? =obs m =0?) ∧L
+                               (¬(n =0?) ⇒L (pred(n) =obs pred(m)))))
+
+observadores básicos
+    • =0?   : nat           → bool
+    pred    : nat n         → nat   {¬(n =0?)}
+
+generadores
+    0       :               → nat
+    suc     : nat           → nat
+
+otras operaciones
+    • + •   : nat   × nat   → nat
+    • - •   : nat n × nat m → nat   {m ≤ n}
+    • × •   : nat   × nat   → nat
+    • < •   : nat   × nat   → bool
+    • ≤ •   : nat   × nat   → bool
+    mín     : nat   × nat   → nat
+    máx     : nat   × nat   → nat
+    -- en el apunte de tads basicos esta en bool
+    β       : bool          → nat
+
+axiomas ∀ n, m: nat
+    0 =0?        ≡ true
+    suc(n) =0?   ≡ false
+    pred(suc(n)) ≡ n
+
+    n + m        ≡ if m =0? then n else suc(n + pred(m)) fi
+    n - m        ≡ if m =0? then n else pred(n) - pred(m) fi
+    n × m        ≡ if m =0? then 0 else n × pred(m) + n fi
+    n < m        ≡ ¬(m =0?) ∧L (n =0? ∨L pred(n) < pred(m))
+    n ≤ m        ≡ n < m ∨ n = m
+    mín(n, m)    ≡ if m < n then m else n fi
+    máx(n, m)    ≡ if m < n then n else m fi
+
+    -- en el apunte de tads basicos esta en bool
+    β(n)         ≡ if n then 1 else 0 fi
+
+Fin TAD
