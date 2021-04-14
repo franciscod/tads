@@ -1,3 +1,19 @@
+snippets
+    esqueleto de tad (echu)
+    al axiomatizar un observador te levante todos los generadores
+
+parsear una expresion usando las secuencias de tokens conocidas
+
+    deberiamos poder parsear a nodos expresiones como
+        ¬true
+        ¬¬true
+        ¬(false v true)
+        if true then true else true fi
+
+        if (if true then true else true fi) then true else true fi
+
+    hintear si te olvidaste del fi o del else
+
 ver que este bien escrito el tad
     que las variables cuantificadas para los axiomas se usen bien
         o sea, que si escribo esto se rompa:
@@ -16,6 +32,10 @@ ver que este bien escrito el tad
     chequear completitud de los observadores:
         todos los observadores tienen que estar bien definidos para todos
         los generadores
+
+
+mostrar ejemplos de un axioma
+    inventar valores para las variables, reemplazar y reducir la expresion de la derecha
 
 evaluar una expresion
     > false v true v false v true
