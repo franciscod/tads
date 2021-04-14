@@ -9,7 +9,7 @@ export type Literal = { // tokens para sintaxis: corchetes, simbolos, etc
 
 export type Slot = { // puntito • que despues puede usarse como variable (para restricciones)
     type: "slot";
-    nombre: string;
+    nombre?: string;
     genero: Genero;
 };
 
@@ -38,13 +38,13 @@ export type Operacion = {
     nombre: string;
     tokens: Token[];  // como lo parseo a un nodo
     retorno: Genero;
-    restriccion?: ExpresionLogica;
     axiomas: Axioma[];
+    restriccion?: ExpresionLogica;
 };
 
 export type TAD = {
     nombre: string;
-    generos: Genero[];
+    generos: string[];
     // exporta por ahora no
     // ig obs por ahora no
     generadores: Operacion[];

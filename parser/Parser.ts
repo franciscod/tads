@@ -1,5 +1,5 @@
 import { Aplicacion, Axioma, ExpresionLogica, Genero, Literal, Nodo,
-         Operacion, Slot, TAD, Token, Variable } from "./Types";
+         Operacion, Slot, TAD, Token, Variable } from "./Types.ts";
 
 export function parseTad(source: string) : TAD {
     let tad: TAD = {
@@ -41,29 +41,62 @@ export function parseTad(source: string) : TAD {
             if (line.trim() === "") {
                 mode = "base";
             } else {
-                target.push(parseOperacion(line));
+                target.push(parseOperacion(line, tad));
             }
         }
-
     })
 
     return tad;
 }
 
-function parseOperacion(line: string) : Operacion {
-    let [_name, line2] = line.split(":")
+function parseOperacion(line: string, tad: TAD) : Operacion {
+    let [_nombre, line2] = line.split(":")
     let [_args, line3] = line2.split("→")
     let [_ret, ...rest] = line3.trim().split(" ")
     let restr = null  // TODO
 
-    let name = _name.trim()
+    let nombre = _nombre.trim()
 
-    if (name.includes("•")) {
-        name = name.split("•").map((name) => name.trim()).join("•")
+    let tokens: Token[] = [];
+    let slots = [];
+
+    let args = _args.split("×").map((arg) => arg.trim()).filter((arg) => arg !== "")
+
+    let tokenSource = nombre;
+    while (tokenSource !== "") {
+        const i = tokenSource.indexOf("•");
+        if (i == 0) {
+            const genName: string = args[slots.length];
+            let gen: Genero = genName;
+            if (tad.generos.includes(genName)) {
+                if (genName === tad.generos[0]) {
+                    gen = tad;
+                }
+            }
+            const slot: Slot = {"type": "slot", "genero": gen};
+            tokens.push(slot);
+            slots.push(slot);
+
+            tokenSource = tokenSource.substr(1);
+        } else if (i == -1) {
+            tokens.push({"type": "literal", "symbol": tokenSource.trim()});
+            tokenSource = "";
+        } else {
+            tokens.push({"type": "literal", "symbol": tokenSource.substr(0, i).trim()});
+            tokenSource = tokenSource.substr(i);
+        }
     }
 
-    let args = _args.split("×").map((name) => name.trim()).filter((name) => name !== "")
-    const ret = _ret.trim()
+    if (nombre.includes("•")) {
+        nombre = nombre.split("•").map((part) => part.trim()).join("•")
+    }
 
-    return [name, args, ret, restr]
+    const retorno = _ret.trim()
+
+    return {
+        nombre,
+        tokens,
+        retorno,
+        axiomas: [],  // TODO
+    }
 }

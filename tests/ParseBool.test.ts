@@ -1,27 +1,77 @@
-import fs from "fs";
-import path from "path";
-import { parseTad } from "../parser/Parser";
+import { assertEquals, assertArrayIncludes } from "https://deno.land/std@0.93.0/testing/asserts.ts";
+import { parseTad } from "../parser/Parser.ts";
+import { Genero, Slot, Token } from "../parser/Types.ts";
 
-const BOOL_TAD = fs.readFileSync(path.resolve(__dirname, "../tads/bool.tad"), 'utf-8');
+const BOOL_TAD = Deno.readTextFileSync("tads/bool.tad");
 
-test("parsea bool", () => {
-    const tad = parseTad(BOOL_TAD);
+function generoStr(gen: Genero) : string {
+    if (typeof gen === "string") {
+        return gen;
+    } else { // es un TAD
+        return gen.nombre.toLowerCase();
+    }
+}
 
-    expect(tad.nombre).toStrictEqual("Bool")
-    expect(tad.generos).toStrictEqual(["bool"]);
+function generosDeSlots(tokens: Token[]) : string[] {
+    return tokens
+        .filter((token) => token.type === "slot" )
+        .map((token: Token) => {
+            const slot = token as Slot;
+            let gen: Genero = slot.genero;
+            return generoStr(gen);
+        });
+}
 
-    expect(tad.generadores).toContainEqual(["true", [], "bool", null]);
-    expect(tad.generadores).toContainEqual(["false", [], "bool", null])
+Deno.test("parsea bool", () => {
+    const tad = parseTad(BOOL_TAD)
 
-    expect(tad.otrasOperaciones).toContainEqual(["if•then•else•fi", ["bool", "α", "α"], "α", null])
+    assertEquals(tad.nombre, "Bool")
+    assertEquals(tad.generos, ["bool"])
 
-    expect(tad.otrasOperaciones).toContainEqual(["¬•", ["bool"], "bool", null])
 
-    expect(tad.otrasOperaciones).toContainEqual(["•∨•", ["bool", "bool"], "bool", null])
-    expect(tad.otrasOperaciones).toContainEqual(["•∧•", ["bool", "bool"], "bool", null])
-    expect(tad.otrasOperaciones).toContainEqual(["•⇒•", ["bool", "bool"], "bool", null])
+    const [genTrue, genFalse] = tad.generadores;
 
-    expect(tad.otrasOperaciones).toContainEqual(["•∨L•", ["bool", "bool"], "bool", null])
-    expect(tad.otrasOperaciones).toContainEqual(["•∧L•", ["bool", "bool"], "bool", null])
-    expect(tad.otrasOperaciones).toContainEqual(["•⇒L•", ["bool", "bool"], "bool", null])
+    assertEquals(genTrue.nombre, "true");
+    assertEquals(genTrue.tokens, [{type: "literal", symbol: "true"}]);
+    assertEquals(generoStr(genTrue.retorno), "bool");
+
+    assertEquals(genFalse.nombre, "false");
+    assertEquals(genFalse.tokens, [{type: "literal", symbol: "false"}]);
+    assertEquals(genFalse.retorno, "bool");
+
+    const [ooItef, ooNot, ooOr, ooAnd, ooImp, ooOrL, ooAndL, ooImpL] = tad.otrasOperaciones;
+
+    assertEquals(ooItef.nombre, "if•then•else•fi");
+    assertEquals(generosDeSlots(ooItef.tokens), ["bool", "α", "α"]);
+    assertEquals(ooItef.retorno, "α");
+
+    assertEquals(ooNot.nombre, "¬•");
+    assertEquals(generosDeSlots(ooNot.tokens), ["bool"]);
+    assertEquals(ooNot.retorno, "bool");
+
+    assertEquals(ooOr.nombre, "•∨•");
+    assertEquals(generosDeSlots(ooOr.tokens), ["bool", "bool"]);
+    assertEquals(ooOr.retorno, "bool");
+
+    assertEquals(ooAnd.nombre, "•∧•");
+    assertEquals(generosDeSlots(ooAnd.tokens), ["bool", "bool"]);
+    assertEquals(ooAnd.retorno, "bool");
+
+    assertEquals(ooImp.nombre, "•⇒•");
+    assertEquals(generosDeSlots(ooImp.tokens), ["bool", "bool"]);
+    assertEquals(ooImp.retorno, "bool");
+
+    assertEquals(ooOrL.nombre, "•∨L•");
+    assertEquals(generosDeSlots(ooOrL.tokens), ["bool", "bool"]);
+    assertEquals(ooOrL.retorno, "bool");
+
+    assertEquals(ooAndL.nombre, "•∧L•");
+    assertEquals(generosDeSlots(ooAndL.tokens), ["bool", "bool"]);
+    assertEquals(ooAndL.retorno, "bool");
+
+    assertEquals(ooImpL.nombre, "•⇒L•");
+    assertEquals(generosDeSlots(ooImpL.tokens), ["bool", "bool"]);
+    assertEquals(ooImpL.retorno, "bool");
+
+    // TODO: chequear axiomas
 })
