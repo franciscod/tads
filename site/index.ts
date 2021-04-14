@@ -1,5 +1,6 @@
 import "./styles.less";
-import "./Colorization"
+import "./Colorization";
+import attachCodeLens from "./CodeLens";
 
 import * as monaco from "monaco-editor";
 import { parseTad } from "../parser/Parser";
@@ -20,5 +21,7 @@ editor.onDidChangeModelContent(e => {
     let tad = parseTad(value);
     console.log(tad);
 });
+
+attachCodeLens(editor);
 
 console.log("Hello");
