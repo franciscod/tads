@@ -66,13 +66,7 @@ function parseOperacion(line: string) : Operacion {
     let name = _name.trim()
 
     if (name.includes("•")) {
-        let parts = name.split("•").map((name) => name.trim()).filter((name) => name !== "")
-
-        if (parts.length === 1){
-            name = parts[0]
-        } else if (parts.length > 0) {
-            name = parts.join("_")
-        }
+        name = name.split("•").map((name) => name.trim()).join("•")
     }
 
     let args = _args.split("×").map((name) => name.trim()).filter((name) => name !== "")
