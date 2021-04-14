@@ -9,8 +9,8 @@ const config = {
     },
     module: {
         rules: [
-            { test: /\.ts?$/, loader: "ts-loader", exclude: [/node_modules/] },
-            { test: /\.js?$/, loader: "babel-loader", exclude: [/node_modules/] },
+            { test: /\.ts?$/, loader: "ts-loader", exclude: [/node_modules/, /tests/] },
+            { test: /\.js?$/, loader: "babel-loader", exclude: [/node_modules/, /tests/] },
             { test: /\.(less|css)$/, use: [{ loader: "style-loader" }, { loader: "css-loader" }, { loader: "less-loader" }] },
             { test: /\.ttf$/, use: ['file-loader'] },
             { test: /\.tad$/, use: ['raw-loader'] }
