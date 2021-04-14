@@ -7,4 +7,7 @@ testloop:
 todo:
 	rg "TODO" tests parser
 
-.PHONY: test testloop todo
+dev:
+	npm run dev
+
+.PHONY: test testloop todo dev
