@@ -2,7 +2,7 @@ TAD Bool
 
 géneros bool
 
-exporta bool, generadores, observadores, if/then/else/fi, ¬, ∨, ∧ ⇒, ∨L, ∧L, ⇒L, β
+exporta bool, generadores, observadores, if•then•else•fi, ¬, ∨, ∧ ⇒, ∨L, ∧L, ⇒L, β
 
 igualdad observacional
     ((true =obs true) ∧ (false =obs false) ∧ ¬(true =obs false) ∧ ¬(false =obs true))
@@ -26,7 +26,7 @@ axiomas ∀ x, y: bool, ∀ a, b: α
     if true  then a else b fi ≡ a
     if false then a else b fi ≡ b
     ¬x                        ≡ if x then false else true fi
-    x ∨ y                     ≡ if x then (if y then true else true
+    x ∨ y                     ≡ if x then (if y then true else true fi) else y fi
     x ∧ y                     ≡ if x then y else (if y then false else false fi) fi
     x ⇒ y                     ≡ ¬x ∨ y
     x ∨L y                    ≡ if x then true else y fi
