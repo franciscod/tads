@@ -7,7 +7,7 @@ monaco.languages.setMonarchTokensProvider('tad', {
     tokenizer: {
         root: [
             [/^(TAD|FIN TAD)/, 'tad-definicion'],
-            [/^(?:g[ée]neros|usa|importa|exporta|par[aá]metros formales|igualdad observacional|igobs|ig obs|observadores b[áa]sicos|obs|generadores|gen|otras operaciones|otras op|otrasop|axiomas)/, "tad-keyword"],
+            [/^(\s*)(?:g[ée]neros|usa|importa|exporta|par[aá]metros formales|igualdad observacional|igobs|ig obs|observadores b[áa]sicos|obs|generadores|gen|otras operaciones|otras op|otrasop|axiomas)/, "tad-keyword"],
             [/--.*/, 'tad-comment'],
             [/(•|×)/, 'tad-dot'],
             [/(≡|:|→)/, 'tad-separators'],
