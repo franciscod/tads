@@ -1,13 +1,5 @@
-type ExpresionLogica = any;  // TODO
-
-type Operacion = [string, string[], string, ExpresionLogica?];
-
-type TAD = {
-    nombre: string;
-    generos: string[];
-    generadores: Operacion[];
-    otrasOperaciones: Operacion[];
-};
+import { Aplicacion, Axioma, ExpresionLogica, Genero, Literal, Nodo,
+         Operacion, Slot, TAD, Token, Variable } from "./Types.ts";
 
 export function parseTad(source: string) : TAD {
     let tad: TAD = {

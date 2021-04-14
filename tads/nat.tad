@@ -13,6 +13,8 @@ igualdad observacional
 observadores básicos
     • =0?   : nat           → bool
     pred    : nat n         → nat   {¬(n =0?)}
+-- sugar de:
+--  pred(•) : nat n         → nat   {¬(n =0?)}
 
 generadores
     0       :               → nat
