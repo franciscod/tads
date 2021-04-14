@@ -1,5 +1,5 @@
 import { Aplicacion, Axioma, ExpresionLogica, Genero, Literal, Nodo,
-         Operacion, Slot, TAD, Token, Variable } from "./Types.ts";
+         Operacion, Slot, TAD, Token, Variable } from "./Types";
 
 export function parseTad(source: string) : TAD {
     let tad: TAD = {
@@ -7,6 +7,7 @@ export function parseTad(source: string) : TAD {
         generos: [],
         generadores: [],
         otrasOperaciones: [],
+        variablesLibres: []
     };
 
     let mode = "base";
