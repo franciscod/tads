@@ -11,23 +11,23 @@ const config = {
         rules: [
             { test: /\.ts?$/, loader: "ts-loader", exclude: [/node_modules/] },
             { test: /\.js?$/, loader: "babel-loader", exclude: [/node_modules/] },
-			{ test: /\.(less|css)$/, use: [{ loader: "style-loader" }, { loader: "css-loader" }, { loader: "less-loader" }] },
-            { test: /\.ttf$/, use: ['file-loader'] }
+            { test: /\.(less|css)$/, use: [{ loader: "style-loader" }, { loader: "css-loader" }, { loader: "less-loader" }] },
+            { test: /\.ttf$/, use: ['file-loader'] },
+            { test: /\.tad$/, use: ['raw-loader'] }
         ]
     },
     resolve: {
         extensions: [".ts", ".js"]
     },
-	plugins: [
-		new HtmlWebpackPlugin({
-			template: path.resolve(__dirname, "site/index.html")
-		})
-	],
+    plugins: [
+        new HtmlWebpackPlugin({
+            template: path.resolve(__dirname, "site/index.html")
+        })
+    ],
     devServer: {
         contentBase: path.resolve(__dirname, "public"),
         compress: false
     }
 };
-
 
 module.exports = config;
