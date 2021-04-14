@@ -1,15 +1,18 @@
 import "./styles.less";
-
-import BOOL_TAD from "../tads/bool.tad";
+import "./Colorization"
 
 import * as monaco from "monaco-editor";
 import { parseTad } from "../parser/Parser";
 
+import BOOL_TAD from "../tads/bool.tad";
+
 let editor = monaco.editor.create(document.getElementById('editor')!, {
     value: BOOL_TAD,
-    language: 'json',
-    theme: 'vs-dark',
-    automaticLayout: true
+    language: 'tad',
+    theme: 'tad-dark',
+    automaticLayout: true,
+    fontFamily: 'Fira Code',
+    fontSize: 20
 });
 
 editor.onDidChangeModelContent(e => {
