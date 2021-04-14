@@ -15,7 +15,7 @@ export type Slot = { // puntito • que despues puede usarse como variable (para
 
 export type Token = Literal | Slot;
 
-export type Aplicacion {
+export type Aplicacion = {
     type: "operacion";
     operacion: Operacion;
     args: Nodo[];
