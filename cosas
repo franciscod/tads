@@ -1,6 +1,18 @@
 snippets
     esqueleto de tad (echu)
     al axiomatizar un observador te levante todos los generadores
+    macros para ingresar simbolos, o botones tipo paleta
+
+go to definition con ctrl+click
+    (ctags para vim? no se en monaco como se implementa esto)
+    muchos buffers?
+
+generos mas complejos
+    una referencia a un tad no es suficiente, deberiamos poder representar:
+        secu<alpha>
+        secu<nat>
+        secu<secu<bool>>
+        dicc<nat,nat>
 
 parsear una expresion usando las secuencias de tokens conocidas
 
@@ -45,3 +57,4 @@ evaluar una expresion
     [1,2,3]
 
 export a latex
+
