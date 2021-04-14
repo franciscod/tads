@@ -7,6 +7,9 @@ go to definition con ctrl+click
     (ctags para vim? no se en monaco como se implementa esto)
     muchos buffers?
 
+idea de translation unit
+    parsear un source con varios TADs
+
 generos mas complejos
     una referencia a un tad no es suficiente, deberiamos poder representar:
         secu<alpha>
