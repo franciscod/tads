@@ -1,0 +1,16 @@
+TAD Clase
+
+géneros clase
+
+generadores
+    crearTablero : → clase
+    agregarAlumno: clase x nat → clase
+
+otras operaciones
+    estaAlumno: clase x alumno → bool
+
+axiomas ∀ a: alumno
+    estaAlumno(crearTablero(), a) ≡ false
+    estaAlumno(agregarAlumno(c, a), a') ≡ a == a' ∨ estaAlumno(c, a')
+
+Fin TAD

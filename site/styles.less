@@ -10,9 +10,35 @@ body {
 	color: white;
 	background-color: #333;
     overflow: hidden;
+	font-family: 'Fira Code';
 }
 
 #editor {
 	width: 100vw;
 	height: 100vh;
+}
+
+.header {
+	display: flex;
+	margin: 8px;
+	
+	.title {
+		font-size: 18px;
+	}
+}
+
+.tabs {
+	display: flex;
+	background-color: #252526;
+    user-select: none;
+
+	.tab {
+		padding: 18px 10px;
+		cursor: pointer;
+		border-right: 1px solid #202020;
+
+		&.open {
+			background-color: #1E1E1E;
+		}
+	}
 }
