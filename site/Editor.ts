@@ -1,4 +1,5 @@
 import "./Colorization";
+import "./Suggestions";
 import attachCodeLens from "./CodeLens";
 
 import * as monaco from "monaco-editor";

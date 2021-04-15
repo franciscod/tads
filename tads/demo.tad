@@ -4,10 +4,10 @@ géneros clase
 
 generadores
     crearTablero : → clase
-    agregarAlumno: clase x nat → clase
+    agregarAlumno: clase × nat → clase
 
 otras operaciones
-    estaAlumno: clase x alumno → bool
+    estaAlumno: clase × alumno → bool
 
 axiomas ∀ a: alumno
     estaAlumno(crearTablero(), a) ≡ false

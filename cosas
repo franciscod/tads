@@ -1,7 +1,7 @@
 snippets
-    esqueleto de tad (echu)
+    esqueleto de tad (echu) ✓
     al axiomatizar un observador te levante todos los generadores
-    macros para ingresar simbolos, o botones tipo paleta
+    macros para ingresar simbolos, o botones tipo paleta ✓
 
 go to definition con ctrl+click
     (ctags para vim? no se en monaco como se implementa esto)
