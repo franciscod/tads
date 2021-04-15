@@ -4,10 +4,25 @@ var i = 0;
 
 export default (editor: monaco.editor.IStandaloneCodeEditor) => {
 
-    var astCommandId = editor.addCommand(0, function () {
-        alert('TODO: show tree');
+    var debugCommandId = editor.addCommand(0, function () {
+        alert('TODO: show debug');
     }, '');
-
+    var testCommandId = editor.addCommand(0, function () {
+        alert('TODO: show test');
+    }, '');
+    
+    /*var decorations = editor.deltaDecorations([], [
+        {
+            range: new monaco.Range(6,1,5,1),
+            options: {
+                isWholeLine: true,
+                className: 'myContentClass',
+                glyphMarginClassName: 'myGlyphMarginClass',
+                glyphMarginHoverMessage: { value: 'pepe' }
+            }
+        }
+    ]);*/
+    
     monaco.languages.registerCodeLensProvider('tad', {
         provideCodeLenses: function (model, token) {
             let value = model.getValue();
@@ -17,21 +32,38 @@ export default (editor: monaco.editor.IStandaloneCodeEditor) => {
                             .map(([n, l]): [string, number] => [n.slice(4).trim(), l + 1]);
 
             return {
-                lenses: tads.map(([name, line]) => {
-                    return {
-                        range: {
-                            startLineNumber: line,
-                            startColumn: 1,
-                            endLineNumber: line,
-                            endColumn: 1
-                        },
-                        id: "ast-" + name,
-                        command: {
-                            id: astCommandId!,
-                            title: "🌲 Ver AST de " + name
+                lenses: [
+                    ...tads.map(([name, line]) => {
+                        return {
+                            range: {
+                                startLineNumber: line,
+                                startColumn: 1,
+                                endLineNumber: line,
+                                endColumn: 1
+                            },
+                            id: "debug-" + name,
+                            command: {
+                                id: debugCommandId!,
+                                title: "🐞 Debug " + name
+                            }
                         }
-                    }
-                }),
+                    }),
+                    ...tads.map(([name, line]) => {
+                        return {
+                            range: {
+                                startLineNumber: line,
+                                startColumn: 1,
+                                endLineNumber: line,
+                                endColumn: 1
+                            },
+                            id: "test-" + name,
+                            command: {
+                                id: testCommandId!,
+                                title: "Test " + name
+                            }
+                        }
+                    })
+                ],
                 dispose: () => {}
             };
         },
