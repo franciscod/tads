@@ -39,6 +39,7 @@ class Tab {
         this.model = monaco.editor.createModel(options.content, 'tad');
         this.model.onDidChangeContent(this.onValueChange.bind(this));
         this.viewState = null;
+        this.validate();
 
         this.tabElement = document.createElement("div");
         this.tabElement.innerText = options.title;
@@ -67,6 +68,20 @@ class Tab {
 
     onValueChange() {
         localStorage.setItem("store", this.model.getValue());
+        this.validate();
+    }
+
+    validate() {
+        var markers = [{
+            severity: monaco.MarkerSeverity.Error,
+            startLineNumber: 7,
+            startColumn: 5,
+            endLineNumber: 7,
+            endColumn: 17,
+            message: 'aca podemos poner errores/warnings/etc'
+        }];
+
+        monaco.editor.setModelMarkers(this.model, 'tad', markers);
     }
 };
 
