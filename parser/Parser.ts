@@ -49,7 +49,7 @@ export function parseTad(source: string) : TAD {
     return tad;
 }
 
-function parseOperacion(line: string, tad: TAD) : Operacion {
+export function parseOperacion(line: string, tad: TAD) : Operacion {
     let [_nombre, line2] = line.split(":")
     let [_args, line3] = line2.split("→")
     let [_ret, ...rest] = line3.trim().split(" ")
