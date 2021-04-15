@@ -37,6 +37,7 @@ class Tab {
     constructor(options: TabOptions) {
         this.readOnly = options.readOnly;
         this.model = monaco.editor.createModel(options.content, 'tad');
+        this.model.onDidChangeContent(this.onValueChange.bind(this));
         this.viewState = null;
 
         this.tabElement = document.createElement("div");
@@ -64,6 +65,9 @@ class Tab {
         activeTab = this;
     }
 
+    onValueChange() {
+        localStorage.setItem("store", this.model.getValue());
+    }
 };
 
 let tabs: Tab[] = [
@@ -74,7 +78,7 @@ let tabs: Tab[] = [
     }),
     new Tab({
         title: '🧪 Ejercicio',
-        content: demo,
+        content: localStorage.getItem("store") || demo,
         readOnly: false
     })
 ];

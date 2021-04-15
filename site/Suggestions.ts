@@ -1,4 +1,5 @@
 import * as monaco from "monaco-editor";
+import { demo } from "../tads";
 
 const symbol_replacements = [
     ['lor', '∨'],
@@ -35,6 +36,12 @@ monaco.languages.registerCompletionItemProvider('tad', {
                 insertText: to,
                 range
             })),
+            {
+                label: "demotad",
+                kind: monaco.languages.CompletionItemKind.Keyword,
+                insertText: demo,
+                range
+            },
             {
                 label: 'ifthenelsefi',
                 kind: monaco.languages.CompletionItemKind.Snippet,
