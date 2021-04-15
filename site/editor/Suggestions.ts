@@ -1,5 +1,5 @@
 import * as monaco from "monaco-editor";
-import { demo } from "../tads";
+import { demo } from "../../tads";
 
 const symbol_replacements = [
     ['lor', '∨'],

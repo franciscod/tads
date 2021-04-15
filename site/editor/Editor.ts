@@ -4,7 +4,8 @@ import attachCodeLens from "./CodeLens";
 
 import * as monaco from "monaco-editor";
 
-import { basicos, demo } from "../tads";
+import { basicos, demo } from "../../tads";
+import { parseTad } from "../../parser/Parser";
 
 let editor = monaco.editor.create(document.getElementById('editor')!, {
     theme: 'tad-dark',
@@ -58,11 +59,12 @@ class Tab {
 
         if(activeTab)
             activeTab.save();
+        editor.setModel(this.model);
         if(this.viewState)
             editor.restoreViewState(this.viewState);
-        editor.setModel(this.model);
         editor.updateOptions({ readOnly: this.readOnly });
-    
+        editor.focus();
+
         activeTab = this;
     }
 
@@ -82,13 +84,15 @@ class Tab {
         }];
 
         monaco.editor.setModelMarkers(this.model, 'tad', markers);
+
+        // let tad = parseTad(this.model.getValue());
     }
 };
 
 let tabs: Tab[] = [
     new Tab({
         title: '⚛️ TADs básicos 🔒',
-        content: basicos.join(`\n\n${('-'.repeat(100)+'\n').repeat(5)}\n\n`),
+        content: [basicos[0]].join(`\n\n${('-'.repeat(100)+'\n').repeat(5)}\n\n`),
         readOnly: true
     }),
     new Tab({

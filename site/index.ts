@@ -1,2 +1,2 @@
 import "./styles.less";
-import "./Editor";
+import "./editor/Editor";
