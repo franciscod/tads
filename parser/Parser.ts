@@ -50,8 +50,19 @@ export function parseTad(source: string) : TAD {
 }
 
 export function parseOperacion(line: string, tad: TAD) : Operacion {
+    let arrow = "→";
+    let cross = "×";
+
+    // alternative syntax
+    if (!line.includes(arrow)) {
+        arrow = "->";
+    }
+    if (!line.includes(cross)) {
+        cross = "✕";
+    }
+
     let [_nombre, line2] = line.split(":")
-    let [_args, line3] = line2.split("→")
+    let [_args, line3] = line2.split(arrow)
     let [_ret, ...rest] = line3.trim().split(" ")
     let restr = null  // TODO
 
@@ -60,7 +71,7 @@ export function parseOperacion(line: string, tad: TAD) : Operacion {
     let tokens: Token[] = [];
     let slots = [];
 
-    let args = _args.split("×").map((arg) => arg.trim()).filter((arg) => arg !== "")
+    let args = _args.split(cross).map((arg) => arg.trim()).filter((arg) => arg !== "")
 
     let tokenSource = nombre;
     while (tokenSource !== "") {
