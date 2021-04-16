@@ -1,5 +1,6 @@
-import { TAD, Operacion, Token, Genero } from "../../parser/Types";
+import { TAD } from "../../parser/Types.ts";
 
+/*
 const generateGeneroTag = (genero: Genero): string => {
     return `<span class="keyword genero">${typeof genero === "string" ? genero : genero.generos[0]}</span>`;
 };
@@ -34,8 +35,9 @@ const generateOperatorTable = (ops: Operacion[]): string => {
         </table>
     `;
 };
-
+*/
 const generateDebugView = (tad: TAD): string => {
+    /*
     console.log(tad);
 
     return `
@@ -45,7 +47,8 @@ const generateDebugView = (tad: TAD): string => {
         ${generateOperatorTable(tad.operaciones)}
     `;
 
+    */
     return "report\n".repeat(500);
 };
-
+    
 export default generateDebugView;

@@ -7,5 +7,5 @@ const SOURCE = [BOOL_TAD, NAT_TAD].join("\n");
 
 Deno.test("parsea source", () => {
     const tads = parseSource(SOURCE);
-    console.log(tads);
+    // console.log(tads);
 });

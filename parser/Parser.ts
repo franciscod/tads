@@ -1,5 +1,5 @@
 import { Aplicacion, Axioma, ExpresionLogica, Genero, Literal, Nodo,
-         Operacion, Slot, TAD, Token, Variable, Range } from "./Types.ts";
+         Operacion, Range, Slot, TAD, Token, Variable } from "./Types.ts";
 
 type MarkerSeverity = 'error' | 'warning' | 'info' | 'hint';
 
@@ -53,23 +53,56 @@ export function parseAxioma(left: string, right: string, context?: ParseContext)
 }
 
 export function parseOperacion(left: string, right: string, section: Section, context?: ParseContext): Operacion | null {
+    // left:   • ∨L • 
+    // right   bool × bool  → bool {restriccion}
+    
     //context?.hints?.addMark('info', `${section}: ${left.length} / ${right.length}`, context.range);
     // TODO: =)
 
+    const sectionToOpType = (section: Section) => {
+        if(section === 'observadores') return 'basico';
+        if(section === 'generadores') return 'generador';
+        return 'otra';
+    };
+
     const op: Operacion = {
-        nombre: left.trim(),
-        tipo: 'basico',
+        nombre: left.replace(/ /g, '').trim(),
+        tipo: sectionToOpType(section),
         tokens: [],
         retorno: "",
         axiomas: [],
-        restriccion: []
+        // restriccion: []
     };
 
+    const [_args, retorno] = right.split(/->|→/);
+    const args = _args.split(/×|✕/).map((arg) => arg.trim()).filter((arg) => arg !== "");
+    let ithSlot = 0;
+
+    while (left !== "") {
+        const i = left.indexOf("•");
+        if (i == 0) {
+            const genName: string = args[ithSlot++];
+            const slot: Slot = {"type": "slot", "genero": genName};
+            op.tokens.push(slot);
+
+            left = left.substr(1);
+        } else if (i == -1) {
+            op.tokens.push({"type": "literal", "symbol": left.trim()});
+            left = "";
+        } else {
+            op.tokens.push({"type": "literal", "symbol": left.substr(0, i).trim()});
+            left = left.substr(i);
+        }
+    }
+    
+
+    op.retorno = retorno.trim();
+    
     return op;
 }
 
 export function parseTad(source: string, context?: ParseContext): TAD | null {
-    const lines = source.replaceAll(/\r\n/g, '\n').split('\n');
+    const lines = source.replaceAll(/\r\n/g, '\n').split('\n').map(l => l.split('--')[0].trimRight());
     const tad: TAD = {
         nombre: "",
         generos: [],
