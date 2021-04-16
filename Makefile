@@ -1,8 +1,9 @@
 test:
-	NO_COLOR=1 deno test --fail-fast --allow-read tests/
+	NO_COLOR=1 npm run test
 
 testloop:
-	ls parser/* tests/* | entr -c make test
+	NO_COLOR=1 ls parser/* tests/* | entr -c make test
+
 
 todo:
 	rg "TODO" tests parser
