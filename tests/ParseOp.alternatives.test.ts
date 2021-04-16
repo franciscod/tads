@@ -14,3 +14,9 @@ Deno.test("varias cruces andan igual", () => {
 
     assertEquals(orig, alt)
 })
+
+
+Deno.test("no matchea literales vacios", () => {
+    const op = parseOperacion("  • + •  ", "nat   × nat   → nat", 'otras operaciones');
+    assertEquals(op?.tokens.length, 3);
+})

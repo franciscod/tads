@@ -59,6 +59,7 @@ export function parseOperacion(left: string, right: string, section: Section, co
     //context?.hints?.addMark('info', `${section}: ${left.length} / ${right.length}`, context.range);
     // TODO: =)
 
+    left = left.trim();
     right = right.split('{')[0];
 
     const sectionToOpType = (section: Section) => {
