@@ -5,7 +5,8 @@ import attachCodeLens from "./CodeLens";
 import * as monaco from "monaco-editor";
 
 import { basicos, demo } from "../../tads";
-import { parseTad } from "../../parser/Parser";
+import { Marker, Parser } from "../../parser/Parser";
+import { TADDatabase } from "../../parser/Database";
 
 let editor = monaco.editor.create(document.getElementById('editor')!, {
     theme: 'tad-dark',
@@ -74,25 +75,34 @@ class Tab {
     }
 
     validate() {
-        var markers = [{
-            severity: monaco.MarkerSeverity.Error,
-            startLineNumber: 7,
-            startColumn: 5,
-            endLineNumber: 7,
-            endColumn: 17,
-            message: 'aca podemos poner errores/warnings/etc'
-        }];
+        let tadDatabase: TADDatabase = new TADDatabase();
+        let parser = new Parser(tadDatabase);
+        parser.parse(this.model.getValue());
+        
+        const toMonacoSeverity = (marker: Marker): monaco.MarkerSeverity => {
+            switch (marker.severity) {
+                case 'error': return monaco.MarkerSeverity.Error;
+                case 'warning': return monaco.MarkerSeverity.Warning;
+                case 'hint': return monaco.MarkerSeverity.Hint;
+                case 'info': return monaco.MarkerSeverity.Info;
+            }
+        };
 
-        monaco.editor.setModelMarkers(this.model, 'tad', markers);
-
-        // let tad = parseTad(this.model.getValue());
+        monaco.editor.setModelMarkers(this.model, 'tad', parser.markers.map(m => ({
+            severity: toMonacoSeverity(m),
+            startLineNumber: m.range.startLine,
+            startColumn: m.range.columnStart,
+            endLineNumber: m.range.endLine,
+            endColumn: m.range.columnEnd,
+            message: m.message
+        })));
     }
 };
 
 let tabs: Tab[] = [
     new Tab({
         title: '⚛️ TADs básicos 🔒',
-        content: [basicos[0]].join(`\n\n${('-'.repeat(100)+'\n').repeat(5)}\n\n`),
+        content: basicos.join(`\n\n${('-'.repeat(100)+'\n').repeat(5)}\n\n`),
         readOnly: true
     }),
     new Tab({

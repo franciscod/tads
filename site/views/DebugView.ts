@@ -41,10 +41,8 @@ const generateDebugView = (tad: TAD): string => {
     return `
         <div class="debug-title">${tad.nombre} (${tad.generos[0]})</div>
         <br>
-        <div class="debug-section">generadores</div>
-        ${generateOperatorTable(tad.generadores)}
         <div class="debug-section">operaciones</div>
-        ${generateOperatorTable(tad.otrasOperaciones)}
+        ${generateOperatorTable(tad.operaciones)}
     `;
 
     return "report\n".repeat(500);

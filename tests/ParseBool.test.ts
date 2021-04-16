@@ -1,5 +1,5 @@
 import { assertEquals, assertArrayIncludes } from "https://deno.land/std@0.93.0/testing/asserts.ts";
-import { parseTad } from "../parser/Parser.ts";
+import { Parser } from "../parser/Parser.ts";
 import { Genero, Slot, Token } from "../parser/Types.ts";
 
 const BOOL_TAD = Deno.readTextFileSync("tads/bool.tad");
@@ -23,7 +23,7 @@ function generosDeSlots(tokens: Token[]) : string[] {
 }
 
 Deno.test("parsea bool", () => {
-    const tad = parseTad(BOOL_TAD)
+    const tad = new Parser().parse(BOOL_TAD)
 
     assertEquals(tad.nombre, "Bool")
     assertEquals(tad.generos, ["bool"])

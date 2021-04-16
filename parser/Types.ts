@@ -3,12 +3,12 @@ export type ExpresionLogica = any;  // TODO
 export type Genero = string | TAD;  // o es una variable (alpha, beta, etc) o es un tad especifico
 
 export type Literal = { // tokens para sintaxis: corchetes, simbolos, etc
-    type: "literal";
+    type: 'literal';
     symbol: string;
 };
 
 export type Slot = { // puntito • que despues puede usarse como variable (para restricciones)
-    type: "slot";
+    type: 'slot';
     nombre?: string;
     genero: Genero;
 };
@@ -16,13 +16,13 @@ export type Slot = { // puntito • que despues puede usarse como variable (para
 export type Token = Literal | Slot;
 
 export type Aplicacion = {
-    type: "operacion";
+    type: 'operacion';
     operacion: Operacion;
     args: Nodo[];
 };
 
 export type Variable = { // letra (hoja del arbol)
-    type: "variable";
+    type: 'variable';
     nombre: string;
     genero: Genero;
 };
@@ -36,6 +36,7 @@ export type Axioma = {
 
 export type Operacion = {
     nombre: string;
+    tipo: 'basico' | 'generador' | 'otra';
     tokens: Token[];  // como lo parseo a un nodo
     retorno: Genero;
     axiomas: Axioma[];
@@ -46,8 +47,6 @@ export type TAD = {
     nombre: string;
     generos: string[];
     // exporta por ahora no
-    // ig obs por ahora no
-    generadores: Operacion[];
-    otrasOperaciones: Operacion[];
+    operaciones: Operacion[];
     variablesLibres: Variable[];
 };
