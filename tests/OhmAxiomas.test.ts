@@ -2,6 +2,7 @@ import { createRequire } from "https://deno.land/std@0.93.0/node/module.ts";
 import { assert } from "https://deno.land/std@0.93.0/testing/asserts.ts";
 import { Operacion } from "../parser/Types.ts";
 import { genGrammar } from "../parser/Ohmification.ts";
+import { parseTad } from "../parser/Parser.ts";
 
 const require = createRequire(import.meta.url);
 const ohm = require('ohm-js');
@@ -18,6 +19,8 @@ const BOOL_AXIOMS = [
     "x ∧L y                    === if x then y else false fi",
     "x ⇒L y                    === ¬x ∨L y",
 ];
+
+const BOOL_TAD = Deno.readTextFileSync("tads/bool.tad");
 
 Deno.test("ohm parsea axiomas de bool", () => {
     // escrito a mano
@@ -64,116 +67,12 @@ Deno.test("ohm parsea axiomas de bool", () => {
     });
 })
 
-{
 
-    // TODO: reemplazar con el resultado de parsear bool.tad
-    const operacionesBool: Operacion[] = [
-      {
-        nombre: "true",
-        tipo: "generador",
-        tokens: [ { type: "literal", symbol: "true" } ],
-        retorno: "bool",
-        axiomas: []
-      },
-      {
-        nombre: "false",
-        tipo: "generador",
-        tokens: [ { type: "literal", symbol: "false" } ],
-        retorno: "bool",
-        axiomas: []
-      },
-      {
-        nombre: "if•then•else•fi",
-        tipo: "otra",
-        tokens: [
-          { type: "literal", symbol: "if" },
-          { type: "slot", genero: "bool" },
-          { type: "literal", symbol: "then" },
-          { type: "slot", genero: "α" },
-          { type: "literal", symbol: "else" },
-          { type: "slot", genero: "α" },
-          { type: "literal", symbol: "fi" }
-        ],
-        retorno: "α",
-        axiomas: []
-      },
-      {
-        nombre: "¬•",
-        tipo: "otra",
-        tokens: [ { type: "literal", symbol: "¬" }, { type: "slot", genero: "bool" } ],
-        retorno: "bool",
-        axiomas: []
-      },
-      {
-        nombre: "•∨•",
-        tipo: "otra",
-        tokens: [
-          { type: "slot", genero: "bool" },
-          { type: "literal", symbol: "∨" },
-          { type: "slot", genero: "bool" }
-        ],
-        retorno: "bool",
-        axiomas: []
-      },
-      {
-        nombre: "•∧•",
-        tipo: "otra",
-        tokens: [
-          { type: "slot", genero: "bool" },
-          { type: "literal", symbol: "∧" },
-          { type: "slot", genero: "bool" }
-        ],
-        retorno: "bool",
-        axiomas: []
-      },
-      {
-        nombre: "•⇒•",
-        tipo: "otra",
-        tokens: [
-          { type: "slot", genero: "bool" },
-          { type: "literal", symbol: "⇒" },
-          { type: "slot", genero: "bool" }
-        ],
-        retorno: "bool",
-        axiomas: []
-      },
-      {
-        nombre: "•∨L•",
-        tipo: "otra",
-        tokens: [
-          { type: "slot", genero: "bool" },
-          { type: "literal", symbol: "∨L" },
-          { type: "slot", genero: "bool" }
-        ],
-        retorno: "bool",
-        axiomas: []
-      },
-      {
-        nombre: "•∧L•",
-        tipo: "otra",
-        tokens: [
-          { type: "slot", genero: "bool" },
-          { type: "literal", symbol: "∧L" },
-          { type: "slot", genero: "bool" }
-        ],
-        retorno: "bool",
-        axiomas: []
-      },
-      {
-        nombre: "•⇒L•",
-        tipo: "otra",
-        tokens: [
-          { type: "slot", genero: "bool" },
-          { type: "literal", symbol: "⇒L" },
-          { type: "slot", genero: "bool" }
-        ],
-        retorno: "bool",
-        axiomas: []
-      }
-    ];
+{
+    const boolTad = parseTad(BOOL_TAD)!;
 
     const vars = new Map([ ["alpha", ["a", "b"]], ["bool", ["x", "y"]] ]);
-    const generated = genGrammar("bool", operacionesBool, vars);
+    const generated = genGrammar("bool", boolTad.operaciones, vars);
     const boolGrammar = ohm.grammar(generated);
 
     BOOL_AXIOMS.forEach((axioma) => {
@@ -181,5 +80,8 @@ Deno.test("ohm parsea axiomas de bool", () => {
             assert(boolGrammar.match(axioma).succeeded());
         });
     });
+
+    console.log(generated);
+    
 
 }
