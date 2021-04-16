@@ -64,8 +64,7 @@ export function genGrammar(tadName: string, ops: Operacion[], variables: Map<Gen
     rules = "Genero = ParenGenero | " + (variablesGenericas.concat(generosConocidos)).join(' | ') + "\n" + rules;
 
 
-        const grammar =
-`TAD${tadName} {
+    return `TAD${tadName} {
 
 Axioma = Genero "===" Genero
 ParenGenero = "(" Genero ")"
@@ -75,8 +74,4 @@ ${rules}
 // fin autogenerado
 }`;
 
-    console.log("\n");
-    console.log("\n");
-    console.log(grammar);
-    return grammar;
 }
