@@ -1,6 +1,6 @@
 export type ExpresionLogica = any;  // TODO
 
-export type Genero = string | TAD;  // o es una variable (alpha, beta, etc) o es un tad especifico
+export type Genero = string;  // o es una variable (alpha, beta, etc) o es un tad especifico
 
 export type Literal = { // tokens para sintaxis: corchetes, simbolos, etc
     type: 'literal';
@@ -36,9 +36,9 @@ export type Axioma = {
 
 export type Operacion = {
     nombre: string;
-    tipo: 'basico' | 'generador' | 'otra';
+    tipo: 'basico' | 'generador' | 'otra';  // TODO: observador
     tokens: Token[];  // como lo parseo a un nodo
-    retorno: Genero;
+    retorno: string;
     axiomas: Axioma[];
     restriccion?: ExpresionLogica;
 };
