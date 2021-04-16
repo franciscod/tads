@@ -38,9 +38,6 @@ const generateOperatorTable = (ops: Operacion[]): string => {
 };
 
 const generateDebugView = (tad: TAD): string => {
-
-    console.log(tad);
-
     return `
         <div class="debug-title">${tad.nombre} (${tad.generos[0]})</div>
         <br>

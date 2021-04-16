@@ -1,13 +1,11 @@
 import * as monaco from "monaco-editor";
-import { openModal } from "../views/Modal";
-import generateDebugView from "../views/DebugView";
-import { parseTad } from "../../parser/Parser.ts";
+import { openModal } from "../views/Modal.ts";
+import generateDebugView from "../views/DebugView.ts";
+import { parseSource } from "../../parser/Parser.ts";
 
 export default (editor: monaco.editor.IStandaloneCodeEditor) => {
-
-    var debugCommandId = editor.addCommand(0, () => {
-        // TODO: ver que tad hay que mostrar y usar una version ya parseada, esto es solo para testing
-        openModal(generateDebugView(parseTad(editor.getValue())!), 750);
+    var debugCommandId = editor.addCommand(0, (_, tadName: string) => {
+        openModal(generateDebugView(parseSource(editor.getValue()).find(tad => tad.nombre === tadName)!), 750);
     }, '');
     var testCommandId = editor.addCommand(0, function () {
         alert('TODO: show test');
@@ -46,7 +44,8 @@ export default (editor: monaco.editor.IStandaloneCodeEditor) => {
                             id: "debug-" + name,
                             command: {
                                 id: debugCommandId!,
-                                title: "🐞 Debug " + name
+                                title: "🐞 Debug " + name,
+                                arguments: [name]
                             }
                         }
                     }),
