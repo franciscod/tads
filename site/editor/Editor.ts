@@ -5,8 +5,7 @@ import attachCodeLens from "./CodeLens";
 import * as monaco from "monaco-editor";
 
 import { basicos, demo } from "../../tads";
-import { Marker, Parser } from "../../parser/Parser";
-import { TADDatabase } from "../../parser/Database";
+import { Marker, EditorHints, parseSource } from "../../parser/Parser";
 
 let editor = monaco.editor.create(document.getElementById('editor')!, {
     theme: 'tad-dark',
@@ -75,9 +74,9 @@ class Tab {
     }
 
     validate() {
-        let tadDatabase: TADDatabase = new TADDatabase();
-        let parser = new Parser(tadDatabase);
-        parser.parse(this.model.getValue());
+        const hints = new EditorHints();
+        let tads = parseSource(this.model.getValue(), hints);
+        console.log(tads);
         
         const toMonacoSeverity = (marker: Marker): monaco.MarkerSeverity => {
             switch (marker.severity) {
@@ -88,7 +87,7 @@ class Tab {
             }
         };
 
-        monaco.editor.setModelMarkers(this.model, 'tad', parser.markers.map(m => ({
+        monaco.editor.setModelMarkers(this.model, 'tad', hints.markers.map(m => ({
             severity: toMonacoSeverity(m),
             startLineNumber: m.range.startLine,
             startColumn: m.range.columnStart,

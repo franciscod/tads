@@ -1,5 +1,4 @@
 import * as monaco from "monaco-editor";
-import { Parser } from "../../parser/Parser";
 import { openModal } from "../views/Modal";
 import generateDebugView from "../views/DebugView";
 

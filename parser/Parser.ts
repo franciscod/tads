@@ -1,13 +1,5 @@
 import { Aplicacion, Axioma, ExpresionLogica, Genero, Literal, Nodo,
-         Operacion, Slot, TAD, Token, Variable } from "./Types.ts";
-import { TADDatabase } from "./Database.ts";
-
-export type Range = {
-    startLine: number;
-    endLine: number;
-    columnStart: number;
-    columnEnd: number;
-};
+         Operacion, Slot, TAD, Token, Variable, Range } from "./Types.ts";
 
 type MarkerSeverity = 'error' | 'warning' | 'info' | 'hint';
 
@@ -17,258 +9,289 @@ export type Marker = {
     range: Range;
 };
 
+export class EditorHints {
+    markers: Marker[] = [];
+
+    addMark(severity: MarkerSeverity, message: string, range: Range) {
+        this.markers.push({ severity, message, range });
+    }
+}
+
+export type ParseContext = {
+    range: Range;
+    hints?: EditorHints;
+}
+
 type Section = 'none' | 'generos' | 'igualdad' | 'observadores' | 'generadores' | 'otras operaciones' | 'axiomas';
 
-export class Parser {
-
-    public markers: Marker[] = [];
-    public database: TADDatabase;
-
-    public activeTad: TAD | null = null;
-    private lines: string[] = [];
-    private currentLine: number = 0;
-
-    constructor(database: TADDatabase) {
-        this.database = database;
-    }
-
-    parse(source: string) {
-        this.activeTad = null;
-        this.markers = [];
-        this.lines = source.split('\n');
-        this.currentLine = 0;
-
-        if(this.line()?.trim().length === 0) this.nextNonEmptyLine();
-
-        let line;
-        while((line = this.line()) != null) {
-            if(this.activeTad != null) {
-                if(line.toUpperCase().startsWith("TAD")) {
-                    this.markerLine("error", "No se esperaba una definición de TAD");
-                } else if(line.toUpperCase().startsWith("FIN TAD")) {
-                    this.activeTad = null;
-                } else {
-                    // seguir parseando TAD
-                    let section: Section = Parser.checkSectionHeader(line);
-                    if(section === 'none') {
-                        this.markerLine('error', "Se esperaba el inicio de una sección.");
-                    } else if(section === 'generos') {
-                        let generos = line.slice('generos'.length).split(",").map(g => g.trim()).filter(g => g.length);
-
-                        if(generos.length === 0) {
-                            this.markerLine('error', "Especificá al menos un género o eliminá toda la sección géneros.");
-                        } else {
-                            for(let i = 0; i < generos.length; i++) {
-                                if(this.activeTad!.generos.length > 0) {
-                                    // no es elegante pero funciona ¯\_(ツ)_/¯
-                                    let start_warning = this.line()!.split(generos[i])[0].length;
-
-                                    this.markers.push({
-                                        severity: 'warning',
-                                        message: `Especificar más de un género tendrá ningún efecto (no implementado).\nLos géneros ya especificados para este TAD son: ${this.activeTad!.generos.join(', ')}`,
-                                        range: {
-                                            startLine: this.currentLine + 1,
-                                            endLine: this.currentLine + 1,
-                                            columnStart: 1 + start_warning,
-                                            columnEnd: 1 + start_warning + generos[i].length
-                                        }
-                                    });
-                                }
-                                this.activeTad!.generos.push(generos[i]);
-                            }
-                        }
-                    } else if(section != 'igualdad') {
-                        // operaciones y axiomas
-                        this.nextNonEmptyLine();
-                        this.readSection(section);
-                        continue;
-                    }
-                }
-            } else {
-                if(line.toUpperCase().startsWith("TAD")) {
-                    // parsear nuevo TAD
-                    this.parseTad();
-                } else {
-                    this.markerLine("error", "Se esperaba la definición de un TAD.\n📎  Quizás querías poner un comentario con --?");
-                }
-            }
-            this.nextNonEmptyLine();
-        }
-    }
-
-    private readSection(section: Section) {
-        let splitter: RegExp;
-        let subParser;
-        switch (section) {
-            case 'observadores':
-            case 'generadores':
-            case 'otras operaciones':
-                splitter = /:/;
-                subParser = this.parseOperacion;
-                break;
-            default:
-            case 'axiomas':
-                splitter = /≡|={3}/;
-                subParser = this.parseAxioma;
-                break;
-        }
-
-        let line;
-        let left = "";
-        let rightBuffer = "";
-        while((line = this.line()) != null &&
-               Parser.checkSectionHeader(line) === 'none' &&
-               !line.toUpperCase().startsWith("FIN TAD")) {
-
-            let split = line.split(splitter);
-            if(split.length === 2) {
-                // anterior
-                if(left.length > 0)
-                    subParser(left, rightBuffer);
-                left = split[0];
-                rightBuffer = split[1];
-            } else {
-                rightBuffer += line;
-            }
-            this.nextNonEmptyLine();
-        }
-        if(left.length > 0)
-            subParser(left, rightBuffer);
-    }
-
-    private parseTad() { // se llama al estar posicionado en una línea de "TAD ..."
-        let name = this.line()!.slice('TAD'.length).trim();
-        if(name.length === 0) {
-            this.markerLine("error", "Se esperaba el nombre de un TAD");
-            return;
-        }
-
-        this.activeTad = this.database.getTADByName(name);
-        if(this.activeTad) {
-            // el TAD se extiende
-            this.markerLine("hint", `Esto es una extensión del TAD ${this.activeTad.nombre}`);
-        } else {
-            // el TAD es nuevo
-            this.activeTad = this.database.registerNewTAD(name);
-        }
-    }
-
-    public parseLineaOperacion(line: string, fallbackActiveTad: TAD) {
-        if (this.activeTad === null) {
-            this.activeTad = fallbackActiveTad;
-        }
-        let [left, right] = line.split(":");
-        return this.parseOperacion(left, right);
-    }
-
-    private parseOperacion(left: string, right: string) {
-        // console.log(left, "++++++++", right);
-
-        const tad: TAD = this.activeTad!;
-
-        let arrow = "→";
-        let cross = "×";
-
-        // alternative syntax
-        if (!right.includes(arrow)) {
-            arrow = "->";
-        }
-        if (!right.includes(cross)) {
-            cross = "✕";
-        }
-
-        let [_args, line3] = right.split(arrow)
-        let [_ret, ...rest] = line3.trim().split(" ")
-        let restr = null  // TODO
-
-        let nombre = left.trim()
-
-        let tokens: Token[] = [];
-        let slots = [];
-
-        let args = _args.split(cross).map((arg) => arg.trim()).filter((arg) => arg !== "")
-
-        let tokenSource = nombre;
-        while (tokenSource !== "") {
-            const i = tokenSource.indexOf("•");
-            if (i == 0) {
-                const genName: string = args[slots.length];
-                let gen: Genero = genName;
-                if (tad.generos.includes(genName)) {
-                    if (genName === tad.generos[0]) {
-                        gen = tad;
-                    }
-                }
-                const slot: Slot = {"type": "slot", "genero": gen};
-                tokens.push(slot);
-                slots.push(slot);
-
-                tokenSource = tokenSource.substr(1);
-            } else if (i == -1) {
-                tokens.push({"type": "literal", "symbol": tokenSource.trim()});
-                tokenSource = "";
-            } else {
-                tokens.push({"type": "literal", "symbol": tokenSource.substr(0, i).trim()});
-                tokenSource = tokenSource.substr(i);
-            }
-        }
-
-        if (nombre.includes("•")) {
-            nombre = nombre.split("•").map((part) => part.trim()).join("•")
-        }
-
-        const retorno = _ret.trim()
-
-        return {
-            nombre,
-            tokens,
-            retorno,
-            axiomas: [],  // TODO
-        }
-    }
-
-    private parseAxioma(left: string, right: string) {
-        console.log(left, "-----------", right);
-    }
-
-    private line(): string | null {
-        if(this.currentLine < this.lines.length) {
-            let line = this.lines[this.currentLine];
-            return line.split('--')[0]/*.trimRight()*/; // remove comments
-        }
-        return null;
-    }
-
-    private backLine() { this.currentLine = Math.max(0, this.currentLine); }
-    private nextLine() { this.currentLine = Math.min(this.currentLine+1, this.lines.length); }
-    private nextNonEmptyLine() {
-        this.nextLine();
-
-        let line = this.line();
-        while(line !== null && line.trim().length === 0) {
-            // skip empty lines
-            this.nextLine();
-            line = this.line();
-        }
-    }
-
-    private getCurrentLineRange(): Range {
-        return { startLine: this.currentLine + 1, endLine: this.currentLine + 1,  columnStart: 1, columnEnd: 1 + this.line()!.length };
-    }
-
-    private markerLine(severity: MarkerSeverity, message: string) {
-        this.markers.push({ severity,  message, range: this.getCurrentLineRange() });
-    }
-
-    static checkSectionHeader(line: string): Section {
-        line = line.trimRight();
-        if(line.match(/^g[ée]neros/i)) return 'generos';
-        if(line.match(/^(igualdad observacional|igobs|ig obs)$/i)) return 'igualdad';
-        if(line.match(/^(observadores b[áa]sicos|obs)$/i)) return 'observadores';
-        if(line.match(/^(generadores|gen)$/i)) return 'generadores';
-        if(line.match(/^(otras operaciones|otras op|otrasop)$/i)) return 'otras operaciones';
-        if(line.match(/^(axiomas)/i)) return 'axiomas';
-        return 'none';
-    }
-
+function checkSectionHeader(line: string): Section {
+    line = line.trimRight();
+    if(line.match(/^g[ée]neros/i)) return 'generos';
+    if(line.match(/^(igualdad observacional|igobs|ig obs)$/i)) return 'igualdad';
+    if(line.match(/^(observadores b[áa]sicos|obs)$/i)) return 'observadores';
+    if(line.match(/^(generadores|gen)$/i)) return 'generadores';
+    if(line.match(/^(otras operaciones|otras op|otrasop)$/i)) return 'otras operaciones';
+    if(line.match(/^(axiomas)/i)) return 'axiomas';
+    return 'none';
 }
+
+export function parseExpresionLogica(input: string, context?: ParseContext): ExpresionLogica | null {
+    // TODO: =)
+    return null;
+}
+
+export function parseVarLibres(input: string, context?: ParseContext): Variable[] {
+    //context?.hints?.addMark('info', 'variables libres', context.range);
+    // TODO: =)
+    return [];
+}
+
+export function parseAxioma(left: string, right: string, context?: ParseContext): Operacion | null {
+    // TODO: =)
+    //context?.hints?.addMark('info', `${JSON.stringify(context.range)} ${left}\n\n\n\n-------------\n\n\n\n\n${right}`, context.range);
+    return null;
+}
+
+export function parseOperacion(left: string, right: string, section: Section, context?: ParseContext): Operacion | null {
+    //context?.hints?.addMark('info', `${section}: ${left.length} / ${right.length}`, context.range);
+    // TODO: =)
+
+    const op: Operacion = {
+        nombre: left.trim(),
+        tipo: 'basico',
+        tokens: [],
+        retorno: "",
+        axiomas: [],
+        restriccion: []
+    };
+
+    return op;
+}
+
+export function parseTad(source: string, context?: ParseContext): TAD | null {
+    const lines = source.replaceAll(/\r\n/g, '\n').split('\n');
+    const tad: TAD = {
+        nombre: "",
+        generos: [],
+        operaciones: [],
+        variablesLibres: [],
+        range: context?.range
+    };
+
+    function offsetRange(range: Range) {
+        return {
+            startLine: (context?.range.startLine || 1) + range.startLine,
+            endLine: (context?.range.startLine || 1) + range.endLine,
+            columnStart: range.columnStart,
+            columnEnd: range.columnEnd,
+        }
+    }
+
+    let closedProperly = false;
+    
+    for(let i = 0; i < lines.length; i++){
+        let line = lines[i];
+
+        if(line.trim().length === 0)
+            continue; // skip empty lines
+
+        if(tad.nombre === "") {
+            if(line.toUpperCase().startsWith("TAD")) {
+                tad.nombre = line.slice('TAD'.length).trim();
+                if(tad.nombre.length === 0) {
+                    i--;
+                    context?.hints?.addMark('error', 'Nombre del TAD incompleto', offsetRange({ startLine: 1+i, endLine: 1+i, columnStart: 4, columnEnd: 5 }));
+                    return null;
+                }
+            } else {
+                context?.hints?.addMark('error', 'Se esperaba la definición de un TAD', offsetRange({ startLine: 1+i, endLine: 1+i, columnStart: 1, columnEnd: 1+line.length }));
+                return null;
+            }
+            continue;
+        }
+        
+        if(line.toUpperCase().startsWith("FIN TAD")) {
+            if(closedProperly) {
+                context?.hints?.addMark('error', 'El TAD ya estaba cerrado', offsetRange({ startLine: 1+i, endLine: 1+i, columnStart: 1, columnEnd: 1+line.length }));
+            }
+            closedProperly = true;
+            continue;
+        }
+        
+        // inicio de sección
+        const section: Section = checkSectionHeader(line);
+
+        if(section === 'none') {
+            context?.hints?.addMark('error', "Se esperaba el inicio de una sección.", offsetRange({ startLine: 1+i, endLine: 1+i, columnStart: 1, columnEnd: 1+line.length }));
+        } else if(section === 'generos') {
+            const generos = line.slice('generos'.length).split(",").map(g => g.trim()).filter(g => g.length);
+
+            for(let j = 0; j < generos.length; j++) {
+                if(tad.generos.length > 0) {
+                    // no es elegante pero funciona ¯\_(ツ)_/¯
+                    const startWarning = line!.split(generos[j])[0].length;
+
+                    context?.hints?.addMark('warning', `Especificar más de un género tendrá ningún efecto (no implementado).\nLos géneros ya especificados para este TAD son: ${tad.generos.join(', ')}`,
+                        offsetRange({
+                            startLine: i,
+                            endLine: i,
+                            columnStart: 1 + startWarning,
+                            columnEnd: 1 + startWarning + generos[j].length
+                        })
+                    );
+                }
+                tad.generos.push(generos[j]);
+            }
+        } else if(section == 'igualdad') {
+            // jaja saludos
+        } else {
+             // operaciones y axiomas
+             
+            let splitter: RegExp;
+            if(section === 'axiomas') {
+                splitter = /≡|={3}/;
+
+                // variables libres de los axiomas
+                const varLibres = line.slice('axiomas'.length);
+                if(varLibres.trim().length > 0) {
+                    tad.variablesLibres = parseVarLibres(varLibres, {
+                        hints: context?.hints,
+                        range: offsetRange({
+                            startLine: 1+i,
+                            endLine: 1+i,
+                            columnStart: 1+'axiomas'.length+1,
+                            columnEnd: 1+line.length
+                        })
+                    });
+                }
+            } else {
+                splitter = /:/;
+            }
+
+            i++;
+
+            let startLine = i;
+            let left = "";
+            let rightBuffer = "";
+            for(;i < lines.length;){
+                line = lines[i];
+
+                if(checkSectionHeader(line) !== 'none' || line.toUpperCase().startsWith("FIN TAD")) {
+                    i--;
+                    break;
+                }
+
+                const split = line.split(splitter);
+                if(split.length === 2) {
+                    // anterior
+                    if(left.length > 0) {
+                        const ctx: ParseContext = {
+                            hints: context?.hints,
+                            range: offsetRange({ startLine: 1+startLine-1, endLine: 1+i-1, columnStart: 1, columnEnd: 1+line.length })
+                        };
+                        if(section === 'axiomas')
+                            parseAxioma(left, rightBuffer, ctx);
+                        else {
+                            const op: Operacion | null = parseOperacion(left, rightBuffer, section, ctx);
+                            if(op) tad.operaciones.push(op);
+                        }
+                    }
+                    startLine = i;
+                    left = split[0];
+                    rightBuffer = split[1];
+                } else {
+                    rightBuffer += line;
+                }
+
+                i++;
+            }
+            if(left.length > 0){
+                const ctx: ParseContext = {
+                    hints: context?.hints,
+                    range: offsetRange({ startLine: 1+startLine, endLine: 1+i, columnStart: 1, columnEnd: 1+line.length })
+                };
+                if(section === 'axiomas')
+                    parseAxioma(left, rightBuffer, ctx);
+                else {
+                    const op: Operacion | null = parseOperacion(left, rightBuffer, section, ctx);
+                    if(op) tad.operaciones.push(op);
+                }
+            }
+        }
+    }
+
+    if(!closedProperly) {
+        context?.hints?.addMark('error', `Se esperaba "FIN TAD" para ${tad.nombre}`, offsetRange({ startLine: lines.length, endLine: lines.length, columnStart: 1, columnEnd: 100 }));
+    }
+
+    return tad;
+}
+
+export function parseSource(source: string, hints?: EditorHints): TAD[] {
+    const tads: TAD[] = [];
+    const lines = source.replaceAll(/\r\n/g, '\n').split('\n');
+    
+    for(let i = 0; i < lines.length; i++){
+        let line = lines[i];
+        if(line.trim().length === 0)
+            continue; // skip empty lines
+
+        // empieza TAD
+        if(line.toUpperCase().startsWith("TAD")) {
+            const startLine = i;
+
+            // copiamos todo el TAD hasta FIN TAD
+            let buffer = line + '\n'; i++;
+            while(i < lines.length) {
+                line = lines[i];
+                
+                if(line.toUpperCase().startsWith("TAD")) {
+                    i--;
+                    break;
+                } else {
+                    buffer += line + '\n';
+                    if(line.toUpperCase().startsWith("FIN TAD"))
+                        break; // fin del tad
+                }
+
+                i++;
+            }
+            
+            const tad: TAD | null = parseTad(buffer, {
+                hints,
+                range: {
+                    startLine: 1 + startLine,
+                    endLine: 1 + i,
+                    columnStart: 1,
+                    columnEnd: 1+line.length
+                }
+            });
+
+            if(tad != null)
+                tads.push(tad);
+        } else {
+            hints?.addMark('error', 'Se esperaba la definición de un TAD', { startLine: 1+i, endLine: 1+i, columnStart: 1, columnEnd: 1+line.length });
+        }
+    }
+
+    return tads;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

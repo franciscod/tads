@@ -1,6 +1,18 @@
+
+export type Range = {
+    startLine: number;
+    endLine: number;
+    columnStart: number;
+    columnEnd: number;
+};
+
+export type ParseReference = {
+    range?: Range;
+};
+
 export type ExpresionLogica = any;  // TODO
 
-export type Genero = string | TAD;  // o es una variable (alpha, beta, etc) o es un tad especifico
+export type Genero = string;  // o es una variable (alpha, beta, etc) o es un tad especifico
 
 export type Literal = { // tokens para sintaxis: corchetes, simbolos, etc
     type: 'literal';
@@ -13,7 +25,7 @@ export type Slot = { // puntito • que despues puede usarse como variable (para
     genero: Genero;
 };
 
-export type Token = Literal | Slot;
+export type Token = (Literal | Slot) & ParseReference;
 
 export type Aplicacion = {
     type: 'operacion';
@@ -27,12 +39,12 @@ export type Variable = { // letra (hoja del arbol)
     genero: Genero;
 };
 
-export type Nodo = Aplicacion | Variable;
+export type Nodo = (Aplicacion | Variable) & ParseReference;
 
 export type Axioma = {
     bindings: Nodo[];  // a la izquierda, uno por slot de la operacion
     reemplazo: Nodo;
-};
+} & ParseReference;
 
 export type Operacion = {
     nombre: string;
@@ -41,7 +53,7 @@ export type Operacion = {
     retorno: Genero;
     axiomas: Axioma[];
     restriccion?: ExpresionLogica;
-};
+} & ParseReference;
 
 export type TAD = {
     nombre: string;
@@ -49,4 +61,4 @@ export type TAD = {
     // exporta por ahora no
     operaciones: Operacion[];
     variablesLibres: Variable[];
-};
+} & ParseReference;

@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "webpack serve",
     "build": "cross-env MODE=production webpack",
-    "test": "deno test --allow-read tests/",
+    "test": "deno test --fail-fast --allow-read tests/",
     "test:watch": "nodemon --exec \"npm run test\" --ext \"js,ts,tad\""
   },
   "devDependencies": {
