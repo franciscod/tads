@@ -12,22 +12,22 @@ function titleSlug(s: string) : string {
 }
 
 export function genGrammar(tadName: string, ops: Operacion[], variables: Map<Genero, string[]>) : string {
-    let reglasParaGenero: Map<string, string[]> = new Map();
+    const reglasParaGenero: Map<string, string[]> = new Map();
 
-        let generosConocidos: string[] = [titleSlug(tadName)];
+    const generosConocidos: string[] = [titleSlug(tadName)];
 
-    let variablesGenericas: string[] = Array.from(variables.keys())
+    const variablesGenericas: string[] = Array.from(variables.keys())
         .filter((g) => !generosConocidos.includes(titleSlug(g)))
         .map(titleSlug);
 
     let rules = ops.map((op) => {
         const ret: string = titleSlug(op.retorno);
-        let caseName = [op.tipo, op.nombre].reduce((p, e) => {
+        const caseName = [op.tipo, op.nombre].reduce((p, e) => {
             return p + titleSlug(e);
         }, "");
 
 
-        let reglas = reglasParaGenero.get(ret) || [];
+        const reglas = reglasParaGenero.get(ret) || [];
 
         reglas.push(caseName);
         reglasParaGenero.set(ret, reglas);
@@ -41,13 +41,13 @@ export function genGrammar(tadName: string, ops: Operacion[], variables: Map<Gen
     }).join('');
 
     for (const g of variables.keys()) {
-        let varRule: string[] = Array.from(variables.get(g) || [])
+        const varRule: string[] = Array.from(variables.get(g) || [])
             .map((v) => `"${v}"`);
 
         const tg = titleSlug(g)
         reglasParaGenero.set("Var" + tg, varRule);
 
-        let reglas = reglasParaGenero.get(tg) || [];
+        const reglas = reglasParaGenero.get(tg) || [];
 
         reglas.push("Var" + tg);
         if (variablesGenericas.includes(tg)) {
@@ -61,8 +61,9 @@ export function genGrammar(tadName: string, ops: Operacion[], variables: Map<Gen
     }
 
 
-    rules = "Genero = ParenGenero | " + (variablesGenericas.concat(generosConocidos)).join(' | ') + "\n" + rules;
+    const reglasGenerosConVariables = variablesGenericas.concat(generosConocidos);
 
+    rules = "Genero = ParenGenero | " + reglasGenerosConVariables.join(' | ') + "\n" + rules;
 
     return `TAD${tadName} {
 

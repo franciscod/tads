@@ -59,6 +59,8 @@ export function parseOperacion(left: string, right: string, section: Section, co
     //context?.hints?.addMark('info', `${section}: ${left.length} / ${right.length}`, context.range);
     // TODO: =)
 
+    right = right.split('{')[0];
+
     const sectionToOpType = (section: Section) => {
         if(section === 'observadores') return 'basico';
         if(section === 'generadores') return 'generador';
@@ -190,8 +192,8 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
                     tad.variablesLibres = parseVarLibres(varLibres, {
                         hints: context?.hints,
                         range: offsetRange({
-                            startLine: 1+i,
-                            endLine: 1+i,
+                            startLine: i,
+                            endLine: i,
                             columnStart: 1+'axiomas'.length+1,
                             columnEnd: 1+line.length
                         })
