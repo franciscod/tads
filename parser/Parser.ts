@@ -20,11 +20,11 @@ export type Marker = {
 type Section = 'none' | 'generos' | 'igualdad' | 'observadores' | 'generadores' | 'otras operaciones' | 'axiomas';
 
 export class Parser {
-    
+
     public markers: Marker[] = [];
     public database: TADDatabase;
-    
-    private activeTad: TAD | null = null;
+
+    public activeTad: TAD | null = null;
     private lines: string[] = [];
     private currentLine: number = 0;
 
@@ -54,7 +54,7 @@ export class Parser {
                         this.markerLine('error', "Se esperaba el inicio de una sección.");
                     } else if(section === 'generos') {
                         let generos = line.slice('generos'.length).split(",").map(g => g.trim()).filter(g => g.length);
-                        
+
                         if(generos.length === 0) {
                             this.markerLine('error', "Especificá al menos un género o eliminá toda la sección géneros.");
                         } else {
@@ -119,7 +119,7 @@ export class Parser {
         while((line = this.line()) != null &&
                Parser.checkSectionHeader(line) === 'none' &&
                !line.toUpperCase().startsWith("FIN TAD")) {
-            
+
             let split = line.split(splitter);
             if(split.length === 2) {
                 // anterior
@@ -142,7 +142,7 @@ export class Parser {
             this.markerLine("error", "Se esperaba el nombre de un TAD");
             return;
         }
-        
+
         this.activeTad = this.database.getTADByName(name);
         if(this.activeTad) {
             // el TAD se extiende
@@ -152,28 +152,36 @@ export class Parser {
             this.activeTad = this.database.registerNewTAD(name);
         }
     }
-    
+
+    public parseLineaOperacion(line: string, fallbackActiveTad: TAD) {
+        if (this.activeTad === null) {
+            this.activeTad = fallbackActiveTad;
+        }
+        let [left, right] = line.split(":");
+        return this.parseOperacion(left, right);
+    }
+
     private parseOperacion(left: string, right: string) {
-        console.log(left, "++++++++", right);
-        
-        /*
+        // console.log(left, "++++++++", right);
+
+        const tad: TAD = this.activeTad!;
+
         let arrow = "→";
         let cross = "×";
 
         // alternative syntax
-        if (!line.includes(arrow)) {
+        if (!right.includes(arrow)) {
             arrow = "->";
         }
-        if (!line.includes(cross)) {
+        if (!right.includes(cross)) {
             cross = "✕";
         }
 
-        let [_nombre, line2] = line.split(":")
-        let [_args, line3] = line2.split(arrow)
+        let [_args, line3] = right.split(arrow)
         let [_ret, ...rest] = line3.trim().split(" ")
         let restr = null  // TODO
 
-        let nombre = _nombre.trim()
+        let nombre = left.trim()
 
         let tokens: Token[] = [];
         let slots = [];
@@ -211,11 +219,10 @@ export class Parser {
 
         const retorno = _ret.trim()
 
-        */
         return {
-            nombre: "",
-            tokens: [],
-            retorno: "",
+            nombre,
+            tokens,
+            retorno,
             axiomas: [],  // TODO
         }
     }
@@ -252,7 +259,7 @@ export class Parser {
     private markerLine(severity: MarkerSeverity, message: string) {
         this.markers.push({ severity,  message, range: this.getCurrentLineRange() });
     }
-    
+
     static checkSectionHeader(line: string): Section {
         line = line.trimRight();
         if(line.match(/^g[ée]neros/i)) return 'generos';

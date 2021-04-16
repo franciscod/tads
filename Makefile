@@ -1,5 +1,5 @@
 test:
-	NO_COLOR=1 deno test --allow-read tests/
+	NO_COLOR=1 deno test --fail-fast --allow-read tests/
 
 testloop:
 	ls parser/* tests/* | entr -c make test

@@ -1,6 +1,7 @@
 import { assertEquals, assertArrayIncludes } from "https://deno.land/std@0.93.0/testing/asserts.ts";
 import { Parser } from "../parser/Parser.ts";
-import { Genero, Slot, Token } from "../parser/Types.ts";
+import { TADDatabase } from "../parser/Database.ts";
+import { Genero, Slot, TAD, Token } from "../parser/Types.ts";
 
 const BOOL_TAD = Deno.readTextFileSync("tads/bool.tad");
 
@@ -23,13 +24,20 @@ function generosDeSlots(tokens: Token[]) : string[] {
 }
 
 Deno.test("parsea bool", () => {
-    const tad = new Parser().parse(BOOL_TAD)
+    const db = new TADDatabase();
+    const p = new Parser(db);
+    p.parse(BOOL_TAD)
+
+    const tad: TAD = p.activeTad!;
 
     assertEquals(tad.nombre, "Bool")
     assertEquals(tad.generos, ["bool"])
 
 
-    const [genTrue, genFalse] = tad.generadores;
+    const generadores = tad.operaciones.filter((op) => op.tipo == 'generador');
+    const otrasOperaciones = tad.operaciones.filter((op) => op.tipo == 'otra');
+
+    const [genTrue, genFalse] = generadores;
 
     assertEquals(genTrue.nombre, "true");
     assertEquals(genTrue.tokens, [{type: "literal", symbol: "true"}]);
@@ -39,7 +47,8 @@ Deno.test("parsea bool", () => {
     assertEquals(genFalse.tokens, [{type: "literal", symbol: "false"}]);
     assertEquals(genFalse.retorno, "bool");
 
-    const [ooItef, ooNot, ooOr, ooAnd, ooImp, ooOrL, ooAndL, ooImpL] = tad.otrasOperaciones;
+
+    const [ooItef, ooNot, ooOr, ooAnd, ooImp, ooOrL, ooAndL, ooImpL] = otrasOperaciones;
 
     assertEquals(ooItef.nombre, "if•then•else•fi");
     assertEquals(generosDeSlots(ooItef.tokens), ["bool", "α", "α"]);
