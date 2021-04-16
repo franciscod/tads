@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "webpack serve",
     "build": "cross-env MODE=production webpack",
-    "test": "deno test --allow-read tests/",
+    "test": "deno test --unstable --allow-read tests/",
     "test:watch": "nodemon --exec \"npm run test\" --ext \"js,ts,tad\""
   },
   "devDependencies": {
@@ -28,6 +28,7 @@
     "webpack-dev-server": "^3.11.2"
   },
   "dependencies": {
-    "monaco-editor": "^0.23.0"
+    "monaco-editor": "^0.23.0",
+    "ohm-js": "^15.5.0"
   }
 }
