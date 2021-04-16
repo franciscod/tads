@@ -48,9 +48,9 @@ export type Axioma = {
 
 export type Operacion = {
     nombre: string;
-    tipo: 'basico' | 'generador' | 'otra';
+    tipo: 'basico' | 'generador' | 'otra';  // TODO: observador
     tokens: Token[];  // como lo parseo a un nodo
-    retorno: Genero;
+    retorno: string;
     axiomas: Axioma[];
     restriccion?: ExpresionLogica;
 } & ParseReference;
