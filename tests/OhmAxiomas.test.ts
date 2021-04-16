@@ -22,7 +22,7 @@ const BOOL_AXIOMS = [
 
 const BOOL_TAD = Deno.readTextFileSync("tads/bool.tad");
 
-Deno.test("ohm parsea axiomas de bool", () => {
+Deno.test("ohm parsea axiomas de bool con grammar armada a mano", () => {
     // escrito a mano
     const contents = `
         TADGrammar {
@@ -68,7 +68,7 @@ Deno.test("ohm parsea axiomas de bool", () => {
 })
 
 
-{
+Deno.test("ohm parsea axiomas de bool con grammar autogenerada", () => {
     const boolTad = parseTad(BOOL_TAD)!;
 
     const vars = new Map([ ["alpha", ["a", "b"]], ["bool", ["x", "y"]] ]);
@@ -76,12 +76,6 @@ Deno.test("ohm parsea axiomas de bool", () => {
     const boolGrammar = ohm.grammar(generated);
 
     BOOL_AXIOMS.forEach((axioma) => {
-        Deno.test("se parsea bien el axioma " + axioma, () => {
-            assert(boolGrammar.match(axioma).succeeded());
-        });
+        assert(boolGrammar.match(axioma).succeeded());
     });
-
-    console.log(generated);
-    
-
-}
+});
