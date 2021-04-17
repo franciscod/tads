@@ -22,7 +22,8 @@ let enBool = true;
 let enNat = false;
 let enConj = false;
 
-console.log(generated);
+// console.log(generated);
+
 Deno.readTextFileSync("tests/evals.txt").split('\n').forEach((line, n) => {
 
   if (line.includes("nat")) {
