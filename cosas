@@ -4,9 +4,6 @@ snippets
 go to definition con ctrl+click
     (ctags para vim? no se en monaco como se implementa esto)
 
-monaco stuff
-    shortcut para togglear commentar la linea completa deberia andar con --
-
 generos mas complejos
     una referencia a un tad no es suficiente, deberiamos poder representar:
         secu<alpha>
