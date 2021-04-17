@@ -1,0 +1,56 @@
+TAD Conjunto(α)
+
+géneros conj(α)
+
+parámetros formales
+  -- géneros α
+
+exporta conj(α), generadores, observadores, ∅?, ∪, ∩, #, • − {•}, dameUno, sinUno, ⊆, • −
+
+usa     Bool, Nat
+
+igualdad observacional
+    (∀c, c': conj(α)) (c =obs c' ⇔ ((∀a : α)(a ∈ c =obs a ∈ c')))
+
+observadores básicos
+    • ∈ •     : α × conj(α) → bool
+
+generadores
+    ∅         :             → conj(α)
+    Ag        : α × conj(α) → conj(α)
+
+otras operaciones
+    ∅?             : conj(α)           → bool
+    vacio?         : conj(α)           → bool
+    {•, . . . , •} : α × ... × α       → conj(α)
+    #              : conj(α)           → nat
+    • − {•}        : conj(α) × α       → conj(α)
+    • ∪ •          : conj(α) × conj(α) → conj(α)
+    • ∩ •          : conj(α) × conj(α) → conj(α)
+    dameUno        : conj(α) c         → α       {¬∅?(c)}
+    sinUno         : conj(α) c         → conj(α) {¬∅?(c)}
+    • ⊆ •          : conj(α) × conj(α) → bool
+    • − •          : conj(α) × conj(α) → conj(α)
+
+axiomas ∀ c, d: conj(α), ∀ a, b: α
+    a ∈ ∅             ≡ false
+    a ∈ Ag(b, c)      ≡ (a = b) ∨ (a ∈ c)
+    ∅?(∅)             ≡ true
+    ∅?(Ag(b, c))      ≡ false
+    vacio?(∅)         ≡ ∅?(∅)
+    vacio?(Ag(b, c))  ≡ ∅?(Ag(b, c))
+    #(∅)              ≡ 0
+    #(Ag(a, c))       ≡ 1 + #(c - { a })
+    {a1, ..., an}     ≡ Ag(an, ..., Ag(a1, ∅))
+    c − {a}           ≡ c − Ag(a, ∅)
+    ∅ ∪ c             ≡ c
+    Ag(a, c) ∪ d      ≡ Ag(a, c ∪ d)
+    ∅ ∩ c             ≡ ∅
+    Ag(a, c) ∩ d      ≡ if a ∈ d then Ag(a, c ∩ d) else c ∩ d fi
+    dameUno(c) ∈ c    ≡ true
+    sinUno(c)         ≡ c − {dameUno(c)}
+    c ⊆ d             ≡ c ∩ d = c
+    ∅ − c             ≡ ∅
+    Ag(a, c) − d      ≡ if a ∈ d then c − d else Ag(a, c − d) fi
+
+Fin TAD

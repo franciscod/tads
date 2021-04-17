@@ -4,7 +4,7 @@ géneros int
 
 exporta int, generadores, observadores, +, -, ×, <, ≤, mín, máx
 
-usa     Nat
+usa     Bool, Nat    -- en el apunte falta Bool
 
 igualdad observacional
     (∀n, m : int) (n =obs m ⇔ (negativo?(n) =obs negativo(m) ∧ |n| =obs |m|))
