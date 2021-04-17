@@ -11,4 +11,10 @@ todo:
 dev:
 	npm run dev
 
-.PHONY: test testloop todo dev
+lint:
+	npx eslint . --ext .js,.jsx,.ts,.tsx --fix
+
+format:
+	npx prettier --write .
+
+.PHONY: test testloop todo dev lint format
