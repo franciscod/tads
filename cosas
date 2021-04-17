@@ -4,9 +4,6 @@ snippets
 go to definition con ctrl+click
     (ctags para vim? no se en monaco como se implementa esto)
 
-idea de translation unit
-    parsear un source con varios TADs
-
 monaco stuff
     shortcut para togglear commentar la linea completa deberia andar con --
 
@@ -18,14 +15,6 @@ generos mas complejos
         dicc<nat,nat>
 
 parsear una expresion usando las secuencias de tokens conocidas
-
-    deberiamos poder parsear a nodos expresiones como
-        ¬true
-        ¬¬true
-        ¬(false v true)
-        if true then true else true fi
-
-        if (if true then true else true fi) then true else true fi
 
     hintear si te olvidaste del fi o del else
 

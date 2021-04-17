@@ -12,63 +12,45 @@ function titleSlug(s: string) : string {
 }
 
 export function genGrammar(tadName: string, ops: Operacion[], variables: Map<Genero, string[]>) : string {
-    const reglasParaGenero: Map<string, string[]> = new Map();
+    const reglasParaExpr: string[] = [];
 
-    const generosConocidos: string[] = [titleSlug(tadName)];
 
-    const variablesGenericas: string[] = Array.from(variables.keys())
-        .filter((g) => !generosConocidos.includes(titleSlug(g)))
-        .map(titleSlug);
+    let rules: string = "";
 
-    let rules = ops.map((op) => {
+    let varTerms: string[] = [];
+    for (const g of variables.keys()) {
+        (variables.get(g) || []).forEach((n) => {
+            const genVar = "Var" + titleSlug(g) + titleSlug(n);
+            rules += `${genVar} = "${n}"\n`;
+            varTerms.push(genVar);
+        });
+    }
+        rules += "Var = " + varTerms.join(" | ") + "\n";
+
+
+    rules += ops.map((op) => {
         const ret: string = titleSlug(op.retorno);
         const caseName = [op.tipo, op.nombre].reduce((p, e) => {
             return p + titleSlug(e);
         }, "");
 
-
-        const reglas = reglasParaGenero.get(ret) || [];
-
-        reglas.push(caseName);
-        reglasParaGenero.set(ret, reglas);
+        // TODO: hay que poner los infijos antes que los generadores
+        reglasParaExpr.unshift(caseName);
 
         const tokensRule = op.tokens.map((tok) => {
             if (tok.type == "literal") return `"${tok.symbol}"`;
-            if (tok.type == "slot") return titleSlug(tok.genero);
+            if (tok.type == "slot") return "Expr";
         }).join(" ");
 
         return `${caseName} = ${tokensRule}\n`;
     }).join('');
 
-    for (const g of variables.keys()) {
-        const varRule: string[] = Array.from(variables.get(g) || [])
-            .map((v) => `"${v}"`);
-
-        const tg = titleSlug(g)
-        reglasParaGenero.set("Var" + tg, varRule);
-
-        const reglas = reglasParaGenero.get(tg) || [];
-
-        reglas.push("Var" + tg);
-        if (variablesGenericas.includes(tg)) {
-            reglas.push("Genero");
-        }
-        reglasParaGenero.set(tg, reglas);
-    }
-
-    for (const g of reglasParaGenero.keys()) {
-        rules += g + " = " + (reglasParaGenero.get(g) || []).join(' | ') + "\n";
-    }
-
-
-    const reglasGenerosConVariables = variablesGenericas.concat(generosConocidos);
-
-    rules = "Genero = ParenGenero | " + reglasGenerosConVariables.join(' | ') + "\n" + rules;
+    rules += "Expr = " + reglasParaExpr.join(" | ") + " | Var | ParenExpr\n";
 
     return `TAD${tadName} {
-
-Axioma = Genero "===" Genero
-ParenGenero = "(" Genero ")"
+  Input = Axioma | Expr
+  Axioma = Expr "===" Expr
+  ParenExpr = "(" Expr ")"
 
 // autogenerado
 ${rules}
