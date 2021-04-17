@@ -8,22 +8,45 @@ const require = createRequire(import.meta.url);
 const ohm = require('ohm-js');
 
 const BOOL_TAD = Deno.readTextFileSync("tads/bool.tad");
+const NAT_TAD = Deno.readTextFileSync("tads/nat.tad");
+
 const boolTad = parseTad(BOOL_TAD)!;
-const generated = genGrammar("bool", boolTad.operaciones, new Map());
+const natTad = parseTad(NAT_TAD)!;
+
+// TODO: hacer algo un poco mas prolijo que juntar todas las operaciones?
+const ops = boolTad.operaciones.concat(natTad.operaciones);
+const generated = genGrammar("bool", ops, new Map());
 const g = ohm.grammar(generated);
 
-let antesDeNat = true;
+let enBool = true;
+let enNat = false;
+let enConj = false;
+
+console.log(generated);
 Deno.readTextFileSync("tests/evals.txt").split('\n').forEach((line, n) => {
 
   if (line.includes("nat")) {
-    antesDeNat = false;
+    enBool = false;
+    enNat = true;
   }
-  if (antesDeNat) {
-    Deno.test("parsea hasta nat evals.txt:" + (n + 1) + ":^" + line + "$", () => {
+
+  if (line.includes("conj")) {
+    enNat = false;
+    enConj = true;
+  }
+
+  if (enBool) {
+    Deno.test("parsea casos bool evals.txt:" + (n + 1) + ":^" + line + "$", () => {
+        line = line.split('--')[0];
+        if (!line) return;
+        assert(g.match(line).succeeded());
+    });
+  }
+  if (enNat) {
+    Deno.test("parsea casos bool+nat evals.txt:" + (n + 1) + ":^" + line + "$", () => {
         line = line.split('--')[0];
         if (!line) return;
         assert(g.match(line).succeeded());
     });
   }
 })
-

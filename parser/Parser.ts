@@ -53,9 +53,9 @@ export function parseAxioma(left: string, right: string, context?: ParseContext)
 }
 
 export function parseOperacion(left: string, right: string, section: Section, context?: ParseContext): Operacion | null {
-    // left:   • ∨L • 
+    // left:   • ∨L •
     // right   bool × bool  → bool {restriccion}
-    
+
     //context?.hints?.addMark('info', `${section}: ${left.length} / ${right.length}`, context.range);
     // TODO: =)
 
@@ -81,12 +81,14 @@ export function parseOperacion(left: string, right: string, section: Section, co
     const args = _args.split(/×|✕/).map((arg) => arg.trim()).filter((arg) => arg !== "");
     let ithSlot = 0;
 
+    let hasSlots = false;
     while (left !== "") {
         const i = left.indexOf("•");
         if (i == 0) {
             const genName: string = args[ithSlot++];
             const slot: Slot = {"type": "slot", "genero": genName};
             op.tokens.push(slot);
+            hasSlots = true;
 
             left = left.substr(1);
         } else if (i == -1) {
@@ -97,10 +99,31 @@ export function parseOperacion(left: string, right: string, section: Section, co
             left = left.substr(i);
         }
     }
-    
+
+    if (!hasSlots && args.length > 0) {
+        let functionStyleArgs: Token[] = [];
+
+        for (let i = 0; i < args.length; i++) {
+            const genName: string = args[i];
+            const slot: Slot = {"type": "slot", "genero": genName};
+            functionStyleArgs.push(slot);
+        }
+
+        const parenLeft: Token = {"type": "literal", "symbol": "("};
+        const comma: Token = {"type": "literal", "symbol": ","};
+        const parenRight: Token ={"type": "literal", "symbol": ")"};
+
+        op.tokens.push(parenLeft);
+        op.tokens = op.tokens.concat(functionStyleArgs.reduce((l: Token[], e: Token) => {
+            if (l.length > 0) l.push(comma);
+            l.push(e);
+            return l;
+        }, []))
+        op.tokens.push(parenRight);
+    }
 
     op.retorno = retorno.trim();
-    
+
     return op;
 }
 
@@ -124,7 +147,7 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
     }
 
     let closedProperly = false;
-    
+
     for(let i = 0; i < lines.length; i++){
         let line = lines[i];
 
@@ -145,7 +168,7 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
             }
             continue;
         }
-        
+
         if(line.toUpperCase().startsWith("FIN TAD")) {
             if(closedProperly) {
                 context?.hints?.addMark('error', 'El TAD ya estaba cerrado', offsetRange({ startLine: 1+i, endLine: 1+i, columnStart: 1, columnEnd: 1+line.length }));
@@ -153,7 +176,7 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
             closedProperly = true;
             continue;
         }
-        
+
         // inicio de sección
         const section: Section = checkSectionHeader(line);
 
@@ -182,7 +205,7 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
             // jaja saludos
         } else {
              // operaciones y axiomas
-             
+
             let splitter: RegExp;
             if(section === 'axiomas') {
                 splitter = /≡|={3}/;
@@ -266,7 +289,7 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
 export function parseSource(source: string, hints?: EditorHints): TAD[] {
     const tads: TAD[] = [];
     const lines = source.replaceAll(/\r\n/g, '\n').split('\n');
-    
+
     for(let i = 0; i < lines.length; i++){
         let line = lines[i];
         if(line.trim().length === 0)
@@ -280,7 +303,7 @@ export function parseSource(source: string, hints?: EditorHints): TAD[] {
             let buffer = line + '\n'; i++;
             while(i < lines.length) {
                 line = lines[i];
-                
+
                 if(line.toUpperCase().startsWith("TAD")) {
                     i--;
                     break;
@@ -292,7 +315,7 @@ export function parseSource(source: string, hints?: EditorHints): TAD[] {
 
                 i++;
             }
-            
+
             const tad: TAD | null = parseTad(buffer, {
                 hints,
                 range: {

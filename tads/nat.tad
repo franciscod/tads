@@ -10,15 +10,14 @@ igualdad observacional
     (∀n, m : nat) (n =obs m ⇔ (  (n =0? =obs m =0?) ∧L
                                (¬(n =0?) ⇒L (pred(n) =obs pred(m)))))
 
-observadores básicos
-    • =0?   : nat           → bool
-    pred    : nat n         → nat   {¬(n =0?)}
--- sugar de:
---  pred(•) : nat n         → nat   {¬(n =0?)}
-
 generadores
     0       :               → nat
     suc     : nat           → nat
+
+-- HACK: movi obs basicos antes de generadores para que el parser vea el op sufijo primero
+observadores básicos
+    • =0?   : nat           → bool
+    pred    : nat n         → nat   {¬(n =0?)}
 
 otras operaciones
     • + •   : nat   × nat   → nat

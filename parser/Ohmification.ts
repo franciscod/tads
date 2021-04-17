@@ -7,6 +7,13 @@ function titleSlug(s: string) : string {
     s = s.replace(/∨/g, "or");
     s = s.replace(/∧/g, "and");
     s = s.replace(/⇒/g, "imp");
+    s = s.replace(/=/g, "eq");
+    s = s.replace(/\?/g, "q");
+    s = s.replace(/\+/g, "plus");
+    s = s.replace(/\-/g, "minus");
+    s = s.replace(/×/g, "times");
+    s = s.replace(/</g, "lt");
+    s = s.replace(/≤/g, "le");
 
     return s[0].toUpperCase() + s.substr(1).toLowerCase();
 }
