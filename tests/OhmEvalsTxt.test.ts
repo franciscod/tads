@@ -5,7 +5,7 @@ import { genGrammar } from "../parser/Ohmification.ts";
 import { parseTad } from "../parser/Parser.ts";
 
 const require = createRequire(import.meta.url);
-const ohm = require('ohm-js');
+const ohm = require("ohm-js");
 
 const BOOL_TAD = Deno.readTextFileSync("tads/bool.tad");
 const NAT_TAD = Deno.readTextFileSync("tads/nat.tad");
@@ -24,30 +24,37 @@ let enConj = false;
 
 // console.log(generated);
 
-Deno.readTextFileSync("tests/evals.txt").split('\n').forEach((line, n) => {
+Deno.readTextFileSync("tests/evals.txt")
+  .split("\n")
+  .forEach((line, n) => {
+    if (line.includes("nat")) {
+      enBool = false;
+      enNat = true;
+    }
 
-  if (line.includes("nat")) {
-    enBool = false;
-    enNat = true;
-  }
+    if (line.includes("conj")) {
+      enNat = false;
+      enConj = true;
+    }
 
-  if (line.includes("conj")) {
-    enNat = false;
-    enConj = true;
-  }
-
-  if (enBool) {
-    Deno.test("parsea casos bool evals.txt:" + (n + 1) + ":^" + line + "$", () => {
-        line = line.split('--')[0];
-        if (!line) return;
-        assert(g.match(line).succeeded());
-    });
-  }
-  if (enNat) {
-    Deno.test("parsea casos bool+nat evals.txt:" + (n + 1) + ":^" + line + "$", () => {
-        line = line.split('--')[0];
-        if (!line) return;
-        assert(g.match(line).succeeded());
-    });
-  }
-})
+    if (enBool) {
+      Deno.test(
+        "parsea casos bool evals.txt:" + (n + 1) + ":^" + line + "$",
+        () => {
+          line = line.split("--")[0];
+          if (!line) return;
+          assert(g.match(line).succeeded());
+        }
+      );
+    }
+    if (enNat) {
+      Deno.test(
+        "parsea casos bool+nat evals.txt:" + (n + 1) + ":^" + line + "$",
+        () => {
+          line = line.split("--")[0];
+          if (!line) return;
+          assert(g.match(line).succeeded());
+        }
+      );
+    }
+  });
