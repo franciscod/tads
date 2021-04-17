@@ -16,7 +16,7 @@ export class TADDatabase {
         if(this.getTADByName(name) !== null)
             return null; // el TAD ya está registrado
 
-        let tad: TAD = {
+        const tad: TAD = {
             nombre: name,
             generos: [],
             operaciones: [],

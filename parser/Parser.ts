@@ -101,7 +101,7 @@ export function parseOperacion(left: string, right: string, section: Section, co
     }
 
     if (!hasSlots && args.length > 0) {
-        let functionStyleArgs: Token[] = args.map((gen) => ({"type": "slot", "genero": gen}));
+        const functionStyleArgs: Token[] = args.map((gen) => ({"type": "slot", "genero": gen}));
 
         const parenLeft: Token = {"type": "literal", "symbol": "("};
         const comma: Token = {"type": "literal", "symbol": ","};

@@ -7,7 +7,7 @@ import * as monaco from "monaco-editor";
 import { basicos, demo } from "../../tads";
 import { Marker, EditorHints, parseSource } from "../../parser/Parser";
 
-let editor = monaco.editor.create(document.getElementById('editor')!, {
+const editor = monaco.editor.create(document.getElementById('editor')!, {
     theme: 'tad-dark',
     automaticLayout: true,
     fontFamily: 'Fira Code',
@@ -75,7 +75,7 @@ class Tab {
 
     validate() {
         const hints = new EditorHints();
-        let tads = parseSource(this.model.getValue(), hints);
+        const tads = parseSource(this.model.getValue(), hints);
         console.log(tads);
         
         const toMonacoSeverity = (marker: Marker): monaco.MarkerSeverity => {
@@ -98,7 +98,7 @@ class Tab {
     }
 };
 
-let tabs: Tab[] = [
+const tabs: Tab[] = [
     new Tab({
         title: '⚛️ TADs básicos 🔒',
         content: basicos.join(`\n\n${('-'.repeat(100)+'\n').repeat(5)}\n\n`),

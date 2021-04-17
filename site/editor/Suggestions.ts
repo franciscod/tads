@@ -22,14 +22,14 @@ const symbol_replacements = [
 
 monaco.languages.registerCompletionItemProvider('tad', {
 	provideCompletionItems: (model, position, token) => {
-        var word = model.getWordUntilPosition(position);
-        var range = {
+        const word = model.getWordUntilPosition(position);
+        const range = {
             startLineNumber: position.lineNumber,
             endLineNumber: position.lineNumber,
             startColumn: word.startColumn,
             endColumn: word.endColumn
         };
-		var suggestions: monaco.languages.CompletionItem[] = [
+		const suggestions: monaco.languages.CompletionItem[] = [
             ...symbol_replacements.map(([from, to]) => ({
                 label: from,
                 kind: monaco.languages.CompletionItemKind.Keyword,
