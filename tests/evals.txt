@@ -1,0 +1,75 @@
+-- evals de ejemplo
+
+-- bool
+true                               = true
+false                              = false
+if true then true else true fi     = true
+if true then true else false fi    = true
+if true then false else true fi    = false
+if true then false else false fi   = false
+if false then true else true fi    = true
+if false then true else false fi   = false
+if false then false else true fi   = true
+if false then false else false fi  = false
+¬true                              = false -- not
+¬false                             = true
+true ∨ true                        = true -- or
+true ∨ false                       = true
+false ∨ true                       = true
+false ∨ false                      = false
+true ∧ true                        = true -- and
+true ∧ false                       = false
+false ∧ true                       = false
+false ∧ false                      = false
+true ⇒ true                        = true -- then
+true ⇒ false                       = false
+false ⇒ true                       = true
+false ⇒ false                      = true
+false ∨ (false ∧ true)             = false
+true ∧ (false ∨ true)              = true
+
+-- nat (+bool)
+0                                  = 0
+suc(0)                             = suc(0)
+suc(suc(0))                        = suc(suc(0))
+0 =0?                              = true
+suc(0) =0?                         = false
+0 + 0                              = 0
+0 - 0                              = 0
+suc(0) + 0                         = suc(0)
+0 + suc(0)                         = suc(0)
+suc(0) - 0                         = suc(0)
+suc(0) + suc(0)                    = suc(suc(0))
+suc(0) - suc(0)                    = 0
+suc(0) × 0                         = 0
+0 × suc(0)                         = 0
+suc(0) × suc(0)                    = suc(0)
+suc(suc(0)) × suc(0)               = suc(suc(0))
+0 < suc(0)                         = true
+suc(0) < suc(0)                    = false
+suc(0) ≤ suc(0)                    = true
+mín(suc(0), 0)                     = 0
+máx(suc(0), 0)                     = suc(0)
+mín(suc(0), suc(suc(0)))           = suc(0)
+máx(suc(0), suc(suc(0)))           = suc(suc(0))
+suc(suc(suc(0))) - suc(suc(0))     = suc(0)
+suc(suc(suc(0))) + suc(suc(0))     = suc(suc(suc(suc(suc(0)))))
+β(false)                           = 0
+β(true)                            = suc(0)
+β(if true then false else true fi) = 0
+β(suc(0) < suc(suc(0)))            = suc(0)
+pred(suc(0))                       = 0
+suc(pred(suc(0)))                  = suc(0)
+pred(β(true))                      = 0
+pred(máx(suc(0), suc(suc(0))))     = suc(0)
+
+-- conj(nat)
+∅?(∅)                              = true
+#(∅)                               = 0
+#(Ag(0, Ag(0,      ∅)))            = suc(0)
+#(Ag(0, Ag(suc(0), ∅)))            = suc(suc(0))
+∅ ∪ ∅                              = ∅
+#(∅ ∪ ∅)                           = ∅
+
+
+-- hay mil cosas para poner aca
