@@ -9,12 +9,11 @@ const ohm = require('ohm-js');
 
 const BOOL_TAD = Deno.readTextFileSync("tads/bool.tad");
 const boolTad = parseTad(BOOL_TAD)!;
+const generated = genGrammar("bool", boolTad.operaciones, new Map());
+const g = ohm.grammar(generated);
 
 let antesDeNat = true;
 Deno.readTextFileSync("tests/evals.txt").split('\n').forEach((line, n) => {
-  const generated = genGrammar("bool", boolTad.operaciones, new Map());
-
-  const g = ohm.grammar(generated);
 
   if (line.includes("nat")) {
     antesDeNat = false;
