@@ -101,24 +101,19 @@ export function parseOperacion(left: string, right: string, section: Section, co
     }
 
     if (!hasSlots && args.length > 0) {
-        let functionStyleArgs: Token[] = [];
-
-        for (let i = 0; i < args.length; i++) {
-            const genName: string = args[i];
-            const slot: Slot = {"type": "slot", "genero": genName};
-            functionStyleArgs.push(slot);
-        }
+        let functionStyleArgs: Token[] = args.map((gen) => ({"type": "slot", "genero": gen}));
 
         const parenLeft: Token = {"type": "literal", "symbol": "("};
         const comma: Token = {"type": "literal", "symbol": ","};
         const parenRight: Token ={"type": "literal", "symbol": ")"};
 
         op.tokens.push(parenLeft);
-        op.tokens = op.tokens.concat(functionStyleArgs.reduce((l: Token[], e: Token) => {
-            if (l.length > 0) l.push(comma);
-            l.push(e);
-            return l;
-        }, []))
+
+        functionStyleArgs.forEach((t, i) => {
+            if (i > 0) op.tokens.push(comma);
+            op.tokens.push(t);
+        })
+
         op.tokens.push(parenRight);
     }
 
