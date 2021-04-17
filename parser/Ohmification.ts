@@ -25,7 +25,9 @@ export function genGrammar(tadName: string, ops: Operacion[], variables: Map<Gen
             varTerms.push(genVar);
         });
     }
-        rules += "Var = " + varTerms.join(" | ") + "\n";
+  if (varTerms.length > 0) {
+      rules += "Var = " + varTerms.join(" | ") + "\n";
+  }
 
 
     rules += ops.map((op) => {
@@ -45,11 +47,16 @@ export function genGrammar(tadName: string, ops: Operacion[], variables: Map<Gen
         return `${caseName} = ${tokensRule}\n`;
     }).join('');
 
-    rules += "Expr = " + reglasParaExpr.join(" | ") + " | Var | ParenExpr\n";
+  if (varTerms.length > 0) {
+      reglasParaExpr.push("Var");
+  }
+
+    rules += "Expr = " + reglasParaExpr.join(" | ") + " | ParenExpr\n";
 
     return `TAD${tadName} {
-  Input = Axioma | Expr
+  Input = Axioma | EvalTest | Expr
   Axioma = Expr "===" Expr
+  EvalTest = Expr "=" Expr
   ParenExpr = "(" Expr ")"
 
 // autogenerado
