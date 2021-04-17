@@ -1,5 +1,6 @@
 snippets
     al axiomatizar un observador te levante todos los generadores
+    (se pueden hacer snippets dinamicos?)
 
 go to definition con ctrl+click
     (ctags para vim? no se en monaco como se implementa esto)
@@ -12,7 +13,6 @@ generos mas complejos
         dicc<nat,nat>
 
 parsear una expresion usando las secuencias de tokens conocidas
-
     hintear si te olvidaste del fi o del else
 
 ver que este bien escrito el tad
@@ -27,12 +27,12 @@ ver que este bien escrito el tad
                 - z no esta entre las variables libres del tad
 
     chequear restricciones
-        que si trato de evaluar una expresion y pero no estoy cumpliendo la
+        que si trato de evaluar una expresion y no estoy cumpliendo la
         restriccion, sea un error
 
     chequear completitud de los observadores:
         todos los observadores tienen que estar bien definidos para todos
-        los generadores
+        los generadores (o para una instancia generica)
 
 
 mostrar ejemplos de un axioma
