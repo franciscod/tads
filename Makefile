@@ -11,4 +11,7 @@ todo:
 dev:
 	npm run dev
 
-.PHONY: test testloop todo dev
+fmt:
+	deno fmt parser site tests
+
+.PHONY: test testloop todo dev fmt
