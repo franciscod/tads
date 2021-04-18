@@ -27,11 +27,11 @@ type Section = 'none' | 'generos' | 'igualdad' | 'observadores' | 'generadores' 
 function checkSectionHeader(line: string): Section {
     line = line.trimRight();
     if(line.match(/^g[ée]neros/i)) return 'generos';
-    if(line.match(/^(igualdad observacional|igobs|ig obs)$/i)) return 'igualdad';
-    if(line.match(/^(observadores b[áa]sicos|obs)$/i)) return 'observadores';
-    if(line.match(/^(generadores|gen)$/i)) return 'generadores';
-    if(line.match(/^(otras operaciones|otras op|otrasop)$/i)) return 'otras operaciones';
-    if(line.match(/^(axiomas)/i)) return 'axiomas';
+    if(line.match(/^ig(ualdad)? ?obs(ervacional)?$/i)) return 'igualdad';
+    if(line.match(/^obs(ervadores b[áa]sicos)?$/i)) return 'observadores';
+    if(line.match(/^gen(eradores)?$/i)) return 'generadores';
+    if(line.match(/^otras ?op(eraciones)?$/i)) return 'otras operaciones';
+    if(line.match(/^axiomas/i)) return 'axiomas';
     return 'none';
 }
 
