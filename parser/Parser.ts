@@ -55,8 +55,6 @@ export function parseVarLibres(input: string, context?: ParseContext): Map<Gener
             result.set(gen, vars);
         });
     
-    console.log(result);
-
     return result;
 }
 
