@@ -49,7 +49,7 @@ export function parseVarLibres(input: string, context?: ParseContext): Map<Gener
         .map(l => l.trim().split(":"))
         .filter(a => a.length === 2)
         .forEach(([_vars, gen]) => {
-            const vars = _vars.split(",").map(v => v.trim());
+            const vars = _vars.split(",").map(v => v.trim()).filter(v => v.length);
             gen = gen.replace(/,/g, '').trim();
 
             result.set(gen, vars);
