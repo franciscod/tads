@@ -24,7 +24,7 @@ let enConj = false;
 
 // console.log(generated);
 
-Deno.readTextFileSync("tests/evals.txt").split('\n').forEach((line, n) => {
+Deno.readTextFileSync("tests/evals.txt").replaceAll('\r\n', '\n').split('\n').forEach((line, n) => {
 
   if (line.includes("nat")) {
     enBool = false;
