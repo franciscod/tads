@@ -61,12 +61,7 @@ export function genGrammar(tadName: string, ops: Operacion[], variables: Map<Gen
     rules += "Expr = " + reglasParaExpr.join(" | ") + " | ParenExpr\n";
 
     return `TAD${tadName} {
-  Input = Axioma | EvalTest | Expr | EmptyLine
-
-  space += comment
-  comment = "--" (any)*
-  EmptyLine =
-
+  Input = Axioma | EvalTest | Expr
   Axioma = Expr "===" Expr
   EvalTest = Expr "=" Expr
   ParenExpr = "(" Expr ")"
