@@ -38,15 +38,11 @@ Deno.readTextFileSync("tests/evals.txt").split('\n').forEach((line, n) => {
 
   if (enBool) {
     Deno.test("parsea casos bool evals.txt:" + (n + 1) + ":^" + line + "$", () => {
-        line = line.split('--')[0];
-        if (!line) return;
         assert(g.match(line).succeeded());
     });
   }
   if (enNat) {
     Deno.test("parsea casos bool+nat evals.txt:" + (n + 1) + ":^" + line + "$", () => {
-        line = line.split('--')[0];
-        if (!line) return;
         assert(g.match(line).succeeded());
     });
   }
