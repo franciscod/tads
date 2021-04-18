@@ -40,10 +40,24 @@ export function parseExpresionLogica(input: string, context?: ParseContext): Exp
     return null;
 }
 
-export function parseVarLibres(input: string, context?: ParseContext): Variable[] {
+export function parseVarLibres(input: string, context?: ParseContext): Map<Genero, string[]> {
     //context?.hints?.addMark('info', 'variables libres', context.range);
-    // TODO: =)
-    return [];
+
+    const result = new Map<Genero, string[]>();
+
+    input.split("∀")
+        .map(l => l.trim().split(":"))
+        .filter(a => a.length === 2)
+        .forEach(([_vars, gen]) => {
+            const vars = _vars.split(",").map(v => v.trim());
+            gen = gen.replace(/,/g, '').trim();
+
+            result.set(gen, vars);
+        });
+    
+    console.log(result);
+
+    return result;
 }
 
 export function parseAxioma(left: string, right: string, context?: ParseContext): Operacion | null {
@@ -128,7 +142,7 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
         nombre: "",
         generos: [],
         operaciones: [],
-        variablesLibres: [],
+        variablesLibres: new Map<Genero, string[]>(),
         range: context?.range
     };
 

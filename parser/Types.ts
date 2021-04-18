@@ -60,5 +60,5 @@ export type TAD = {
     generos: string[];
     // exporta por ahora no
     operaciones: Operacion[];
-    variablesLibres: Variable[];
+    variablesLibres: Map<Genero, string[]>;
 } & ParseReference;

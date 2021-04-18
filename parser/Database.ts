@@ -13,6 +13,8 @@ export class TADDatabase {
     }
 
     registerNewTAD(name: string): TAD | null {
+        return null;
+        /*
         if(this.getTADByName(name) !== null)
             return null; // el TAD ya está registrado
 
@@ -20,10 +22,11 @@ export class TADDatabase {
             nombre: name,
             generos: [],
             operaciones: [],
-            variablesLibres: []
+            variablesLibres: new Map()
         };
         this.tads.push(tad);
         
         return tad;
+        */
     }
 }
