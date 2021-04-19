@@ -1,6 +1,6 @@
 import fs from "fs";
 import { genGrammar, getAST } from "../parser/Ohmification";
-import { evalAxiomas, auxAxiomasAST } from "../parser/Eval";
+import { Axioma, evalAxiomas, auxAxiomasAST } from "../parser/Eval";
 import { parseTad } from "../parser/Parser";
 
 import ohm from "ohm-js";
@@ -21,6 +21,12 @@ let enNat = false;
 let enConj = false;
 
 // console.log(generated);
+
+let axiomas: Axioma[];
+
+it("parsea los axiomas", () => {
+    axiomas = auxAxiomasAST([boolTad, natTad]);
+});
 
 fs.readFileSync("tests/evals.txt", "utf-8")
     .replace(/\r\n/g, "\n")
@@ -52,8 +58,6 @@ fs.readFileSync("tests/evals.txt", "utf-8")
         it("  eval evals.txt:" + (n + 1) + ":^" + line + "$", () => {
             let exprL = getAST(matches[0], unaries);
             let exprR = getAST(matches[1], unaries);
-
-            const axiomas = auxAxiomasAST(boolTad);
 
             expect(evalAxiomas(exprL, axiomas)).toStrictEqual(exprR);
         });

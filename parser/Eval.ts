@@ -4,30 +4,52 @@ import ohm from "ohm-js";
 
 type AST = any;
 // TODO: los axiomas deberian tener info de tipos attacheada
-type Axioma = [AST, AST];
+export type Axioma = [AST, AST];
 
-export function auxAxiomasAST(tad: TAD): Axioma[] {
-    const vars = tad.variablesLibres;
-    const [generated, unaries] = genGrammar(
-        tad.nombre,
-        tad.operaciones,
-        tad.variablesLibres
-    );
-    const g = ohm.grammar(generated);
+export function auxAxiomasAST(tads: TAD[]): Axioma[] {
+    let ret: Axioma[] = [];
 
-    return tad.axiomas.map((rawPair: [string, string]) => {
-        const left = rawPair[0];
-        const right = rawPair[1];
-        return [
-            getAST(g.match(left), unaries),
-            getAST(g.match(right), unaries),
-        ];
+    let opsTodos = tads.map((tad) => tad.operaciones)
+                    .reduce((ret, ops) => ret.concat(ops), []);
+
+    tads.forEach((tad) => {
+        const [generated, unaries] = genGrammar(
+            tad.nombre,
+            opsTodos,
+            tad.variablesLibres
+        );
+        const g = ohm.grammar(generated);
+
+        const axiomasEsteTad: Axioma[] = tad.axiomas.map((rawPair: [string, string]) => {
+            const left = rawPair[0];
+            const right = rawPair[1];
+
+
+            const matchLeft = g.match(left);
+            const matchRight = g.match(right);
+            if (!matchLeft.succeeded()) {
+                console.log(left);
+            }
+
+            if (!matchRight.succeeded()) {
+                console.log(right);
+            }
+
+            return [
+                getAST(matchLeft, unaries),
+                getAST(matchRight, unaries),
+            ];
+        });
+
+        ret = ret.concat(axiomasEsteTad);
     });
+
+    return ret;
 }
 
 export function evalAxiomas(expr: AST, axiomas: Axioma[]): AST {
     let run = true;
-    while (run) {
+    for (let i = 0; i < 10 && run; i++) {
         [run, expr] = evalStep(expr, axiomas);
     }
 
@@ -40,6 +62,10 @@ function evalStep(expr: AST, axiomas: Axioma[]): [boolean, AST] {
 
         // si expr no entra en la izq del axioma, skip
         if (left.type !== expr.type) continue;
+
+        if (JSON.stringify(expr) === JSON.stringify(left)) {
+            return [true, right];
+        }
 
         for (const child in expr) {
             if (child === "type") continue;
