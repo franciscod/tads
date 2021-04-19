@@ -78,10 +78,11 @@ mín(suc(suc(0)), máx(0, suc(0)))   = suc(0)
 -- conj(nat)
 ∅?(∅)                              = true
 #(∅)                               = 0
-#(Ag(0, Ag(0,      ∅)))            = suc(0)
-#(Ag(0, Ag(suc(0), ∅)))            = suc(suc(0))
 ∅ ∪ ∅                              = ∅
 #(∅ ∪ ∅)                           = 0
+-- estos piden =
+-- #(Ag(0, Ag(0,      ∅)))            = suc(0)
+-- #(Ag(0, Ag(suc(0), ∅)))            = suc(suc(0))
 
 
 
