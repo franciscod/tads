@@ -1,3 +1,4 @@
+-- autogenerado del csv
 true = true
 false = false
 if true then true else true fi = true
@@ -50,6 +51,7 @@ suc(suc(0)) × suc(0) = suc(suc(0))
 0 < suc(0) = true
 0 < 0 = false
 suc(0) < suc(0) = false
+-- deshabilitadoHasta(tenerIgual): suc(0) ≤ suc(0) = true
 mín(suc(0), 0) = 0
 máx(suc(0), 0) = suc(0)
 mín(suc(0), suc(suc(0))) = suc(0)
@@ -71,6 +73,9 @@ mín(suc(suc(0)), máx(0, suc(0))) = suc(0)
 #(∅) = 0
 ∅ ∪ ∅ = ∅
 #(∅ ∪ ∅) = 0
+-- deshabilitadoHasta(tenerIgual): #(Ag(0, Ag(0, ∅))) = suc(0)
+-- deshabilitadoHasta(tenerIgual): #(Ag(0, Ag(suc(0), ∅))) = suc(suc(0))
+-- (linea que no es un caso de eval)
 negativo?(-suc(0)) = true
 negativo?(+0) = false
 negativo?(+suc(0)) = false
@@ -105,14 +110,22 @@ negativo?(+suc(0)) = false
 -suc(0) × -suc(0) = +1
 +0 × +0 = +0
 +suc(suc(0)) × +suc(0) = +suc(suc(0))
+-- deshabilitadoHasta(sugar numeros): +suc(suc(0)) × +suc(0) = +2
 +suc(suc(0)) × -suc(0) = -suc(suc(0))
+-- deshabilitadoHasta(sugar numeros): +suc(suc(0)) × -suc(0) = -2
 +suc(suc(0)) × +suc(suc(0)) = +suc(suc(suc(suc(0))))
+-- deshabilitadoHasta(sugar numeros): +suc(suc(0)) × +suc(suc(0)) = +4
 +suc(suc(0)) × -suc(suc(0)) = -suc(suc(suc(suc(0))))
+-- deshabilitadoHasta(sugar numeros): +suc(suc(0)) × -suc(suc(0)) = -4
 -suc(suc(0)) × -suc(0) = +suc(suc(0))
+-- deshabilitadoHasta(sugar numeros): -suc(suc(0)) × -suc(0) = +2
 -suc(suc(0)) × -suc(suc(0)) = +suc(suc(suc(suc(0))))
+-- deshabilitadoHasta(sugar numeros): -suc(suc(0)) × -suc(suc(0)) = +4
+-- (linea que no es un caso de eval)
 negativo?(-|-suc(suc(0))|) = true
 |-suc(suc(0))|-|suc(suc(0))| = 0
+-- (linea que no es un caso de eval)
 suc(suc(0)) × suc(suc(suc(0))) + suc(suc(suc(suc(suc(0))))) = suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(0))))))))))) --precedencia
 suc(suc(suc(suc(suc(0))))) + suc(suc(suc(0))) × suc(suc(0)) = suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(0))))))))))) --precedencia
-2 × 3 + 5 = 11 --precedencia, numeros
-5 + 3 × 2 = 11 --precedencia, numeros
+-- deshabilitadoHasta(sugar numeros): 2 × 3 + 5 = 11 --precedencia, numeros
+-- deshabilitadoHasta(sugar numeros): 5 + 3 × 2 = 11 --precedencia, numeros

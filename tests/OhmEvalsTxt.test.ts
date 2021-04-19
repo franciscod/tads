@@ -23,6 +23,9 @@ const ops = [
     ...conjTad.operaciones,
 ];
 const [generated, unaries] = genGrammar("bool", ops, new Map());
+
+// console.log(generated);
+
 const g = ohm.grammar(generated);
 
 // console.log(generated);
@@ -48,7 +51,18 @@ fs.readFileSync("tests/evals.txt", "utf-8")
             });
         });
 
-        it("  eval evals.txt:" + (n + 1) + ":^" + line + "$", () => {
+    });
+
+fs.readFileSync("tests/evals.txt", "utf-8")
+    .replace(/\r\n/g, "\n")
+    .split("\n")
+    .forEach((line, n) => {
+        line = line.split("--")[0];
+        if (!line) return;
+        const parts = line.split(" = ");
+        const matches = parts.map(s => g.match(s));
+
+        it("eval evals.txt:" + (n + 1) + ":^" + line + "$", () => {
             const exprL = getAST(matches[0], unaries);
             const exprR = getAST(matches[1], unaries);
 
