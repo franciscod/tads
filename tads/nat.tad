@@ -47,11 +47,3 @@ axiomas ∀ n, m: nat
     β(n)         ≡ if n then suc(0) else 0 fi
 
 Fin TAD
-
--- x ∧L y                    ≡ if x then y else false fi
-
--- ¬(suc(0) =0?) ∧L (suc(0) =0? ∨L pred(suc(0)) < pred(suc(0)))
--- true ∧L (false ∨L pred(suc(0)) < pred(suc(0)))
--- true ∧L (false ∨L 0 < 0)
-
-
