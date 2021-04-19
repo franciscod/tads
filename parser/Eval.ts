@@ -87,7 +87,7 @@ function reemplazar(expr: AST, bindings: Map<string, AST>): [boolean, AST] {
         if (child === "type") continue;
         let [seReemplazo, sub] = reemplazar(expr[child], bindings);
         ret[child] = sub;
-        hizoAlgo ||= seReemplazo;
+        hizoAlgo = hizoAlgo || seReemplazo;
     }
 
     return [hizoAlgo, ret];
