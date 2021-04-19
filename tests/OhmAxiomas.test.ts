@@ -61,6 +61,7 @@ it("ohm con grammar armada a mano parsea axiomas de bool", () => {
 
     BOOL_AXIOMS.forEach((axioma) => {
         let match = boolGrammar.match(axioma);
+        expect(match.succeeded());
     });
 })
 
@@ -69,6 +70,7 @@ it("ohm con grammar armada a mano parsea expresiones random con bools", () => {
 
     BOOL_RANDOM_EXPRS.forEach((expr) => {
         let match = boolGrammar.match(expr);
+        expect(match.succeeded());
     });
 })
 
