@@ -255,20 +255,14 @@ const tabs: Tab[] = [
 (tabs.find(t => t.options.title === localStorage.getItem("tab")) || tabs[1]).switchTo();
 
 
+// TODO: no funciona :C
+/*
 function updateViewState() {
-    console.log("SAVED");
     localStorage.setItem("view_state", JSON.stringify(editor.saveViewState()));
 }
-
 // no se cuales hookear
 editor.onDidScrollChange(updateViewState);
 editor.onDidLayoutChange(updateViewState);
-
-
-setTimeout(() => {
-    const viewState = localStorage.getItem("view_state") as monaco.editor.ICodeEditorViewState | null;
-    console.log("viewState", viewState);
-
-    if(viewState) editor.restoreViewState(viewState);
-}, 1000);
-
+const viewState = localStorage.getItem("view_state") as monaco.editor.ICodeEditorViewState | null;
+if(viewState) editor.restoreViewState(viewState);
+*/
