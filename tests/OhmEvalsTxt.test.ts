@@ -7,12 +7,16 @@ import ohm from "ohm-js";
 
 const BOOL_TAD = fs.readFileSync("tads/bool.tad", "utf-8");
 const NAT_TAD = fs.readFileSync("tads/nat.tad", "utf-8");
+const CONJ_TAD = fs.readFileSync("tads/conj.tad", "utf-8");
 
 const boolTad = parseTad(BOOL_TAD)!;
 const natTad = parseTad(NAT_TAD)!;
+const conjTad = parseTad(CONJ_TAD)!;
 
 // TODO: hacer algo un poco mas prolijo que juntar todas las operaciones?
-const ops = boolTad.operaciones.concat(natTad.operaciones);
+const ops = boolTad.operaciones
+                .concat(natTad.operaciones)
+                .concat(conjTad.operaciones);
 const [generated, unaries] = genGrammar("bool", ops, new Map());
 const g = ohm.grammar(generated);
 
@@ -25,7 +29,7 @@ let enConj = false;
 let axiomas: Axioma[];
 
 it("parsea los axiomas", () => {
-    axiomas = auxAxiomasAST([boolTad, natTad]);
+    axiomas = auxAxiomasAST([boolTad, natTad, conjTad]);
 });
 
 fs.readFileSync("tests/evals.txt", "utf-8")
@@ -42,7 +46,7 @@ fs.readFileSync("tests/evals.txt", "utf-8")
             enConj = true;
         }
 
-        if (!enBool && !enNat) return;
+        if (!enBool && !enNat && !enConj) return;
 
         line = line.split("--")[0];
         if (!line) return;
