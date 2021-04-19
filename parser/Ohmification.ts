@@ -19,6 +19,7 @@ function titleSlug(s: string): string {
     s = s.replace(/≤/g, "le");
 
     s = s.replace(/#/g, "hash");
+    s = s.replace(/\|/g, "pipe");
     s = s.replace(/{/g, "lbrace");
     s = s.replace(/}/g, "rbrace");
     s = s.replace(/∅/g, "empty");
@@ -50,9 +51,9 @@ export function genGrammar(tadName: string, ops: Operacion[], variables: Map<Gen
     }
 
     rules += ops
-        .map(op => {
+        .map((op, i) => {
             const ret: string = titleSlug(op.retorno);
-            const caseName = [op.tipo, op.nombre].reduce((p, e) => {
+            const caseName = [op.tipo, op.nombre, `__${i}`].reduce((p, e) => {
                 return p + titleSlug(e);
             }, "");
 

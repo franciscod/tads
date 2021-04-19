@@ -15,22 +15,23 @@ export function auxAxiomasAST(tads: TAD[]): Axioma[] {
         const [generated, unaries] = genGrammar(tad.nombre, opsTodos, tad.variablesLibres);
         const g = ohm.grammar(generated);
 
-        const axiomasEsteTad: Axioma[] = tad.axiomas.map((rawPair: [string, string]) => {
-            const left = rawPair[0];
-            const right = rawPair[1];
+        const axiomasEsteTad: Axioma[] = [];
 
+        for(const [left, right] of tad.axiomas) {
             const matchLeft = g.match(left);
             const matchRight = g.match(right);
             if (!matchLeft.succeeded()) {
-                console.log(left);
+                //console.log(left);
+                continue;
             }
 
             if (!matchRight.succeeded()) {
-                console.log(right);
+                //console.log(right);
+                continue;
             }
 
-            return [getAST(matchLeft, unaries), getAST(matchRight, unaries)];
-        });
+            axiomasEsteTad.push([getAST(matchLeft, unaries), getAST(matchRight, unaries)]);
+        }
 
         ret = ret.concat(axiomasEsteTad);
     });

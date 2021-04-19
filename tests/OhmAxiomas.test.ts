@@ -95,37 +95,3 @@ it("ohm parsea expresiones random de bool con grammar autogenerada", () => {
         expect(boolGrammar.match(expr).succeeded()).toStrictEqual(true);
     });
 });
-
-it("obtiene el ast de ciertas expresiones con bool", () => {
-    const casos: [string, any][] = [];
-
-    casos.push([
-        "¬(false ∨ true)",
-        {
-            "1": {
-                "0": { type: "GeneradorFalse" },
-                "2": { type: "GeneradorTrue" },
-                type: "OtraOr",
-            },
-            type: "OtraNeg",
-        },
-    ]);
-
-    casos.push([
-        "if true then true else true fi",
-        {
-            "1": { type: "GeneradorTrue" },
-            "3": { type: "GeneradorTrue" },
-            "5": { type: "GeneradorTrue" },
-            type: "OtraIfthenelsefi",
-        },
-    ]);
-
-    casos.forEach(([expr, ast]) => {
-        const [generated, unaryRules] = genGrammar("bool", tadBool.operaciones, new Map());
-        const g = ohm.grammar(generated);
-        const match = g.match(expr);
-
-        expect(getAST(match, unaryRules)).toStrictEqual(ast);
-    });
-});

@@ -1,8 +1,6 @@
-import { Axioma, ExpresionLogica, Genero, Literal, Operacion, Range, Slot, TAD, Token } from "./Types";
+import { Axioma, Eval, ExpresionLogica, Genero, Operacion, Range, Slot, TAD, Token } from "./Types";
 
 type MarkerSeverity = "error" | "warning" | "info" | "hint";
-
-import ohm from "ohm-js";
 
 export type Marker = {
     severity: MarkerSeverity;
@@ -389,8 +387,9 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
     return tad;
 }
 
-export function parseSource(source: string, hints?: EditorHints): TAD[] {
+export function parseSource(source: string, hints?: EditorHints): [TAD[], Eval[]] {
     const tads: TAD[] = [];
+    const evals: Eval[] = [];
     const lines = source.replace(/\r\n/g, "\n").split("\n");
 
     for (let i = 0; i < lines.length; i++) {
@@ -400,6 +399,15 @@ export function parseSource(source: string, hints?: EditorHints): TAD[] {
         // empieza TAD
         if(line.toLowerCase().startsWith("eval")) {
             // ok
+            evals.push({
+                expr: line.slice("eval".length),
+                range: {
+                    startLine: 1 + i,
+                    endLine: 1 + i,
+                    columnStart: 1,
+                    columnEnd: 1 + line.length,
+                }
+            });
         } else if (line.toUpperCase().startsWith("TAD")) {
             const startLine = i;
 
@@ -441,5 +449,5 @@ export function parseSource(source: string, hints?: EditorHints): TAD[] {
         }
     }
 
-    return tads;
+    return [tads, evals];
 }

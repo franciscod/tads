@@ -45,3 +45,5 @@ export type TAD = {
     variablesLibres: Map<Genero, string[]>;
     axiomas: Axioma[];
 } & ParseReference;
+
+export type Eval = { expr: string; } & ParseReference;
