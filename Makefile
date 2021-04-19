@@ -1,9 +1,8 @@
 test:
-	NO_COLOR=1 npx jest test
+	NO_COLOR=1 npm run test
 
 testloop:
-	NO_COLOR=1 ls parser/* tests/* | entr -c make test
-
+	NO_COLOR=1 ls parser/* tests/* | entr -c npm run test
 
 todo:
 	rg "TODO" tests parser
@@ -12,9 +11,9 @@ dev run:
 	npm run dev
 
 format:
-	npx prettier --write site/ parser/ tests/
+	npm run format
 
 lint:
-	npx eslint --ext .js,.ts --fix site/ parser/ tests/
+	npm run lint
 
 .PHONY: test testloop todo dev run format lint
