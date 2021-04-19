@@ -1,5 +1,5 @@
 import fs from "fs";
-import { genGrammar, getAST } from "../parser/Ohmification";
+import { genGrammar, toAST } from "../parser/Ohmification";
 import { Axioma, evalAxiomas, auxAxiomasAST } from "../parser/Eval";
 import { parseTad } from "../parser/Parser";
 
@@ -63,8 +63,8 @@ fs.readFileSync("tests/evals.txt", "utf-8")
         const matches = parts.map(s => g.match(s));
 
         it("eval evals.txt:" + (n + 1) + ":^" + line + "$", () => {
-            const exprL = getAST(matches[0], unaries);
-            const exprR = getAST(matches[1], unaries);
+            const exprL = toAST(matches[0], unaries);
+            const exprR = toAST(matches[1], unaries);
 
             expect(evalAxiomas(exprL, axiomas)).toStrictEqual(exprR);
         });

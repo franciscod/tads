@@ -1,5 +1,5 @@
 import fs from "fs";
-import { genGrammar, getAST } from "../parser/Ohmification";
+import { genGrammar, toAST } from "../parser/Ohmification";
 import { parseTad } from "../parser/Parser";
 import { TAD } from "../parser/Types";
 

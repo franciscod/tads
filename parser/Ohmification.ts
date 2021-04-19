@@ -1,7 +1,9 @@
 import { Genero, Operacion } from "./Types";
 
 import ohm from "ohm-js";
-import { toAST } from "ohm-js/extras";
+import { toAST as ohm_toAST } from "ohm-js/extras";
+
+export type AST = any;
 
 function titleSlug(s: string): string {
     s = s.replace(/•/g, "");
@@ -32,8 +34,15 @@ function titleSlug(s: string): string {
     return s[0].toUpperCase() + s.substr(1).toLowerCase();
 }
 
-export function genGrammar(tadName: string, ops: Operacion[], variables: Map<Genero, string[]>): [string, string[]] {
+export function genGrammar(tadName: string, ops: Operacion[], variables: Map<Genero, string[]>): [string, string[], (ast: AST) => string] {
     const reglasParaExpr: string[] = [];
+    const printMapping: { [key: string]: (ast: AST) => string } = { };
+    const fromAST = (ast: AST): string => {
+        return printMapping[ast.type](ast)
+                .replace(/\s+/g, ' ')
+                .replace(/\( /g, '(')
+                .replace(/ \)/g, ')');
+    }
 
     const unaryRuleNames: string[] = [];
     let rules = "";
@@ -71,6 +80,15 @@ export function genGrammar(tadName: string, ops: Operacion[], variables: Map<Gen
                 unaryRuleNames.push(caseName);
             }
 
+            printMapping[caseName] = (ast: AST): string => {
+                return op.tokens
+                        .map((tok, i) => {
+                            if (tok.type == "literal") return tok.symbol;
+                            if (tok.type == "slot") return ` ${printMapping[ast[i].type](ast[i])} `;
+                        })
+                        .join("");
+            };
+            
             return `${caseName} = ${tokensRule}\n`;
         })
         .join("");
@@ -87,13 +105,14 @@ export function genGrammar(tadName: string, ops: Operacion[], variables: Map<Gen
 ${rulesHead}
 ${rules}
 }`;
-    return [grammarSource, unaryRuleNames];
+
+    return [grammarSource, unaryRuleNames, fromAST];
 }
 
-export function getAST(match: ohm.MatchResult, unaries: string[]) {
+export function toAST(match: ohm.MatchResult, unaries: string[]): AST {
     const baseMapping: Record<string, any> = {};
     unaries.forEach(r => {
         baseMapping[r] = undefined;
     });
-    return toAST(match, baseMapping);
+    return ohm_toAST(match, baseMapping);
 }

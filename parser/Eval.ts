@@ -1,8 +1,7 @@
-import { genGrammar, getAST } from "../parser/Ohmification";
+import { AST, genGrammar, toAST } from "../parser/Ohmification";
 import { TAD } from "../parser/Types";
 import ohm from "ohm-js";
 
-export type AST = any;
 // TODO: los axiomas deberian tener info de tipos attacheada
 export type Axioma = [AST, AST];
 
@@ -30,7 +29,7 @@ export function auxAxiomasAST(tads: TAD[]): Axioma[] {
                 continue;
             }
 
-            axiomasEsteTad.push([getAST(matchLeft, unaries), getAST(matchRight, unaries)]);
+            axiomasEsteTad.push([toAST(matchLeft, unaries), toAST(matchRight, unaries)]);
         }
 
         ret = ret.concat(axiomasEsteTad);

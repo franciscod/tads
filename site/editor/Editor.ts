@@ -7,7 +7,7 @@ import { basicos, demo } from "../../tads";
 import { Marker, EditorHints, parseSource } from "../../parser/Parser";
 import { Eval, Operacion, TAD } from "../../parser/Types";
 import { auxAxiomasAST, Axioma, evalAxiomas } from "../../parser/Eval";
-import { genGrammar, getAST } from "../../parser/Ohmification";
+import { AST, genGrammar, toAST } from "../../parser/Ohmification";
 import ohm from "ohm-js";
 import generateDebugView from "../views/DebugView";
 import { openModal } from "../views/Modal";
@@ -31,8 +31,8 @@ const editor = monaco.editor.create(document.getElementById("editor")!, {
 const debugCommandId = editor.addCommand(0, (_, tad: TAD) => {
     openModal(generateDebugView(tad), 750);
 }, "");
-const evalCommandId = editor.addCommand(0, (_, expr: string, axiomas: Axioma[]) => {
-    openModal(generateEvalDebug(expr, axiomas), 750);
+const evalCommandId = editor.addCommand(0, (_, expr: string, axiomas: Axioma[], fromAST: (ast: AST) => string) => {
+    openModal(generateEvalDebug(expr, axiomas, fromAST), 750);
 }, "");
 
 monaco.languages.registerCodeLensProvider("tad", {
@@ -108,7 +108,7 @@ class Tab {
         [this.tads, this.evals] = parseSource(this.model.getValue() + '\n\n\n' + (this._options.usarBasicos ? basicos.join('\n') : ''), hints);
 
         const ops = this.tads.reduce((p: Operacion[], c) => p.concat(c.operaciones), []);
-        const [generated, unaries] = genGrammar("Universe", ops, new Map());
+        const [generated, unaries, fromAST] = genGrammar("Universe", ops, new Map());
         const grammar = ohm.grammar(generated);
         const axiomas = auxAxiomasAST(this.tads);
 
@@ -127,10 +127,11 @@ class Tab {
             }
         };
 
+        const numLines = this.model.getValue().replace(/\r\n/g, '\n').split('\n').length;
         monaco.editor.setModelMarkers(
             this.model,
             "tad",
-            hints.markers.map(m => ({
+            hints.markers.filter(m => m.range.startLine <= numLines).map(m => ({
                 severity: toMonacoSeverity(m),
                 startLineNumber: m.range.startLine,
                 startColumn: m.range.columnStart,
@@ -145,7 +146,7 @@ class Tab {
 
         for(const tad of this.tads) {
             for(const axioma of tad.axiomas) {
-                if(!axioma.range) continue;
+                if(!axioma.range || axioma.range.startLine > numLines) continue;
 
                 deltaDecorations.push({
                     range: {
@@ -194,7 +195,7 @@ class Tab {
             let ok = false;
             const match = grammar.match(_eval.expr);
             if(match.succeeded()) {
-                const exprAST = getAST(match, unaries);
+                const exprAST = toAST(match, unaries);
                 const evaluado = evalAxiomas(exprAST, axiomas);
                 ok = true;
                 
@@ -204,14 +205,14 @@ class Tab {
                     command: {
                         id: evalCommandId!,
                         title: "👀 Ver eval",
-                        arguments: [exprAST, axiomas],
+                        arguments: [exprAST, axiomas, fromAST],
                     },
                 }, {
                     range: evalRange,
                     id: "eval-result-" + evalRange.startLineNumber,
                     command: {
                         id: "",
-                        title: JSON.stringify(evaluado)
+                        title: fromAST(evaluado)
                     },
                 });
             }
