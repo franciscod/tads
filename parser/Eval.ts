@@ -9,8 +9,9 @@ export type Axioma = [AST, AST];
 export function auxAxiomasAST(tads: TAD[]): Axioma[] {
     let ret: Axioma[] = [];
 
-    let opsTodos = tads.map((tad) => tad.operaciones)
-                    .reduce((ret, ops) => ret.concat(ops), []);
+    let opsTodos = tads
+        .map((tad) => tad.operaciones)
+        .reduce((ret, ops) => ret.concat(ops), []);
 
     tads.forEach((tad) => {
         const [generated, unaries] = genGrammar(
@@ -20,26 +21,27 @@ export function auxAxiomasAST(tads: TAD[]): Axioma[] {
         );
         const g = ohm.grammar(generated);
 
-        const axiomasEsteTad: Axioma[] = tad.axiomas.map((rawPair: [string, string]) => {
-            const left = rawPair[0];
-            const right = rawPair[1];
+        const axiomasEsteTad: Axioma[] = tad.axiomas.map(
+            (rawPair: [string, string]) => {
+                const left = rawPair[0];
+                const right = rawPair[1];
 
+                const matchLeft = g.match(left);
+                const matchRight = g.match(right);
+                if (!matchLeft.succeeded()) {
+                    console.log(left);
+                }
 
-            const matchLeft = g.match(left);
-            const matchRight = g.match(right);
-            if (!matchLeft.succeeded()) {
-                console.log(left);
+                if (!matchRight.succeeded()) {
+                    console.log(right);
+                }
+
+                return [
+                    getAST(matchLeft, unaries),
+                    getAST(matchRight, unaries),
+                ];
             }
-
-            if (!matchRight.succeeded()) {
-                console.log(right);
-            }
-
-            return [
-                getAST(matchLeft, unaries),
-                getAST(matchRight, unaries),
-            ];
-        });
+        );
 
         ret = ret.concat(axiomasEsteTad);
     });
@@ -81,7 +83,11 @@ function evalStep(expr: AST, axiomas: Axioma[]): [boolean, AST] {
         }
 
         // bindeamos las variables de left a los valores que tienen en expr
-        let bindings: Map<string, AST> = conseguirBindings(left, expr, new Map());
+        let bindings: Map<string, AST> = conseguirBindings(
+            left,
+            expr,
+            new Map()
+        );
 
         // console.log("MAMA ENCONTRE MAS BINDINGS AHORA", bindings)
 
@@ -93,7 +99,6 @@ function evalStep(expr: AST, axiomas: Axioma[]): [boolean, AST] {
         }
         return [true, ret];
     }
-
 
     // no se pudo aplicar un axioma en la raiz
 
@@ -115,8 +120,8 @@ function reemplazar(expr: AST, bindings: Map<string, AST>): [boolean, AST] {
         return [true, bindings.get(expr.type)];
     }
 
-    let ret: AST = {type: expr.type}
-    let hizoAlgo : boolean = false;
+    let ret: AST = { type: expr.type };
+    let hizoAlgo: boolean = false;
 
     for (const child in expr) {
         if (child === "type") continue;
@@ -133,8 +138,7 @@ function tienenLaMismaFormaSalvoVariables(template: AST, expr: AST): boolean {
         return true;
     }
 
-    if (template.type !== expr.type)
-        return false;
+    if (template.type !== expr.type) return false;
 
     // son el mismo tipo, tienen la misma forma en la raiz
     // tienen los mismos hijos
@@ -148,8 +152,11 @@ function tienenLaMismaFormaSalvoVariables(template: AST, expr: AST): boolean {
     return true;
 }
 
-
-function conseguirBindings(template: AST, expr: AST, bindings: Map<string, AST>): Map<string, AST> {
+function conseguirBindings(
+    template: AST,
+    expr: AST,
+    bindings: Map<string, AST>
+): Map<string, AST> {
     if (template.type.startsWith("Var")) {
         bindings.set(template.type, expr);
         return bindings;
@@ -164,13 +171,11 @@ function conseguirBindings(template: AST, expr: AST, bindings: Map<string, AST>)
 }
 
 function contieneVariables(expr: AST): boolean {
-    if (expr.type.startsWith("Var"))
-        return true;
+    if (expr.type.startsWith("Var")) return true;
 
     for (const child in expr) {
         if (child === "type") continue;
-        if (contieneVariables(expr[child]))
-            return true;
+        if (contieneVariables(expr[child])) return true;
     }
 
     return false;
