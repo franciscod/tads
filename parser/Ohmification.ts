@@ -34,7 +34,7 @@ function titleSlug(s: string): string {
 export function genGrammar(tadName: string, ops: Operacion[], variables: Map<Genero, string[]>): [string, string[]] {
     const reglasParaExpr: string[] = [];
 
-    let unaryRuleNames: string[] = [];
+    const unaryRuleNames: string[] = [];
     let rules = "";
 
     const varTerms: string[] = [];
@@ -78,7 +78,7 @@ export function genGrammar(tadName: string, ops: Operacion[], variables: Map<Gen
         reglasParaExpr.push("Var");
     }
 
-    let rulesHead: string = "";
+    let rulesHead = "";
     rulesHead += "Expr = " + reglasParaExpr.join(" | ") + " | ParenExpr\n";
     rulesHead += `ParenExpr = "(" Expr ")"\n`;
 
@@ -90,7 +90,7 @@ ${rules}
 }
 
 export function getAST(match: ohm.MatchResult, unaries: string[]) {
-    let baseMapping: Record<string, any> = {};
+    const baseMapping: Record<string, any> = {};
     unaries.forEach(r => {
         baseMapping[r] = undefined;
     });

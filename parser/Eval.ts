@@ -9,7 +9,7 @@ export type Axioma = [AST, AST];
 export function auxAxiomasAST(tads: TAD[]): Axioma[] {
     let ret: Axioma[] = [];
 
-    let opsTodos = tads.map(tad => tad.operaciones).reduce((ret, ops) => ret.concat(ops), []);
+    const opsTodos = tads.map(tad => tad.operaciones).reduce((ret, ops) => ret.concat(ops), []);
 
     tads.forEach(tad => {
         const [generated, unaries] = genGrammar(tad.nombre, opsTodos, tad.variablesLibres);
@@ -75,13 +75,13 @@ function evalStep(expr: AST, axiomas: Axioma[]): [boolean, AST] {
         }
 
         // bindeamos las variables de left a los valores que tienen en expr
-        let bindings: Map<string, AST> = conseguirBindings(left, expr, new Map());
+        const bindings: Map<string, AST> = conseguirBindings(left, expr, new Map());
 
         // console.log("MAMA ENCONTRE MAS BINDINGS AHORA", bindings)
 
         // reemplazamos en right con los bindings
 
-        let [okReemplazo, ret] = reemplazar(right, bindings);
+        const [okReemplazo, ret] = reemplazar(right, bindings);
 
         // console.log("LUEGO DE BINDEAR ", JSON.stringify(ret, null, 4));
 
@@ -92,7 +92,7 @@ function evalStep(expr: AST, axiomas: Axioma[]): [boolean, AST] {
     // no se pudo aplicar un axioma en la raiz
     // va a evaluar cada uno de los hijos recursivamente
 
-    let ret: any = {};
+    const ret: any = {};
 
     for (const child in expr) {
         ret[child] = expr[child];
@@ -100,7 +100,7 @@ function evalStep(expr: AST, axiomas: Axioma[]): [boolean, AST] {
 
     for (const child in expr) {
         if (child === "type") continue;
-        let [evaluoAlgo, sub] = evalStep(expr[child], axiomas);
+        const [evaluoAlgo, sub] = evalStep(expr[child], axiomas);
         if (evaluoAlgo) {
             ret[child] = sub;
             return [true, ret];
@@ -116,12 +116,12 @@ function reemplazar(expr: AST, bindings: Map<string, AST>): [boolean, AST] {
         return [true, bindings.get(expr.type)];
     }
 
-    let ret: AST = { type: expr.type };
-    let hizoAlgo: boolean = false;
+    const ret: AST = { type: expr.type };
+    let hizoAlgo = false;
 
     for (const child in expr) {
         if (child === "type") continue;
-        let [seReemplazo, sub] = reemplazar(expr[child], bindings);
+        const [seReemplazo, sub] = reemplazar(expr[child], bindings);
         ret[child] = sub;
         hizoAlgo = hizoAlgo || seReemplazo;
     }

@@ -97,7 +97,7 @@ it("ohm parsea expresiones random de bool con grammar autogenerada", () => {
 });
 
 it("obtiene el ast de ciertas expresiones con bool", () => {
-    let casos: [string, any][] = [];
+    const casos: [string, any][] = [];
 
     casos.push([
         "¬(false ∨ true)",
