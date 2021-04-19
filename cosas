@@ -1,6 +1,10 @@
 interfaces
     que gengrammar reciba un tad? o tad[]?
 
+que los unarios prefijos como el ¬ o el + o el - no requieran parentesis y bindeen con precedencia
+
+al evaluar, si no hay axiomas disponibles tirar un warning y cancelar la evaluacion
+
 snippets
     al axiomatizar un observador te levante todos los generadores
     (se pueden hacer snippets dinamicos?)
