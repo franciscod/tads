@@ -37,8 +37,8 @@ axiomas ∀ n, m: nat
 
     n + m        ≡ if m =0? then n else suc(n + pred(m)) fi
     n - m        ≡ if m =0? then n else pred(n) - pred(m) fi
-    n × m        ≡ if m =0? then 0 else n × pred(m) + n fi
-    n < m        ≡ ¬(m =0?) ∧L (n =0? ∨L pred(n) < pred(m))
+    n × m        ≡ if m =0? then 0 else (n × pred(m)) + n fi -- parentesis por precedencia
+    n < m        ≡ (¬(m =0?)) ∧L (n =0? ∨L pred(n) < pred(m))
     -- n ≤ m        ≡ n < m ∨ n = m -- todavia no tenemos igobs
     mín(n, m)    ≡ if m < n then m else n fi
     máx(n, m)    ≡ if m < n then n else m fi
@@ -47,3 +47,11 @@ axiomas ∀ n, m: nat
     β(n)         ≡ if n then suc(0) else 0 fi
 
 Fin TAD
+
+-- x ∧L y                    ≡ if x then y else false fi
+
+-- ¬(suc(0) =0?) ∧L (suc(0) =0? ∨L pred(suc(0)) < pred(suc(0)))
+-- true ∧L (false ∨L pred(suc(0)) < pred(suc(0)))
+-- true ∧L (false ∨L 0 < 0)
+
+

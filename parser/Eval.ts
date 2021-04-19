@@ -52,7 +52,7 @@ export function auxAxiomasAST(tads: TAD[]): Axioma[] {
 export function evalAxiomas(expr: AST, axiomas: Axioma[]): AST {
     let run = true;
     let ret: AST = expr;
-    for (let i = 0; i < 15 && run; i++) {
+    for (let i = 0; i < 50 && run; i++) {
         [run, ret] = evalStep(ret, axiomas);
     }
 
@@ -60,7 +60,9 @@ export function evalAxiomas(expr: AST, axiomas: Axioma[]): AST {
 }
 
 function evalStep(expr: AST, axiomas: Axioma[]): [boolean, AST] {
-    forAxiomaEnRaiz: for (const [left, right] of axiomas) {
+    const axiomasEnRaiz = axiomas.filter(a => a[0].type === expr.type);
+
+    forAxiomaEnRaiz: for (const [left, right] of axiomasEnRaiz) {
         // console.log("expr", expr)
         // console.log("left", left)
         // console.log("right", right)
@@ -96,6 +98,8 @@ function evalStep(expr: AST, axiomas: Axioma[]): [boolean, AST] {
 
         let [okReemplazo, ret] = reemplazar(right, bindings);
 
+        // console.log("LUEGO DE BINDEAR ", JSON.stringify(ret, null, 4));
+
         if(!contieneVariables(ret))
             return [true, ret];
         if (okReemplazo)
@@ -103,6 +107,7 @@ function evalStep(expr: AST, axiomas: Axioma[]): [boolean, AST] {
     }
 
     // no se pudo aplicar un axioma en la raiz
+    // va a evaluar cada uno de los hijos recursivamente
 
     let ret: any = { };
 
