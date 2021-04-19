@@ -8,7 +8,7 @@ testloop:
 todo:
 	rg "TODO" tests parser
 
-dev:
+dev run:
 	npm run dev
 
 format:
@@ -17,4 +17,4 @@ format:
 lint:
 	npx eslint --ext .js,.ts --fix site/ parser/ tests/
 
-.PHONY: test testloop todo dev format lint
+.PHONY: test testloop todo dev run format lint
