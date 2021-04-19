@@ -5,7 +5,9 @@
     "dev": "webpack serve",
     "build": "cross-env MODE=production webpack",
     "test": "jest test",
-    "test:watch": "jest test --watchAll"
+    "test:watch": "jest test --watchAll",
+    "format": "prettier --write site/ parser/ tests/",
+	"lint": "eslint --ext .js,.ts --fix site/ parser/ tests/"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.13.15",
