@@ -158,7 +158,7 @@ export function parseOperacion(
     }
 
     if (!hasSlots && args.length > 0) {
-        let functionStyleArgs: Token[] = args.map((gen) => ({
+        const functionStyleArgs: Token[] = args.map((gen) => ({
             type: "slot",
             genero: gen,
         }));

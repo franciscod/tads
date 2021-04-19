@@ -4,7 +4,7 @@ import generateDebugView from "../views/DebugView.ts";
 import { parseSource } from "../../parser/Parser.ts";
 
 export default (editor: monaco.editor.IStandaloneCodeEditor) => {
-    var debugCommandId = editor.addCommand(
+    const debugCommandId = editor.addCommand(
         0,
         (_, tadName: string) => {
             openModal(
@@ -18,7 +18,7 @@ export default (editor: monaco.editor.IStandaloneCodeEditor) => {
         },
         ""
     );
-    var testCommandId = editor.addCommand(
+    const testCommandId = editor.addCommand(
         0,
         function () {
             alert("TODO: show test");
@@ -40,8 +40,8 @@ export default (editor: monaco.editor.IStandaloneCodeEditor) => {
 
     monaco.languages.registerCodeLensProvider("tad", {
         provideCodeLenses: function (model, token) {
-            let value = model.getValue();
-            let tads = value
+            const value = model.getValue();
+            const tads = value
                 .split("\n")
                 .map((s, i): [string, number] => [s.trim(), i])
                 .filter((s) => s[0].toUpperCase().startsWith("TAD "))

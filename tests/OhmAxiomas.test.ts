@@ -62,7 +62,7 @@ it("ohm con grammar armada a mano parsea axiomas de bool", () => {
     const boolGrammar = ohm.grammar(BOOL_CUSTOM_GRAMMAR);
 
     BOOL_AXIOMS.forEach((axioma) => {
-        let match = boolGrammar.match(axioma);
+        const match = boolGrammar.match(axioma);
         expect(match.succeeded());
     });
 });
@@ -71,7 +71,7 @@ it("ohm con grammar armada a mano parsea expresiones random con bools", () => {
     const boolGrammar = ohm.grammar(BOOL_CUSTOM_GRAMMAR);
 
     BOOL_RANDOM_EXPRS.forEach((expr) => {
-        let match = boolGrammar.match(expr);
+        const match = boolGrammar.match(expr);
         expect(match.succeeded());
     });
 });

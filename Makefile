@@ -14,4 +14,7 @@ dev:
 format:
 	npx prettier --write site/ parser/ tests/
 
-.PHONY: test testloop todo dev format
+lint:
+	npx eslint --ext .js,.ts --fix site/ parser/ tests/
+
+.PHONY: test testloop todo dev format lint

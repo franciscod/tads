@@ -25,9 +25,9 @@ export function genGrammar(
 ): string {
     const reglasParaExpr: string[] = [];
 
-    let rules: string = "";
+    let rules = "";
 
-    let varTerms: string[] = [];
+    const varTerms: string[] = [];
     for (const g of variables.keys()) {
         (variables.get(g) || []).forEach((n) => {
             const genVar = "Var" + titleSlug(g) + titleSlug(n);
