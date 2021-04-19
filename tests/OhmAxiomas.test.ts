@@ -53,7 +53,7 @@ it("ohm con grammar armada a mano parsea axiomas de bool", () => {
     tadBool.axiomas.forEach((axioma: [string, string]) => {
         axioma.forEach((expr: string) => {
             const match = boolGrammar.match(expr);
-            expect(match.succeeded());
+            expect(match.succeeded()).toStrictEqual(true);
         });
     });
 });
@@ -63,7 +63,7 @@ it("ohm con grammar armada a mano parsea expresiones random con bools", () => {
 
     BOOL_RANDOM_EXPRS.forEach((expr) => {
         const match = boolGrammar.match(expr);
-        expect(match.succeeded());
+        expect(match.succeeded()).toStrictEqual(true);
     });
 });
 
@@ -78,7 +78,7 @@ it("ohm parsea axiomas de bool con grammar autogenerada", () => {
     tadBool.axiomas.forEach((axioma: [string, string]) => {
         axioma.forEach((expr: string) => {
             const match = boolGrammar.match(expr);
-            expect(match.succeeded());
+            expect(match.succeeded()).toStrictEqual(true);
         });
     });
 });
@@ -92,7 +92,7 @@ it("ohm parsea expresiones random de bool con grammar autogenerada", () => {
     const boolGrammar = ohm.grammar(generated);
 
     BOOL_RANDOM_EXPRS.forEach((expr) => {
-        expect(boolGrammar.match(expr).succeeded());
+        expect(boolGrammar.match(expr).succeeded()).toStrictEqual(true);
     });
 });
 
