@@ -24,13 +24,8 @@ jobs:
         run: npm run build
         
       - name: Deploy site to Netlify
-        uses: netlify/actions/cli@master
-        env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+      - uses: jsmrcaga/action-netlify-deploy@v1.1.0
         with:
-          # uso la ruta completa porque el cli esta medio loco
-          args: deploy --dir=/home/runner/work/tads/tads/build --prod
-          secrets: '["NETLIFY_AUTH_TOKEN", "NETLIFY_SITE_ID"]'
- 
-
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_DEPLOY_TO_PROD: true
+      
