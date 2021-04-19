@@ -23,6 +23,7 @@ const config = {
     plugins: [
         new HtmlWebpackPlugin({
             template: path.resolve(__dirname, "site/index.html"),
+            minify: { removeComments: false },
             templateParameters: {
                 "BUILD_HASH": git.short() + (git.isDirty() ? '-dirty' : ''),
                 "BUILD_TIME": new Date()
