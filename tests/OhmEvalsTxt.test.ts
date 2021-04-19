@@ -14,9 +14,7 @@ const natTad = parseTad(NAT_TAD)!;
 const conjTad = parseTad(CONJ_TAD)!;
 
 // TODO: hacer algo un poco mas prolijo que juntar todas las operaciones?
-const ops = boolTad.operaciones
-                .concat(natTad.operaciones)
-                .concat(conjTad.operaciones);
+const ops = boolTad.operaciones.concat(natTad.operaciones).concat(conjTad.operaciones);
 const [generated, unaries] = genGrammar("bool", ops, new Map());
 const g = ohm.grammar(generated);
 
@@ -51,10 +49,10 @@ fs.readFileSync("tests/evals.txt", "utf-8")
         line = line.split("--")[0];
         if (!line) return;
         let parts = line.split(" = ");
-        const matches = parts.map((s) => g.match(s));
+        const matches = parts.map(s => g.match(s));
 
         it("parsea evals.txt:" + (n + 1) + ":^" + line + "$", () => {
-            matches.forEach((match) => {
+            matches.forEach(match => {
                 expect(match.succeeded()).toStrictEqual(true);
             });
         });

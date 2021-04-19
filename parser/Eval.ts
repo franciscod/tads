@@ -9,39 +9,28 @@ export type Axioma = [AST, AST];
 export function auxAxiomasAST(tads: TAD[]): Axioma[] {
     let ret: Axioma[] = [];
 
-    let opsTodos = tads
-        .map((tad) => tad.operaciones)
-        .reduce((ret, ops) => ret.concat(ops), []);
+    let opsTodos = tads.map(tad => tad.operaciones).reduce((ret, ops) => ret.concat(ops), []);
 
-    tads.forEach((tad) => {
-        const [generated, unaries] = genGrammar(
-            tad.nombre,
-            opsTodos,
-            tad.variablesLibres
-        );
+    tads.forEach(tad => {
+        const [generated, unaries] = genGrammar(tad.nombre, opsTodos, tad.variablesLibres);
         const g = ohm.grammar(generated);
 
-        const axiomasEsteTad: Axioma[] = tad.axiomas.map(
-            (rawPair: [string, string]) => {
-                const left = rawPair[0];
-                const right = rawPair[1];
+        const axiomasEsteTad: Axioma[] = tad.axiomas.map((rawPair: [string, string]) => {
+            const left = rawPair[0];
+            const right = rawPair[1];
 
-                const matchLeft = g.match(left);
-                const matchRight = g.match(right);
-                if (!matchLeft.succeeded()) {
-                    console.log(left);
-                }
-
-                if (!matchRight.succeeded()) {
-                    console.log(right);
-                }
-
-                return [
-                    getAST(matchLeft, unaries),
-                    getAST(matchRight, unaries),
-                ];
+            const matchLeft = g.match(left);
+            const matchRight = g.match(right);
+            if (!matchLeft.succeeded()) {
+                console.log(left);
             }
-        );
+
+            if (!matchRight.succeeded()) {
+                console.log(right);
+            }
+
+            return [getAST(matchLeft, unaries), getAST(matchRight, unaries)];
+        });
 
         ret = ret.concat(axiomasEsteTad);
     });
@@ -86,11 +75,7 @@ function evalStep(expr: AST, axiomas: Axioma[]): [boolean, AST] {
         }
 
         // bindeamos las variables de left a los valores que tienen en expr
-        let bindings: Map<string, AST> = conseguirBindings(
-            left,
-            expr,
-            new Map()
-        );
+        let bindings: Map<string, AST> = conseguirBindings(left, expr, new Map());
 
         // console.log("MAMA ENCONTRE MAS BINDINGS AHORA", bindings)
 
@@ -100,16 +85,14 @@ function evalStep(expr: AST, axiomas: Axioma[]): [boolean, AST] {
 
         // console.log("LUEGO DE BINDEAR ", JSON.stringify(ret, null, 4));
 
-        if(!contieneVariables(ret))
-            return [true, ret];
-        if (okReemplazo)
-            return [true, ret];
+        if (!contieneVariables(ret)) return [true, ret];
+        if (okReemplazo) return [true, ret];
     }
 
     // no se pudo aplicar un axioma en la raiz
     // va a evaluar cada uno de los hijos recursivamente
 
-    let ret: any = { };
+    let ret: any = {};
 
     for (const child in expr) {
         ret[child] = expr[child];
@@ -158,18 +141,13 @@ function tienenLaMismaFormaSalvoVariables(template: AST, expr: AST): boolean {
 
     for (const child in template) {
         if (child === "type") continue;
-        if (!tienenLaMismaFormaSalvoVariables(template[child], expr[child]))
-            return false;
+        if (!tienenLaMismaFormaSalvoVariables(template[child], expr[child])) return false;
     }
 
     return true;
 }
 
-function conseguirBindings(
-    template: AST,
-    expr: AST,
-    bindings: Map<string, AST>
-): Map<string, AST> {
+function conseguirBindings(template: AST, expr: AST, bindings: Map<string, AST>): Map<string, AST> {
     if (template.type.startsWith("Var")) {
         bindings.set(template.type, expr);
         return bindings;

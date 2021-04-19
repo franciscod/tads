@@ -6,7 +6,7 @@ const BOOL_TAD = fs.readFileSync("tads/bool.tad", "utf-8");
 
 function generosDeSlots(tokens: Token[]): string[] {
     return tokens
-        .filter((token) => token.type === "slot")
+        .filter(token => token.type === "slot")
         .map((token: Token) => {
             const slot = token as Slot;
             return slot.genero;
@@ -19,8 +19,8 @@ it("parsea bool", () => {
     expect(tad.nombre).toStrictEqual("Bool");
     expect(tad.generos).toStrictEqual(["bool"]);
 
-    const generadores = tad.operaciones.filter((op) => op.tipo == "generador");
-    const otrasOperaciones = tad.operaciones.filter((op) => op.tipo == "otra");
+    const generadores = tad.operaciones.filter(op => op.tipo == "generador");
+    const otrasOperaciones = tad.operaciones.filter(op => op.tipo == "otra");
 
     const [genTrue, genFalse] = generadores;
 
@@ -29,21 +29,10 @@ it("parsea bool", () => {
     expect(genTrue.retorno).toStrictEqual("bool");
 
     expect(genFalse.nombre).toStrictEqual("false");
-    expect(genFalse.tokens).toStrictEqual([
-        { type: "literal", symbol: "false" },
-    ]);
+    expect(genFalse.tokens).toStrictEqual([{ type: "literal", symbol: "false" }]);
     expect(genFalse.retorno).toStrictEqual("bool");
 
-    const [
-        ooItef,
-        ooNot,
-        ooOr,
-        ooAnd,
-        ooImp,
-        ooOrL,
-        ooAndL,
-        ooImpL,
-    ] = otrasOperaciones;
+    const [ooItef, ooNot, ooOr, ooAnd, ooImp, ooOrL, ooAndL, ooImpL] = otrasOperaciones;
 
     expect(ooItef.nombre).toStrictEqual("if•then•else•fi");
     expect(generosDeSlots(ooItef.tokens)).toStrictEqual(["bool", "α", "α"]);

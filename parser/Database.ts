@@ -8,11 +8,7 @@ export class TADDatabase {
     }
 
     getTADByName(name: string): TAD | null {
-        return (
-            this.tads.find(
-                (t) => t.nombre.toLowerCase() === name.toLowerCase()
-            ) || null
-        );
+        return this.tads.find(t => t.nombre.toLowerCase() === name.toLowerCase()) || null;
     }
 
     registerNewTAD(name: string): TAD | null {

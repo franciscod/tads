@@ -1,14 +1,4 @@
-import {
-    Axioma,
-    ExpresionLogica,
-    Genero,
-    Literal,
-    Operacion,
-    Range,
-    Slot,
-    TAD,
-    Token,
-} from "./Types";
+import { Axioma, ExpresionLogica, Genero, Literal, Operacion, Range, Slot, TAD, Token } from "./Types";
 
 type MarkerSeverity = "error" | "warning" | "info" | "hint";
 
@@ -33,14 +23,7 @@ export type ParseContext = {
     hints?: EditorHints;
 };
 
-type Section =
-    | "none"
-    | "generos"
-    | "igualdad"
-    | "observadores"
-    | "generadores"
-    | "otras operaciones"
-    | "axiomas";
+type Section = "none" | "generos" | "igualdad" | "observadores" | "generadores" | "otras operaciones" | "axiomas";
 
 function checkSectionHeader(line: string): Section {
     line = line.trimRight();
@@ -53,30 +36,24 @@ function checkSectionHeader(line: string): Section {
     return "none";
 }
 
-export function parseExpresionLogica(
-    input: string,
-    context?: ParseContext
-): ExpresionLogica | null {
+export function parseExpresionLogica(input: string, context?: ParseContext): ExpresionLogica | null {
     // TODO: =)
     return null;
 }
 
-export function parseVarLibres(
-    input: string,
-    context?: ParseContext
-): Map<Genero, string[]> {
+export function parseVarLibres(input: string, context?: ParseContext): Map<Genero, string[]> {
     //context?.hints?.addMark('info', 'variables libres', context.range);
     const result = new Map<Genero, string[]>();
 
     input
         .split("∀")
-        .map((l) => l.trim().split(":"))
-        .filter((a) => a.length === 2)
+        .map(l => l.trim().split(":"))
+        .filter(a => a.length === 2)
         .forEach(([_vars, gen]) => {
             const vars = _vars
                 .split(",")
-                .map((v) => v.trim())
-                .filter((v) => v.length);
+                .map(v => v.trim())
+                .filter(v => v.length);
             gen = gen.replace(/,/g, "").trim();
 
             result.set(gen, vars);
@@ -85,11 +62,7 @@ export function parseVarLibres(
     return result;
 }
 
-export function parseAxioma(
-    left: string,
-    right: string,
-    context?: ParseContext
-): [string, string] {
+export function parseAxioma(left: string, right: string, context?: ParseContext): [string, string] {
     // TODO: =)
     //context?.hints?.addMark('info', `${JSON.stringify(context.range)} ${left}\n\n\n\n-------------\n\n\n\n\n${right}`, context.range);
     return [left, right];
@@ -127,8 +100,8 @@ export function parseOperacion(
     const [_args, retorno] = right.split(/->|→/);
     const args = _args
         .split(/×|✕/)
-        .map((arg) => arg.trim())
-        .filter((arg) => arg !== "");
+        .map(arg => arg.trim())
+        .filter(arg => arg !== "");
     let ithSlot = 0;
 
     let hasSlots = false;
@@ -154,7 +127,7 @@ export function parseOperacion(
     }
 
     if (!hasSlots && args.length > 0) {
-        const functionStyleArgs: Token[] = args.map((gen) => ({
+        const functionStyleArgs: Token[] = args.map(gen => ({
             type: "slot",
             genero: gen,
         }));
@@ -182,7 +155,7 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
     const lines = source
         .replace(/\r\n/g, "\n")
         .split("\n")
-        .map((l) => l.split("--")[0].trimRight());
+        .map(l => l.split("--")[0].trimRight());
     const tad: TAD = {
         nombre: "",
         generos: [],
@@ -276,8 +249,8 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
             const generos = line
                 .slice("generos".length)
                 .split(",")
-                .map((g) => g.trim())
-                .filter((g) => g.length);
+                .map(g => g.trim())
+                .filter(g => g.length);
 
             for (let j = 0; j < generos.length; j++) {
                 if (tad.generos.length > 0) {
@@ -333,10 +306,7 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
             for (; i < lines.length; ) {
                 line = lines[i];
 
-                if (
-                    checkSectionHeader(line) !== "none" ||
-                    line.toUpperCase().startsWith("FIN TAD")
-                ) {
+                if (checkSectionHeader(line) !== "none" || line.toUpperCase().startsWith("FIN TAD")) {
                     i--;
                     break;
                 }
@@ -354,17 +324,9 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
                                 columnEnd: 1 + line.length,
                             }),
                         };
-                        if (section === "axiomas")
-                            tad.axiomas.push(
-                                parseAxioma(left, rightBuffer, ctx)
-                            );
+                        if (section === "axiomas") tad.axiomas.push(parseAxioma(left, rightBuffer, ctx));
                         else {
-                            const op: Operacion | null = parseOperacion(
-                                left,
-                                rightBuffer,
-                                section,
-                                ctx
-                            );
+                            const op: Operacion | null = parseOperacion(left, rightBuffer, section, ctx);
                             if (op) tad.operaciones.push(op);
                         }
                     }
@@ -387,15 +349,9 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
                         columnEnd: 1 + line.length,
                     }),
                 };
-                if (section === "axiomas")
-                    tad.axiomas.push(parseAxioma(left, rightBuffer, ctx));
+                if (section === "axiomas") tad.axiomas.push(parseAxioma(left, rightBuffer, ctx));
                 else {
-                    const op: Operacion | null = parseOperacion(
-                        left,
-                        rightBuffer,
-                        section,
-                        ctx
-                    );
+                    const op: Operacion | null = parseOperacion(left, rightBuffer, section, ctx);
                     if (op) tad.operaciones.push(op);
                 }
             }

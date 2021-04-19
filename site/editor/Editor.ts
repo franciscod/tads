@@ -54,9 +54,7 @@ class Tab {
     }
 
     switchTo() {
-        document
-            .querySelectorAll(".tab")
-            .forEach((e) => e.classList.remove("open"));
+        document.querySelectorAll(".tab").forEach(e => e.classList.remove("open"));
         this.tabElement.classList.add("open");
 
         if (activeTab) activeTab.save();
@@ -94,7 +92,7 @@ class Tab {
         monaco.editor.setModelMarkers(
             this.model,
             "tad",
-            hints.markers.map((m) => ({
+            hints.markers.map(m => ({
                 severity: toMonacoSeverity(m),
                 startLineNumber: m.range.startLine,
                 startColumn: m.range.columnStart,

@@ -45,18 +45,14 @@ monaco.languages.registerCompletionItemProvider("tad", {
             {
                 label: "ifthenelsefi",
                 kind: monaco.languages.CompletionItemKind.Snippet,
-                insertTextRules:
-                    monaco.languages.CompletionItemInsertTextRule
-                        .InsertAsSnippet,
+                insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
                 insertText: "if ${1} then ${2} else ${3} fi",
                 range,
             },
             {
                 label: "tad",
                 kind: monaco.languages.CompletionItemKind.Snippet,
-                insertTextRules:
-                    monaco.languages.CompletionItemInsertTextRule
-                        .InsertAsSnippet,
+                insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
                 insertText: [
                     "TAD ${1}",
                     "",

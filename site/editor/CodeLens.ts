@@ -1,20 +1,13 @@
 import * as monaco from "monaco-editor";
-import { openModal } from "../views/Modal";
 import generateDebugView from "../views/DebugView";
+import { openModal } from "../views/Modal";
 import { parseSource } from "../../parser/Parser";
 
 export default (editor: monaco.editor.IStandaloneCodeEditor) => {
     const debugCommandId = editor.addCommand(
         0,
         (_, tadName: string) => {
-            openModal(
-                generateDebugView(
-                    parseSource(editor.getValue()).find(
-                        (tad) => tad.nombre === tadName
-                    )!
-                ),
-                750
-            );
+            openModal(generateDebugView(parseSource(editor.getValue()).find(tad => tad.nombre === tadName)!), 750);
         },
         ""
     );
@@ -44,7 +37,7 @@ export default (editor: monaco.editor.IStandaloneCodeEditor) => {
             const tads = value
                 .split("\n")
                 .map((s, i): [string, number] => [s.trim(), i])
-                .filter((s) => s[0].toUpperCase().startsWith("TAD "))
+                .filter(s => s[0].toUpperCase().startsWith("TAD "))
                 .map(([n, l]): [string, number] => [n.slice(4).trim(), l + 1]);
 
             return {

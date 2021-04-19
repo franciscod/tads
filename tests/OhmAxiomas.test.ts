@@ -61,7 +61,7 @@ it("ohm con grammar armada a mano parsea axiomas de bool", () => {
 it("ohm con grammar armada a mano parsea expresiones random con bools", () => {
     const boolGrammar = ohm.grammar(BOOL_CUSTOM_GRAMMAR);
 
-    BOOL_RANDOM_EXPRS.forEach((expr) => {
+    BOOL_RANDOM_EXPRS.forEach(expr => {
         const match = boolGrammar.match(expr);
         expect(match.succeeded()).toStrictEqual(true);
     });
@@ -91,7 +91,7 @@ it("ohm parsea expresiones random de bool con grammar autogenerada", () => {
     const [generated, _unused] = genGrammar("bool", tadBool.operaciones, vars);
     const boolGrammar = ohm.grammar(generated);
 
-    BOOL_RANDOM_EXPRS.forEach((expr) => {
+    BOOL_RANDOM_EXPRS.forEach(expr => {
         expect(boolGrammar.match(expr).succeeded()).toStrictEqual(true);
     });
 });
@@ -122,11 +122,7 @@ it("obtiene el ast de ciertas expresiones con bool", () => {
     ]);
 
     casos.forEach(([expr, ast]) => {
-        const [generated, unaryRules] = genGrammar(
-            "bool",
-            tadBool.operaciones,
-            new Map()
-        );
+        const [generated, unaryRules] = genGrammar("bool", tadBool.operaciones, new Map());
         const g = ohm.grammar(generated);
         const match = g.match(expr);
 

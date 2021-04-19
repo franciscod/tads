@@ -31,11 +31,7 @@ function titleSlug(s: string): string {
     return s[0].toUpperCase() + s.substr(1).toLowerCase();
 }
 
-export function genGrammar(
-    tadName: string,
-    ops: Operacion[],
-    variables: Map<Genero, string[]>
-): [string, string[]] {
+export function genGrammar(tadName: string, ops: Operacion[], variables: Map<Genero, string[]>): [string, string[]] {
     const reglasParaExpr: string[] = [];
 
     let unaryRuleNames: string[] = [];
@@ -43,7 +39,7 @@ export function genGrammar(
 
     const varTerms: string[] = [];
     for (const g of variables.keys()) {
-        (variables.get(g) || []).forEach((n) => {
+        (variables.get(g) || []).forEach(n => {
             const genVar = "Var" + titleSlug(g) + titleSlug(n);
             rules += `${genVar} = "${n}"\n`;
             varTerms.push(genVar);
@@ -54,7 +50,7 @@ export function genGrammar(
     }
 
     rules += ops
-        .map((op) => {
+        .map(op => {
             const ret: string = titleSlug(op.retorno);
             const caseName = [op.tipo, op.nombre].reduce((p, e) => {
                 return p + titleSlug(e);
@@ -64,13 +60,13 @@ export function genGrammar(
             reglasParaExpr.unshift(caseName);
 
             const tokensRule = op.tokens
-                .map((tok) => {
+                .map(tok => {
                     if (tok.type == "literal") return `"${tok.symbol}"`;
                     if (tok.type == "slot") return "Expr";
                 })
                 .join(" ");
 
-            if (op.tokens.filter((t) => t.type == "slot").length == 1) {
+            if (op.tokens.filter(t => t.type == "slot").length == 1) {
                 unaryRuleNames.push(caseName);
             }
 
@@ -95,7 +91,7 @@ ${rules}
 
 export function getAST(match: ohm.MatchResult, unaries: string[]) {
     let baseMapping: Record<string, any> = {};
-    unaries.forEach((r) => {
+    unaries.forEach(r => {
         baseMapping[r] = undefined;
     });
     return toAST(match, baseMapping);
