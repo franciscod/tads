@@ -60,9 +60,6 @@ export function evalAxiomas(expr: AST, axiomas: Axioma[]): AST {
 }
 
 function evalStep(expr: AST, axiomas: Axioma[]): [boolean, AST] {
-    if(expr.type.startsWith("Generador"))
-        return [false, expr];
-
     forAxiomaEnRaiz: for (const [left, right] of axiomas) {
         // console.log("expr", expr)
         // console.log("left", left)
