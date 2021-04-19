@@ -1,7 +1,7 @@
-const moment = require('moment');
 const path = require('path');
 const git = require('git-rev-sync');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 
 const config = {
     entry: "./site/index.ts",
@@ -30,6 +30,10 @@ const config = {
                 "BUILD_COUNT": git.count(),
                 "BUILD_TIME": git.date()
             }
+        }),
+        new MonacoWebpackPlugin({
+            languages: [],
+			features: []
         })
     ],
     devServer: {
