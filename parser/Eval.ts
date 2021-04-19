@@ -150,9 +150,11 @@ function contieneVariables(expr: AST): boolean {
     if (expr.type.startsWith("Var"))
         return true;
 
-    for (const child in expr)
+    for (const child in expr) {
+        if (child === "type") continue;
         if (contieneVariables(expr[child]))
             return true;
+    }
 
     return false;
 }
