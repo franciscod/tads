@@ -38,6 +38,7 @@
     "eslint": "^7.24.0",
     "monaco-editor": "^0.23.0",
     "ohm-js": "^15.5.0",
-    "prettier": "^2.2.1"
+    "prettier": "^2.2.1",
+    "timeago.js": "^4.0.2"
   }
 }

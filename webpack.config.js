@@ -28,8 +28,7 @@ const config = {
             templateParameters: {
                 "BUILD_HASH": git.short() + (git.isDirty() ? '-dirty' : ''),
                 "BUILD_COUNT": git.count(),
-                "BUILD_TIME": new Date(),
-                "BUILD_TIME_AGO": moment(new Date()).locale('es').fromNow()
+                "BUILD_TIME": git.date()
             }
         })
     ],

@@ -2,13 +2,15 @@ import "./Colorization";
 import "./Suggestions";
 
 import * as monaco from "monaco-editor";
+import ohm from "ohm-js";
+import { register, render } from "timeago.js";
+import timeago_es from "timeago.js/lib/lang/es";
 
 import { basicos, demo } from "../../tads";
 import { Marker, EditorHints, parseSource } from "../../parser/Parser";
 import { Eval, Operacion, TAD } from "../../parser/Types";
 import { auxAxiomasAST, Axioma, evalAxiomas } from "../../parser/Eval";
 import { AST, genGrammar, toAST } from "../../parser/Ohmification";
-import ohm from "ohm-js";
 import generateDebugView from "../views/DebugView";
 import { openModal } from "../views/Modal";
 import generateEvalDebug from "../views/EvalDebugView";
@@ -276,6 +278,9 @@ const tabs: Tab[] = [
 (tabs.find(t => t.options.title === localStorage.getItem("tab")) || tabs[1]).switchTo();
 
 setTimeout(monaco.editor.remeasureFonts, 1000);
+
+register("es", timeago_es);
+render(document.querySelectorAll(".moment"), "es");
 
 // TODO: no funciona :C
 /*
