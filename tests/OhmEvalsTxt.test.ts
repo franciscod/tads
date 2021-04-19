@@ -41,7 +41,9 @@ fs.readFileSync("tests/evals.txt", "utf-8")
                 () => {
                     line = line.split("--")[0];
                     if (!line) return;
-                    expect(g.match(line).succeeded());
+                    line.split(" = ").forEach((expr) => {
+                        expect(g.match(expr).succeeded()).toStrictEqual(true);
+                    })
                 }
             );
         }
@@ -55,7 +57,9 @@ fs.readFileSync("tests/evals.txt", "utf-8")
                 () => {
                     line = line.split("--")[0];
                     if (!line) return;
-                    expect(g.match(line).succeeded());
+                    line.split(" = ").forEach((expr) => {
+                        expect(g.match(expr).succeeded()).toStrictEqual(true);
+                    })
                 }
             );
         }
