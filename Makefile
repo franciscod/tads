@@ -1,5 +1,5 @@
 test:
-	NO_COLOR=1 deno test --unstable --fail-fast --allow-read tests/
+	NO_COLOR=1 npx jest test
 
 testloop:
 	NO_COLOR=1 ls parser/* tests/* | entr -c make test
