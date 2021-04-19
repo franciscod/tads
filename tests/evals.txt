@@ -13,6 +13,8 @@ if false then false else true fi   = true
 if false then false else false fi  = false
 ¬true                              = false -- not
 ¬false                             = true
+¬¬true                             = true
+¬¬false                            = false
 true ∨ true                        = true -- or
 true ∨ false                       = true
 false ∨ true                       = true
@@ -27,6 +29,8 @@ false ⇒ true                       = true
 false ⇒ false                      = true
 false ∨ (false ∧ true)             = false
 true ∧ (false ∨ true)              = true
+¬ if true then false else true fi  = true
+if ¬true then ¬false else ¬true fi = false
 
 -- nat (+bool)
 0                                  = 0
@@ -62,6 +66,9 @@ pred(suc(0))                       = 0
 suc(pred(suc(0)))                  = suc(0)
 pred(β(true))                      = 0
 pred(máx(suc(0), suc(suc(0))))     = suc(0)
+pred(suc(β(false ∨ true)))         = suc(0)
+mín(suc(suc(0)), máx(0, suc(0)))   = suc(0)
+¬ suc(suc(0)) < suc(0)             = true
 
 -- conj(nat)
 ∅?(∅)                              = true
