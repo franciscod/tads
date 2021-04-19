@@ -58,35 +58,35 @@ export function evalAxiomas(expr: AST, axiomas: Axioma[]): AST {
 
 function evalStep(expr: AST, axiomas: Axioma[]): [boolean, AST] {
     forAxiomaEnRaiz: for (const [left, right] of axiomas) {
+        // console.log("expr", expr)
+        // console.log("left", left)
+        // console.log("right", right)
+
         // TODO: deberian chequearse los tipos
 
         // si expr no entra en la izq del axioma, skip
-        if (left.type !== expr.type) continue;
+        if (left.type !== expr.type) {
+            // console.log("no es el mismo nodo raiz");
+            continue;
+        }
 
         if (JSON.stringify(expr) === JSON.stringify(left)) {
             return [true, right];
         }
 
-        for (const child in expr) {
-            if (child === "type") continue;
-            // si en el axioma no hay var y son distintos, no me sirve el axioma
-            if (
-                !left[child].type.startsWith("Var") &&
-                left[child].type !== expr[child].type
-            )
-                continue forAxiomaEnRaiz;
+        // no son iguales
+
+        // si en el axioma no hay variables, no entra
+        if (!contieneVariables(left)) {
+            // console.log("son distintos y no hay variables");
+            continue forAxiomaEnRaiz;
         }
 
         // bindeamos las variables de left a los valores que tienen en expr
 
-        let bindings: Map<string, AST> = new Map();
-        for (const child in expr) {
-            if (child === "type") continue;
-            if (!left[child].type.startsWith("Var")) continue;
+        let bindings: Map<string, AST> = conseguirBindings(left, expr, new Map());
 
-            // TODO: que onda si el binding ya existia? lo pisamos?
-            bindings.set(left[child].type, expr[child]);
-        }
+            // console.log("MAMA ENCONTRE MAS BINDINGS AHORA", bindings)
 
         // reemplazamos en right con los bindings
 
@@ -129,4 +129,30 @@ function reemplazar(expr: AST, bindings: Map<string, AST>): [boolean, AST] {
     }
 
     return [hizoAlgo, ret];
+}
+
+
+function conseguirBindings(template: AST, expr: AST, bindings: Map<string, AST>): Map<string, AST> {
+    if (template.type.startsWith("Var")) {
+        bindings.set(template.type, expr);
+        return bindings;
+    }
+
+    for (const child in expr) {
+        if (child === "type") continue;
+        bindings = conseguirBindings(template[child], expr[child], bindings);
+    }
+
+    return bindings;
+}
+
+function contieneVariables(expr: AST): boolean {
+    if (expr.type.startsWith("Var"))
+        return true;
+
+    for (const child in expr)
+        if (contieneVariables(expr[child]))
+            return true;
+
+    return false;
 }
