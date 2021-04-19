@@ -51,14 +51,18 @@ export function auxAxiomasAST(tads: TAD[]): Axioma[] {
 
 export function evalAxiomas(expr: AST, axiomas: Axioma[]): AST {
     let run = true;
-    for (let i = 0; i < 10 && run; i++) {
-        [run, expr] = evalStep(expr, axiomas);
+    let ret: AST = expr;
+    for (let i = 0; i < 15 && run; i++) {
+        [run, ret] = evalStep(ret, axiomas);
     }
 
-    return expr;
+    return ret;
 }
 
 function evalStep(expr: AST, axiomas: Axioma[]): [boolean, AST] {
+    if(expr.type.startsWith("Generador"))
+        return [false, expr];
+
     forAxiomaEnRaiz: for (const [left, right] of axiomas) {
         // console.log("expr", expr)
         // console.log("left", left)
@@ -94,20 +98,27 @@ function evalStep(expr: AST, axiomas: Axioma[]): [boolean, AST] {
         // reemplazamos en right con los bindings
 
         let [okReemplazo, ret] = reemplazar(right, bindings);
-        if (!okReemplazo) {
-            continue;
-        }
-        return [true, ret];
+
+        if(!contieneVariables(ret))
+            return [true, ret];
+        if (okReemplazo)
+            return [true, ret];
     }
 
     // no se pudo aplicar un axioma en la raiz
+
+    let ret: any = { };
+
+    for (const child in expr) {
+        ret[child] = expr[child];
+    }
 
     for (const child in expr) {
         if (child === "type") continue;
         let [evaluoAlgo, sub] = evalStep(expr[child], axiomas);
         if (evaluoAlgo) {
-            expr[child] = sub;
-            return [true, expr];
+            ret[child] = sub;
+            return [true, ret];
         }
     }
 
