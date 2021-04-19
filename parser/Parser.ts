@@ -62,10 +62,10 @@ export function parseVarLibres(input: string, context?: ParseContext): Map<Gener
     return result;
 }
 
-export function parseAxioma(left: string, right: string, context?: ParseContext): [string, string] {
-    // TODO: =)
-    //context?.hints?.addMark('info', `${JSON.stringify(context.range)} ${left}\n\n\n\n-------------\n\n\n\n\n${right}`, context.range);
-    return [left, right];
+export function parseAxioma(left: string, right: string, context?: ParseContext): Axioma {
+    const axioma: Axioma = [left, right];
+    axioma.range = context?.range;
+    return axioma;
 }
 
 export function parseOperacion(
@@ -343,8 +343,8 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
                 const ctx: ParseContext = {
                     hints: context?.hints,
                     range: offsetRange({
-                        startLine: 1 + startLine,
-                        endLine: 1 + i,
+                        startLine: 1 + startLine - 1,
+                        endLine: 1 + i - 1,
                         columnStart: 1,
                         columnEnd: 1 + line.length,
                     }),

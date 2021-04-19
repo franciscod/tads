@@ -6,6 +6,11 @@ import * as monaco from "monaco-editor";
 
 import { basicos, demo } from "../../tads";
 import { Marker, EditorHints, parseSource } from "../../parser/Parser";
+import { Range, TAD } from "../../parser/Types";
+
+export interface ITextModelData {
+    tab?: Tab;
+}
 
 const editor = monaco.editor.create(document.getElementById("editor")!, {
     theme: "tad-dark",
@@ -30,8 +35,10 @@ type TabOptions = {
 
 class Tab {
     private readOnly: boolean;
-    private model: monaco.editor.ITextModel;
+    private model: monaco.editor.ITextModel & ITextModelData;
     private viewState: monaco.editor.ICodeEditorViewState | null;
+    private decorations: string[];
+    private tads: TAD[];
 
     private tabElement: HTMLElement;
 
@@ -39,7 +46,10 @@ class Tab {
         this.readOnly = options.readOnly;
         this.model = monaco.editor.createModel(options.content, "tad");
         this.model.onDidChangeContent(this.onValueChange.bind(this));
+        this.model.tab = this;
         this.viewState = null;
+        this.decorations = [];
+        this.tads = [];
         this.validate();
 
         this.tabElement = document.createElement("div");
@@ -73,8 +83,7 @@ class Tab {
 
     validate() {
         const hints = new EditorHints();
-        const tads = parseSource(this.model.getValue(), hints);
-        console.log(tads);
+        this.tads = parseSource(this.model.getValue(), hints);
 
         const toMonacoSeverity = (marker: Marker): monaco.MarkerSeverity => {
             switch (marker.severity) {
@@ -101,6 +110,34 @@ class Tab {
                 message: m.message,
             }))
         );
+
+        const deltaDecorations: monaco.editor.IModelDeltaDecoration[] = [];
+
+        for(const tad of this.tads) {
+            for(const axioma of tad.axiomas) {
+                if(!axioma.range) continue;
+
+                deltaDecorations.push({
+                    range: {
+                        startLineNumber: axioma.range.startLine,
+                        startColumn: 1,
+                        endLineNumber: axioma.range.startLine,
+                        endColumn: 1
+                    },
+                    options: {
+                        minimap: { position: monaco.editor.MinimapPosition.Gutter, color: 'rgba(255, 255, 0, 1.0)' },
+                        glyphMarginClassName: 'glyph-margin-warning',
+                        glyphMarginHoverMessage: { value: 'El axioma no tipa.' }
+                    }
+                });
+            }
+        }
+
+        this.decorations = this.model.deltaDecorations(this.decorations, deltaDecorations);
+    }
+
+    public get activeTADs(): TAD[] {
+        return this.tads;
     }
 }
 

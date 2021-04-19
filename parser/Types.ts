@@ -27,7 +27,7 @@ export type Slot = {
 };
 
 export type Token = (Literal | Slot) & ParseReference;
-export type Axioma = [string, string];
+export type Axioma = [string, string] & ParseReference;
 
 export type Operacion = {
     nombre: string;
