@@ -64,17 +64,15 @@ function evalStep(expr: AST, axiomas: Axioma[]): [boolean, AST] {
 
         // TODO: deberian chequearse los tipos
 
-        // si expr no entra en la izq del axioma, skip
-        if (left.type !== expr.type) {
-            // console.log("no es el mismo nodo raiz");
-            continue;
-        }
-
         if (JSON.stringify(expr) === JSON.stringify(left)) {
             return [true, right];
         }
 
-        // no son iguales
+        // si expr no entra en la izq del axioma, skip
+        if (!tienenLaMismaFormaSalvoVariables(left, expr)) {
+            // console.log("tienen otra forma")
+            continue forAxiomaEnRaiz;
+        }
 
         // si en el axioma no hay variables, no entra
         if (!contieneVariables(left)) {
@@ -83,10 +81,9 @@ function evalStep(expr: AST, axiomas: Axioma[]): [boolean, AST] {
         }
 
         // bindeamos las variables de left a los valores que tienen en expr
-
         let bindings: Map<string, AST> = conseguirBindings(left, expr, new Map());
 
-            // console.log("MAMA ENCONTRE MAS BINDINGS AHORA", bindings)
+        // console.log("MAMA ENCONTRE MAS BINDINGS AHORA", bindings)
 
         // reemplazamos en right con los bindings
 
@@ -129,6 +126,26 @@ function reemplazar(expr: AST, bindings: Map<string, AST>): [boolean, AST] {
     }
 
     return [hizoAlgo, ret];
+}
+
+function tienenLaMismaFormaSalvoVariables(template: AST, expr: AST): boolean {
+    if (template.type.startsWith("Var")) {
+        return true;
+    }
+
+    if (template.type !== expr.type)
+        return false;
+
+    // son el mismo tipo, tienen la misma forma en la raiz
+    // tienen los mismos hijos
+
+    for (const child in template) {
+        if (child === "type") continue;
+        if (!tienenLaMismaFormaSalvoVariables(template[child], expr[child]))
+            return false;
+    }
+
+    return true;
 }
 
 
