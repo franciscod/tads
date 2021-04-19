@@ -35,7 +35,7 @@ export function evalAxiomas(expr: AST, axiomas: Axioma[]): AST {
 }
 
 function evalStep(expr: AST, axiomas: Axioma[]): [boolean, AST] {
-    forAxioma: for (const [left, right] of axiomas) {
+    forAxiomaEnRaiz: for (const [left, right] of axiomas) {
         // TODO: deberian chequearse los tipos
 
         // si expr no entra en la izq del axioma, skip
@@ -48,7 +48,7 @@ function evalStep(expr: AST, axiomas: Axioma[]): [boolean, AST] {
                 !left[child].type.startsWith("Var") &&
                 left[child].type !== expr[child].type
             )
-                continue forAxioma;
+                continue forAxiomaEnRaiz;
         }
 
         // bindeamos las variables de left a los valores que tienen en expr
@@ -69,6 +69,18 @@ function evalStep(expr: AST, axiomas: Axioma[]): [boolean, AST] {
             continue;
         }
         return [true, ret];
+    }
+
+
+    // no se pudo aplicar un axioma en la raiz
+
+    for (const child in expr) {
+        if (child === "type") continue;
+        let [evaluoAlgo, sub] = evalStep(expr[child], axiomas);
+        if (evaluoAlgo) {
+            expr[child] = sub;
+            return [true, expr];
+        }
     }
 
     // iokce no soi 100tifiko
