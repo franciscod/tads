@@ -1,10 +1,6 @@
-name: CI Tests
+name: CI
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+on: [push, pull_request]
     
 jobs:
   
@@ -23,4 +19,17 @@ jobs:
         
       - name: Run tests
         run: npm run test
+        
+      - name: Build site
+        run: npm run build
+        
+      - name: Deploy site to Netlify
+        uses: netlify/actions/cli@master
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        with:
+          args: deploy --dir=build --prod
+          secrets: '["NETLIFY_AUTH_TOKEN", "NETLIFY_SITE_ID"]'
+ 
 
