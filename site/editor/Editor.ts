@@ -6,11 +6,12 @@ import * as monaco from "monaco-editor";
 import { basicos, demo } from "../../tads";
 import { Marker, EditorHints, parseSource } from "../../parser/Parser";
 import { Eval, Operacion, TAD } from "../../parser/Types";
-import { auxAxiomasAST, evalAxiomas } from "../../parser/Eval";
+import { auxAxiomasAST, Axioma, evalAxiomas } from "../../parser/Eval";
 import { genGrammar, getAST } from "../../parser/Ohmification";
 import ohm from "ohm-js";
 import generateDebugView from "../views/DebugView";
 import { openModal } from "../views/Modal";
+import generateEvalDebug from "../views/EvalDebugView";
 
 interface ITextModelData {
     tab?: Tab;
@@ -29,6 +30,9 @@ const editor = monaco.editor.create(document.getElementById("editor")!, {
 
 const debugCommandId = editor.addCommand(0, (_, tad: TAD) => {
     openModal(generateDebugView(tad), 750);
+}, "");
+const evalCommandId = editor.addCommand(0, (_, expr: string, axiomas: Axioma[]) => {
+    openModal(generateEvalDebug(expr, axiomas), 750);
 }, "");
 
 monaco.languages.registerCodeLensProvider("tad", {
@@ -198,9 +202,9 @@ class Tab {
                     range: evalRange,
                     id: "eval-" + evalRange.startLineNumber,
                     command: {
-                        id: debugCommandId!,
+                        id: evalCommandId!,
                         title: "👀 Ver eval",
-                        arguments: [],
+                        arguments: [exprAST, axiomas],
                     },
                 }, {
                     range: evalRange,

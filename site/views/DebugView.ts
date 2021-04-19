@@ -1,5 +1,5 @@
-import { Genero, Operacion, TAD, Token } from "../../parser/Types.ts";
-import { genGrammar } from "../../parser/Ohmification.ts";
+import { Genero, Operacion, TAD, Token } from "../../parser/Types";
+import { genGrammar } from "../../parser/Ohmification";
 
 const generateGeneroTag = (genero: Genero): string => {
     return `<span class="keyword genero">${genero}</span>`;
@@ -46,9 +46,8 @@ const generateDebugView = (tad: TAD): string => {
         <br>
         <br>
         <br>
-        <pre>
-        ${grammarSource}
-        </pre>
+        <div class="debug-section">Grammar generado</div>
+        <pre>${grammarSource}</pre>
     `;
 
     return "report\n".repeat(500);

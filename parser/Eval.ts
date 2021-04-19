@@ -2,7 +2,7 @@ import { genGrammar, getAST } from "../parser/Ohmification";
 import { TAD } from "../parser/Types";
 import ohm from "ohm-js";
 
-type AST = any;
+export type AST = any;
 // TODO: los axiomas deberian tener info de tipos attacheada
 export type Axioma = [AST, AST];
 
@@ -49,7 +49,7 @@ export function evalAxiomas(expr: AST, axiomas: Axioma[]): AST {
     return ret;
 }
 
-function evalStep(expr: AST, axiomas: Axioma[]): [boolean, AST] {
+export function evalStep(expr: AST, axiomas: Axioma[]): [boolean, AST] {
     const axiomasEnRaiz = axiomas.filter(a => a[0].type === expr.type);
 
     forAxiomaEnRaiz: for (const [left, right] of axiomasEnRaiz) {
