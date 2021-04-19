@@ -16,56 +16,56 @@ function generosDeSlots(tokens: Token[]) : string[] {
 it("parsea bool", () => {
     const tad: TAD = parseTad(BOOL_TAD)!;
 
-    expect(tad.nombre).toBe("Bool")
-    expect(tad.generos).toBe(["bool"])
+    expect(tad.nombre).toStrictEqual("Bool")
+    expect(tad.generos).toStrictEqual(["bool"])
 
     const generadores = tad.operaciones.filter((op) => op.tipo == 'generador');
     const otrasOperaciones = tad.operaciones.filter((op) => op.tipo == 'otra');
 
     const [genTrue, genFalse] = generadores;
 
-    expect(genTrue.nombre).toBe("true");
-    expect(genTrue.tokens).toBe([{type: "literal", symbol: "true"}]);
-    expect(genTrue.retorno).toBe("bool");
+    expect(genTrue.nombre).toStrictEqual("true");
+    expect(genTrue.tokens).toStrictEqual([{type: "literal", symbol: "true"}]);
+    expect(genTrue.retorno).toStrictEqual("bool");
 
-    expect(genFalse.nombre).toBe("false");
-    expect(genFalse.tokens).toBe([{type: "literal", symbol: "false"}]);
-    expect(genFalse.retorno).toBe("bool");
+    expect(genFalse.nombre).toStrictEqual("false");
+    expect(genFalse.tokens).toStrictEqual([{type: "literal", symbol: "false"}]);
+    expect(genFalse.retorno).toStrictEqual("bool");
 
 
     const [ooItef, ooNot, ooOr, ooAnd, ooImp, ooOrL, ooAndL, ooImpL] = otrasOperaciones;
 
-    expect(ooItef.nombre).toBe("if•then•else•fi");
-    expect(generosDeSlots(ooItef.tokens)).toBe(["bool", "α", "α"]);
-    expect(ooItef.retorno).toBe("α");
+    expect(ooItef.nombre).toStrictEqual("if•then•else•fi");
+    expect(generosDeSlots(ooItef.tokens)).toStrictEqual(["bool", "α", "α"]);
+    expect(ooItef.retorno).toStrictEqual("α");
 
-    expect(ooNot.nombre).toBe("¬•");
-    expect(generosDeSlots(ooNot.tokens)).toBe(["bool"]);
-    expect(ooNot.retorno).toBe("bool");
+    expect(ooNot.nombre).toStrictEqual("¬•");
+    expect(generosDeSlots(ooNot.tokens)).toStrictEqual(["bool"]);
+    expect(ooNot.retorno).toStrictEqual("bool");
 
-    expect(ooOr.nombre).toBe("•∨•");
-    expect(generosDeSlots(ooOr.tokens)).toBe(["bool", "bool"]);
-    expect(ooOr.retorno).toBe("bool");
+    expect(ooOr.nombre).toStrictEqual("•∨•");
+    expect(generosDeSlots(ooOr.tokens)).toStrictEqual(["bool", "bool"]);
+    expect(ooOr.retorno).toStrictEqual("bool");
 
-    expect(ooAnd.nombre).toBe("•∧•");
-    expect(generosDeSlots(ooAnd.tokens)).toBe(["bool", "bool"]);
-    expect(ooAnd.retorno).toBe("bool");
+    expect(ooAnd.nombre).toStrictEqual("•∧•");
+    expect(generosDeSlots(ooAnd.tokens)).toStrictEqual(["bool", "bool"]);
+    expect(ooAnd.retorno).toStrictEqual("bool");
 
-    expect(ooImp.nombre).toBe("•⇒•");
-    expect(generosDeSlots(ooImp.tokens)).toBe(["bool", "bool"]);
-    expect(ooImp.retorno).toBe("bool");
+    expect(ooImp.nombre).toStrictEqual("•⇒•");
+    expect(generosDeSlots(ooImp.tokens)).toStrictEqual(["bool", "bool"]);
+    expect(ooImp.retorno).toStrictEqual("bool");
 
-    expect(ooOrL.nombre).toBe("•∨L•");
-    expect(generosDeSlots(ooOrL.tokens)).toBe(["bool", "bool"]);
-    expect(ooOrL.retorno).toBe("bool");
+    expect(ooOrL.nombre).toStrictEqual("•∨L•");
+    expect(generosDeSlots(ooOrL.tokens)).toStrictEqual(["bool", "bool"]);
+    expect(ooOrL.retorno).toStrictEqual("bool");
 
-    expect(ooAndL.nombre).toBe("•∧L•");
-    expect(generosDeSlots(ooAndL.tokens)).toBe(["bool", "bool"]);
-    expect(ooAndL.retorno).toBe("bool");
+    expect(ooAndL.nombre).toStrictEqual("•∧L•");
+    expect(generosDeSlots(ooAndL.tokens)).toStrictEqual(["bool", "bool"]);
+    expect(ooAndL.retorno).toStrictEqual("bool");
 
-    expect(ooImpL.nombre).toBe("•⇒L•");
-    expect(generosDeSlots(ooImpL.tokens)).toBe(["bool", "bool"]);
-    expect(ooImpL.retorno).toBe("bool");
+    expect(ooImpL.nombre).toStrictEqual("•⇒L•");
+    expect(generosDeSlots(ooImpL.tokens)).toStrictEqual(["bool", "bool"]);
+    expect(ooImpL.retorno).toStrictEqual("bool");
 
     // TODO: chequear axiomas
 })

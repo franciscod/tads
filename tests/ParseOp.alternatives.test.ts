@@ -17,5 +17,5 @@ it("varias cruces andan igual", () => {
 
 it("no matchea literales vacios", () => {
     const op = parseOperacion("  • + •  ", "nat   × nat   → nat", 'otras operaciones');
-    expect(op?.tokens.length).toBe(3);
+    expect(op?.tokens.length).toStrictEqual(3);
 })
