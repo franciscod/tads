@@ -4,8 +4,8 @@
   "scripts": {
     "dev": "webpack serve",
     "build": "cross-env MODE=production webpack",
-    "test": "deno test --unstable --fail-fast --allow-read tests/",
-    "test:watch": "nodemon --exec \"npm run test\" --ext \"js,ts,tad\""
+    "test": "jest test",
+    "test:watch": "jest test --watchAll"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.13.15",
@@ -21,6 +21,7 @@
     "nodemon": "^2.0.7",
     "raw-loader": "^4.0.2",
     "style-loader": "^2.0.0",
+    "ts-jest": "^26.5.5",
     "ts-loader": "^8.1.0",
     "typescript": "^4.2.4",
     "webpack": "^5.32.0",

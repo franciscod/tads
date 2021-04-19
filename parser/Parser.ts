@@ -1,7 +1,9 @@
 import { Aplicacion, Axioma, ExpresionLogica, Genero, Literal, Nodo,
-         Operacion, Range, Slot, TAD, Token, Variable } from "./Types.ts";
+         Operacion, Range, Slot, TAD, Token, Variable } from "./Types";
 
 type MarkerSeverity = 'error' | 'warning' | 'info' | 'hint';
+
+import ohm from  'ohm-js';
 
 export type Marker = {
     severity: MarkerSeverity;
@@ -42,7 +44,6 @@ export function parseExpresionLogica(input: string, context?: ParseContext): Exp
 
 export function parseVarLibres(input: string, context?: ParseContext): Map<Genero, string[]> {
     //context?.hints?.addMark('info', 'variables libres', context.range);
-
     const result = new Map<Genero, string[]>();
 
     input.split("∀")
@@ -135,7 +136,7 @@ export function parseOperacion(left: string, right: string, section: Section, co
 }
 
 export function parseTad(source: string, context?: ParseContext): TAD | null {
-    const lines = source.replaceAll(/\r\n/g, '\n').split('\n').map(l => l.split('--')[0].trimRight());
+    const lines = source.replace(/\r\n/g, '\n').split('\n').map(l => l.split('--')[0].trimRight());
     const tad: TAD = {
         nombre: "",
         generos: [],
@@ -295,7 +296,7 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
 
 export function parseSource(source: string, hints?: EditorHints): TAD[] {
     const tads: TAD[] = [];
-    const lines = source.replaceAll(/\r\n/g, '\n').split('\n');
+    const lines = source.replace(/\r\n/g, '\n').split('\n');
 
     for(let i = 0; i < lines.length; i++){
         let line = lines[i];

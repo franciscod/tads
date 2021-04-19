@@ -1,14 +1,11 @@
-import { createRequire } from "https://deno.land/std@0.93.0/node/module.ts";
-import { assert } from "https://deno.land/std@0.93.0/testing/asserts.ts";
-import { Operacion } from "../parser/Types.ts";
-import { genGrammar } from "../parser/Ohmification.ts";
-import { parseTad } from "../parser/Parser.ts";
+import fs from "fs";
+import { genGrammar } from "../parser/Ohmification";
+import { parseTad } from "../parser/Parser";
 
-const require = createRequire(import.meta.url);
-const ohm = require('ohm-js');
+import ohm from 'ohm-js';
 
-const BOOL_TAD = Deno.readTextFileSync("tads/bool.tad");
-const NAT_TAD = Deno.readTextFileSync("tads/nat.tad");
+const BOOL_TAD = fs.readFileSync("tads/bool.tad", 'utf-8');
+const NAT_TAD = fs.readFileSync("tads/nat.tad", 'utf-8');
 
 const boolTad = parseTad(BOOL_TAD)!;
 const natTad = parseTad(NAT_TAD)!;
@@ -24,7 +21,7 @@ let enConj = false;
 
 // console.log(generated);
 
-Deno.readTextFileSync("tests/evals.txt").replaceAll('\r\n', '\n').split('\n').forEach((line, n) => {
+fs.readFileSync("tests/evals.txt", 'utf-8').replace(/\r\n/g, '\n').split('\n').forEach((line, n) => {
 
   if (line.includes("nat")) {
     enBool = false;
@@ -37,17 +34,17 @@ Deno.readTextFileSync("tests/evals.txt").replaceAll('\r\n', '\n').split('\n').fo
   }
 
   if (enBool) {
-    Deno.test("parsea casos bool evals.txt:" + (n + 1) + ":^" + line + "$", () => {
+    it("parsea casos bool evals.txt:" + (n + 1) + ":^" + line + "$", () => {
         line = line.split('--')[0];
         if (!line) return;
-        assert(g.match(line).succeeded());
+        expect(g.match(line).succeeded());
     });
   }
   if (enNat) {
-    Deno.test("parsea casos bool+nat evals.txt:" + (n + 1) + ":^" + line + "$", () => {
+    it("parsea casos bool+nat evals.txt:" + (n + 1) + ":^" + line + "$", () => {
         line = line.split('--')[0];
         if (!line) return;
-        assert(g.match(line).succeeded());
+        expect(g.match(line).succeeded());
     });
   }
 })

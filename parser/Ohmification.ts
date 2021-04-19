@@ -1,4 +1,4 @@
-import { Genero, Operacion } from "./Types.ts";
+import { Genero, Operacion } from "./Types";
 
 function titleSlug(s: string) : string {
     s = s.replace(/•/g, "")

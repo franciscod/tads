@@ -1,22 +1,21 @@
-import { assertEquals } from "https://deno.land/std@0.93.0/testing/asserts.ts";
-import { parseOperacion } from "../parser/Parser.ts";
+import { parseOperacion } from "../parser/Parser";
 
-Deno.test("varias flechas andan igual", () => {
+it("varias flechas andan igual", () => {
     const orig = parseOperacion("• ∨ •", "bool × bool → bool", 'otras operaciones');
     const ascii = parseOperacion("• ∨ •", "bool × bool -> bool", 'otras operaciones');
 
-    assertEquals(orig, ascii);
+    expect(orig).toStrictEqual(ascii);
 })
 
-Deno.test("varias cruces andan igual", () => {
+it("varias cruces andan igual", () => {
     const orig = parseOperacion("• ∨ •", "bool × bool → bool", 'otras operaciones');
     const alt = parseOperacion("• ∨ •", "bool ✕ bool → bool", 'otras operaciones');
 
-    assertEquals(orig, alt)
+    expect(orig).toStrictEqual(alt)
 })
 
 
-Deno.test("no matchea literales vacios", () => {
+it("no matchea literales vacios", () => {
     const op = parseOperacion("  • + •  ", "nat   × nat   → nat", 'otras operaciones');
-    assertEquals(op?.tokens.length, 3);
+    expect(op?.tokens.length).toBe(3);
 })

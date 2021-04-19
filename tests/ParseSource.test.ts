@@ -1,11 +1,12 @@
-import { parseSource, ParseContext } from "../parser/Parser.ts";
+import fs from "fs";
+import { parseSource } from "../parser/Parser";
 
-const BOOL_TAD = Deno.readTextFileSync("tads/bool.tad");
-const NAT_TAD = Deno.readTextFileSync("tads/nat.tad");
+const BOOL_TAD = fs.readFileSync("tads/bool.tad", 'utf-8');
+const NAT_TAD = fs.readFileSync("tads/nat.tad", 'utf-8');
 
 const SOURCE = [BOOL_TAD, NAT_TAD].join("\n");
 
-Deno.test("parsea source", () => {
+it("parsea source", () => {
     const tads = parseSource(SOURCE);
     // console.log(tads);
 });

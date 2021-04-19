@@ -1,12 +1,8 @@
-import { createRequire } from "https://deno.land/std@0.93.0/node/module.ts";
-import { assert } from "https://deno.land/std@0.93.0/testing/asserts.ts";
-import { Operacion } from "../parser/Types.ts";
-import { genGrammar } from "../parser/Ohmification.ts";
-import { parseTad } from "../parser/Parser.ts";
+import fs from "fs";
+import { genGrammar } from "../parser/Ohmification";
+import { parseTad } from "../parser/Parser";
 
-const require = createRequire(import.meta.url);
-const ohm = require('ohm-js');
-
+import ohm from 'ohm-js';
 
 // TODO: extraer de bool.tad
 const BOOL_AXIOMS = [
@@ -58,9 +54,9 @@ TADBoolAMano {
 } `;
 
 
-const BOOL_TAD = Deno.readTextFileSync("tads/bool.tad");
+const BOOL_TAD = fs.readFileSync("tads/bool.tad", "utf-8");
 
-Deno.test("ohm con grammar armada a mano parsea axiomas de bool", () => {
+it("ohm con grammar armada a mano parsea axiomas de bool", () => {
     const boolGrammar = ohm.grammar(BOOL_CUSTOM_GRAMMAR);
 
     BOOL_AXIOMS.forEach((axioma) => {
@@ -68,7 +64,7 @@ Deno.test("ohm con grammar armada a mano parsea axiomas de bool", () => {
     });
 })
 
-Deno.test("ohm con grammar armada a mano parsea expresiones random con bools", () => {
+it("ohm con grammar armada a mano parsea expresiones random con bools", () => {
     const boolGrammar = ohm.grammar(BOOL_CUSTOM_GRAMMAR);
 
     BOOL_RANDOM_EXPRS.forEach((expr) => {
@@ -78,7 +74,7 @@ Deno.test("ohm con grammar armada a mano parsea expresiones random con bools", (
 
 
 
-Deno.test("ohm parsea axiomas de bool con grammar autogenerada", () => {
+it("ohm parsea axiomas de bool con grammar autogenerada", () => {
     const boolTad = parseTad(BOOL_TAD)!;
 
     const vars = new Map([ ["alpha", ["a", "b"]], ["bool", ["x", "y"]] ]);
@@ -86,11 +82,11 @@ Deno.test("ohm parsea axiomas de bool con grammar autogenerada", () => {
     const boolGrammar = ohm.grammar(generated);
 
     BOOL_AXIOMS.forEach((axioma) => {
-        assert(boolGrammar.match(axioma).succeeded());
+        expect(boolGrammar.match(axioma).succeeded());
     });
 });
 
-Deno.test("ohm parsea expresiones random de bool con grammar autogenerada", () => {
+it("ohm parsea expresiones random de bool con grammar autogenerada", () => {
     const boolTad = parseTad(BOOL_TAD)!;
 
     const vars = new Map([ ["alpha", ["a", "b"]], ["bool", ["x", "y"]] ]);
@@ -98,6 +94,6 @@ Deno.test("ohm parsea expresiones random de bool con grammar autogenerada", () =
     const boolGrammar = ohm.grammar(generated);
 
     BOOL_RANDOM_EXPRS.forEach((expr) => {
-        assert(boolGrammar.match(expr).succeeded());
+        expect(boolGrammar.match(expr).succeeded());
     });
 });
