@@ -31,6 +31,9 @@ false ∨ (false ∧ true)             = false
 true ∧ (false ∨ true)              = true
 ¬ if true then false else true fi  = true
 if ¬true then ¬false else ¬true fi = false
+¬false ∨ ¬false                    = false
+(¬false) ∨ (¬false)                = true
+
 
 -- nat (+bool)
 0                                  = 0

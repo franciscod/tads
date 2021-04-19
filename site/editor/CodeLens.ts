@@ -1,7 +1,7 @@
 import * as monaco from "monaco-editor";
-import { openModal } from "../views/Modal.ts";
-import generateDebugView from "../views/DebugView.ts";
-import { parseSource } from "../../parser/Parser.ts";
+import { openModal } from "../views/Modal";
+import generateDebugView from "../views/DebugView";
+import { parseSource } from "../../parser/Parser";
 
 export default (editor: monaco.editor.IStandaloneCodeEditor) => {
     const debugCommandId = editor.addCommand(

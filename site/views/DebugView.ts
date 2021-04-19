@@ -37,6 +37,7 @@ const generateOperatorTable = (ops: Operacion[]): string => {
 };
 
 const generateDebugView = (tad: TAD): string => {
+    const [grammarSource] = genGrammar(tad.nombre, tad.operaciones, new Map());
     return `
         <div class="debug-title">${tad.nombre} (${tad.generos[0]})</div>
         <br>
@@ -46,7 +47,7 @@ const generateDebugView = (tad: TAD): string => {
         <br>
         <br>
         <pre>
-        ${genGrammar(tad.nombre, tad.operaciones, new Map())}
+        ${grammarSource}
         </pre>
     `;
 
