@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-    <!-- build <%= BUILD_HASH %> @ <%= BUILD_TIME %> -->
+    <!-- build <%= BUILD_HASH %> (#<%= BUILD_COUNT %>) @ <%= BUILD_TIME %> -->
     <head>
         <meta charset="UTF-8" />
         <title>TADs &middot; AED2</title>
@@ -8,6 +8,7 @@
     <body>
         <div class="header">
             <div class="title">🛠️ TADs &middot; AED2</div>
+            <div class="repo"><span id="repo-hash">v<span id="repo-count"><%= BUILD_COUNT %></span> (<%= BUILD_TIME_AGO %>)</div>
         </div>
         <div class="tabs"></div>
         <div id="editor"></div>

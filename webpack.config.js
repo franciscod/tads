@@ -1,3 +1,4 @@
+const moment = require('moment');
 const path = require('path');
 const git = require('git-rev-sync');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -26,7 +27,9 @@ const config = {
             minify: { removeComments: false },
             templateParameters: {
                 "BUILD_HASH": git.short() + (git.isDirty() ? '-dirty' : ''),
-                "BUILD_TIME": new Date()
+                "BUILD_COUNT": git.count(),
+                "BUILD_TIME": new Date(),
+                "BUILD_TIME_AGO": moment(new Date()).locale('es').fromNow()
             }
         })
     ],
