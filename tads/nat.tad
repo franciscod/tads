@@ -13,8 +13,6 @@ igualdad observacional
 generadores
     0       :               → nat
     suc     : nat           → nat
-    -- TODO: hacer alguna magia en el parser para que anden todos los nats
-    1       :               → nat
 
 -- HACK: movi obs basicos antes de generadores para que el parser vea el op sufijo primero
 observadores básicos
@@ -26,16 +24,13 @@ otras operaciones
     • - •   : nat n × nat m → nat   {m ≤ n}
     • × •   : nat   × nat   → nat
     • < •   : nat   × nat   → bool
-    • ≤ •   : nat   × nat   → bool
+    -- • ≤ •   : nat   × nat   → bool  -- todavia no tenemos igobs
     mín     : nat   × nat   → nat
     máx     : nat   × nat   → nat
     -- en el apunte de tads basicos esta en bool
     β       : bool          → nat
 
 axiomas ∀ n, m: nat
-    -- TODO: hacer alguna magia en el parser para que anden todos los nats
-    1            ≡ suc(0)
-
     0 =0?        ≡ true
     suc(n) =0?   ≡ false
     pred(suc(n)) ≡ n
@@ -49,6 +44,6 @@ axiomas ∀ n, m: nat
     máx(n, m)    ≡ if m < n then n else m fi
 
     -- en el apunte de tads basicos esta en bool
-    β(n)         ≡ if n then 1 else 0 fi
+    β(n)         ≡ if n then suc(0) else 0 fi
 
 Fin TAD
