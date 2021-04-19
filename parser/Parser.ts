@@ -306,6 +306,21 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
             for (; i < lines.length; ) {
                 line = lines[i];
 
+                if(line.toLowerCase().startsWith("eval")) {
+                    context?.hints?.addMark(
+                        "error",
+                        "Los evals no pueden estar adentro de los TADs",
+                        offsetRange({
+                            startLine: 1 + i - 1,
+                            endLine: 1 + i - 1,
+                            columnStart: 1,
+                            columnEnd: 1 + line.length,
+                        })
+                    );
+                    i++;
+                    continue;
+                }
+        
                 if (checkSectionHeader(line) !== "none" || line.toUpperCase().startsWith("FIN TAD")) {
                     i--;
                     break;
@@ -383,7 +398,9 @@ export function parseSource(source: string, hints?: EditorHints): TAD[] {
         if (line.trim().length === 0) continue; // skip empty lines
 
         // empieza TAD
-        if (line.toUpperCase().startsWith("TAD")) {
+        if(line.toLowerCase().startsWith("eval")) {
+            // ok
+        } else if (line.toUpperCase().startsWith("TAD")) {
             const startLine = i;
 
             // copiamos todo el TAD hasta FIN TAD
