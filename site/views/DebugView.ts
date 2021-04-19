@@ -1,19 +1,18 @@
 import { Genero, Operacion, TAD, Token } from "../../parser/Types.ts";
 import { genGrammar } from "../../parser/Ohmification.ts";
 
-
 const generateGeneroTag = (genero: Genero): string => {
     return `<span class="keyword genero">${genero}</span>`;
 };
 
 const generateToken = (token: Token): string => {
-    return token.type === 'literal' ?
-        `<span class="keyword ${token.type}">${token.symbol}</span>` :
-        generateGeneroTag(token.genero);
+    return token.type === "literal"
+        ? `<span class="keyword ${token.type}">${token.symbol}</span>`
+        : generateGeneroTag(token.genero);
 };
 
 const generateTokens = (tokens: Token[]): string => {
-    return tokens.map(generateToken).join(' ');
+    return tokens.map(generateToken).join(" ");
 };
 
 const generateOperatorRow = (op: Operacion): string => {
@@ -31,7 +30,7 @@ const generateOperatorTable = (ops: Operacion[]): string => {
         <table>
             <thead></thead>
             <tbody>
-                ${ops.map(generateOperatorRow).join('\n')}
+                ${ops.map(generateOperatorRow).join("\n")}
             </tbody>
         </table>
     `;
@@ -53,5 +52,5 @@ const generateDebugView = (tad: TAD): string => {
 
     return "report\n".repeat(500);
 };
-    
+
 export default generateDebugView;

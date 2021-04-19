@@ -1,4 +1,3 @@
-
 export type Range = {
     startLine: number;
     endLine: number;
@@ -10,17 +9,19 @@ export type ParseReference = {
     range?: Range;
 };
 
-export type ExpresionLogica = any;  // TODO
+export type ExpresionLogica = any; // TODO
 
-export type Genero = string;  // o es una variable (alpha, beta, etc) o es un tad especifico
+export type Genero = string; // o es una variable (alpha, beta, etc) o es un tad especifico
 
-export type Literal = { // tokens para sintaxis: corchetes, simbolos, etc
-    type: 'literal';
+export type Literal = {
+    // tokens para sintaxis: corchetes, simbolos, etc
+    type: "literal";
     symbol: string;
 };
 
-export type Slot = { // puntito • que despues puede usarse como variable (para restricciones)
-    type: 'slot';
+export type Slot = {
+    // puntito • que despues puede usarse como variable (para restricciones)
+    type: "slot";
     nombre?: string;
     genero: Genero;
 };
@@ -28,13 +29,14 @@ export type Slot = { // puntito • que despues puede usarse como variable (para
 export type Token = (Literal | Slot) & ParseReference;
 
 export type Aplicacion = {
-    type: 'operacion';
+    type: "operacion";
     operacion: Operacion;
     args: Nodo[];
 };
 
-export type Variable = { // letra (hoja del arbol)
-    type: 'variable';
+export type Variable = {
+    // letra (hoja del arbol)
+    type: "variable";
     nombre: string;
     genero: Genero;
 };
@@ -42,14 +44,14 @@ export type Variable = { // letra (hoja del arbol)
 export type Nodo = (Aplicacion | Variable) & ParseReference;
 
 export type Axioma = {
-    bindings: Nodo[];  // a la izquierda, uno por slot de la operacion
+    bindings: Nodo[]; // a la izquierda, uno por slot de la operacion
     reemplazo: Nodo;
 } & ParseReference;
 
 export type Operacion = {
     nombre: string;
-    tipo: 'basico' | 'generador' | 'otra';  // TODO: observador
-    tokens: Token[];  // como lo parseo a un nodo
+    tipo: "basico" | "generador" | "otra"; // TODO: observador
+    tokens: Token[]; // como lo parseo a un nodo
     retorno: string;
     axiomas: Axioma[];
     restriccion?: ExpresionLogica;

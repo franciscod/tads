@@ -11,4 +11,7 @@ todo:
 dev:
 	npm run dev
 
-.PHONY: test testloop todo dev
+format:
+	npx prettier --write site/ parser/ tests/
+
+.PHONY: test testloop todo dev format

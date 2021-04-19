@@ -1,7 +1,7 @@
 import { Genero, Operacion } from "./Types";
 
-function titleSlug(s: string) : string {
-    s = s.replace(/•/g, "")
+function titleSlug(s: string): string {
+    s = s.replace(/•/g, "");
     s = s.replace(/α/g, "alpha");
     s = s.replace(/¬/g, "neg");
     s = s.replace(/∨/g, "or");
@@ -18,9 +18,12 @@ function titleSlug(s: string) : string {
     return s[0].toUpperCase() + s.substr(1).toLowerCase();
 }
 
-export function genGrammar(tadName: string, ops: Operacion[], variables: Map<Genero, string[]>) : string {
+export function genGrammar(
+    tadName: string,
+    ops: Operacion[],
+    variables: Map<Genero, string[]>
+): string {
     const reglasParaExpr: string[] = [];
-
 
     let rules: string = "";
 
@@ -32,31 +35,34 @@ export function genGrammar(tadName: string, ops: Operacion[], variables: Map<Gen
             varTerms.push(genVar);
         });
     }
-  if (varTerms.length > 0) {
-      rules += "Var = " + varTerms.join(" | ") + "\n";
-  }
+    if (varTerms.length > 0) {
+        rules += "Var = " + varTerms.join(" | ") + "\n";
+    }
 
+    rules += ops
+        .map((op) => {
+            const ret: string = titleSlug(op.retorno);
+            const caseName = [op.tipo, op.nombre].reduce((p, e) => {
+                return p + titleSlug(e);
+            }, "");
 
-    rules += ops.map((op) => {
-        const ret: string = titleSlug(op.retorno);
-        const caseName = [op.tipo, op.nombre].reduce((p, e) => {
-            return p + titleSlug(e);
-        }, "");
+            // TODO: hay que poner los infijos antes que los generadores
+            reglasParaExpr.unshift(caseName);
 
-        // TODO: hay que poner los infijos antes que los generadores
-        reglasParaExpr.unshift(caseName);
+            const tokensRule = op.tokens
+                .map((tok) => {
+                    if (tok.type == "literal") return `"${tok.symbol}"`;
+                    if (tok.type == "slot") return "Expr";
+                })
+                .join(" ");
 
-        const tokensRule = op.tokens.map((tok) => {
-            if (tok.type == "literal") return `"${tok.symbol}"`;
-            if (tok.type == "slot") return "Expr";
-        }).join(" ");
+            return `${caseName} = ${tokensRule}\n`;
+        })
+        .join("");
 
-        return `${caseName} = ${tokensRule}\n`;
-    }).join('');
-
-  if (varTerms.length > 0) {
-      reglasParaExpr.push("Var");
-  }
+    if (varTerms.length > 0) {
+        reglasParaExpr.push("Var");
+    }
 
     rules += "Expr = " + reglasParaExpr.join(" | ") + " | ParenExpr\n";
 
@@ -70,5 +76,4 @@ export function genGrammar(tadName: string, ops: Operacion[], variables: Map<Gen
 ${rules}
 // fin autogenerado
 }`;
-
 }

@@ -2,7 +2,7 @@ import fs from "fs";
 import { genGrammar } from "../parser/Ohmification";
 import { parseTad } from "../parser/Parser";
 
-import ohm from 'ohm-js';
+import ohm from "ohm-js";
 
 // TODO: extraer de bool.tad
 const BOOL_AXIOMS = [
@@ -18,9 +18,12 @@ const BOOL_AXIOMS = [
 ];
 
 const BOOL_RANDOM_EXPRS = [
-    "¬true", "¬¬true", "¬(false ∨ true)", "if true then true else true fi",
+    "¬true",
+    "¬¬true",
+    "¬(false ∨ true)",
+    "if true then true else true fi",
     "if (if true then true else true fi) then true else true fi",
-    "true ∨ (if true then true else true fi)"
+    "true ∨ (if true then true else true fi)",
 ];
 
 // escrito a mano
@@ -53,7 +56,6 @@ TADBoolAMano {
   VarBoolY = "y"
 } `;
 
-
 const BOOL_TAD = fs.readFileSync("tads/bool.tad", "utf-8");
 
 it("ohm con grammar armada a mano parsea axiomas de bool", () => {
@@ -63,7 +65,7 @@ it("ohm con grammar armada a mano parsea axiomas de bool", () => {
         let match = boolGrammar.match(axioma);
         expect(match.succeeded());
     });
-})
+});
 
 it("ohm con grammar armada a mano parsea expresiones random con bools", () => {
     const boolGrammar = ohm.grammar(BOOL_CUSTOM_GRAMMAR);
@@ -72,14 +74,15 @@ it("ohm con grammar armada a mano parsea expresiones random con bools", () => {
         let match = boolGrammar.match(expr);
         expect(match.succeeded());
     });
-})
-
-
+});
 
 it("ohm parsea axiomas de bool con grammar autogenerada", () => {
     const boolTad = parseTad(BOOL_TAD)!;
 
-    const vars = new Map([ ["alpha", ["a", "b"]], ["bool", ["x", "y"]] ]);
+    const vars = new Map([
+        ["alpha", ["a", "b"]],
+        ["bool", ["x", "y"]],
+    ]);
     const generated = genGrammar("bool", boolTad.operaciones, vars);
     const boolGrammar = ohm.grammar(generated);
 
@@ -91,7 +94,10 @@ it("ohm parsea axiomas de bool con grammar autogenerada", () => {
 it("ohm parsea expresiones random de bool con grammar autogenerada", () => {
     const boolTad = parseTad(BOOL_TAD)!;
 
-    const vars = new Map([ ["alpha", ["a", "b"]], ["bool", ["x", "y"]] ]);
+    const vars = new Map([
+        ["alpha", ["a", "b"]],
+        ["bool", ["x", "y"]],
+    ]);
     const generated = genGrammar("bool", boolTad.operaciones, vars);
     const boolGrammar = ohm.grammar(generated);
 
