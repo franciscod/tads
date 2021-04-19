@@ -28,7 +28,7 @@ axiomas ∀ x, y: bool, ∀ a, b: α
     ¬x                        ≡ if x then false else true fi
     x ∨ y                     ≡ if x then (if y then true else true fi) else y fi
     x ∧ y                     ≡ if x then y else (if y then false else false fi) fi
-    x ⇒ y                     ≡ (¬x) ∨ y -- parentesis por la precedencia    x ∨L y                    ≡ if x then true else y fi
+    x ⇒ y                     ≡ (¬x) ∨ y -- parentesis por la precedencia
     x ∨L y                    ≡ if x then true else y fi
     x ∧L y                    ≡ if x then y else false fi
     x ⇒L y                    ≡ (¬x) ∨L y -- parentesis por la precedencia
