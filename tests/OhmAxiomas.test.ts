@@ -1,21 +1,9 @@
 import fs from "fs";
 import { genGrammar } from "../parser/Ohmification";
 import { parseTad } from "../parser/Parser";
+import { TAD } from "../parser/Types";
 
 import ohm from "ohm-js";
-
-// TODO: extraer de bool.tad
-const BOOL_AXIOMS = [
-    "if true then a else b fi  === a",
-    "if false then a else b fi === b",
-    "¬x                        === if x then false else true fi",
-    "x ∨ y                     === if x then (if y then true else true fi) else y fi",
-    "x ∧ y                     === if x then y else (if y then false else false fi) fi",
-    "x ⇒ y                     === ¬x ∨ y",
-    "x ∨L y                    === if x then true else y fi",
-    "x ∧L y                    === if x then y else false fi",
-    "x ⇒L y                    === ¬x ∨L y",
-];
 
 const BOOL_RANDOM_EXPRS = [
     "¬true",
@@ -57,13 +45,16 @@ TADBoolAMano {
 } `;
 
 const BOOL_TAD = fs.readFileSync("tads/bool.tad", "utf-8");
+const tadBool: TAD = parseTad(BOOL_TAD)!;
 
 it("ohm con grammar armada a mano parsea axiomas de bool", () => {
     const boolGrammar = ohm.grammar(BOOL_CUSTOM_GRAMMAR);
 
-    BOOL_AXIOMS.forEach((axioma) => {
-        const match = boolGrammar.match(axioma);
-        expect(match.succeeded());
+    tadBool.axiomas.forEach((axioma: [string, string]) => {
+        axioma.forEach((expr: string) => {
+            const match = boolGrammar.match(expr);
+            expect(match.succeeded());
+        });
     });
 });
 
@@ -77,28 +68,27 @@ it("ohm con grammar armada a mano parsea expresiones random con bools", () => {
 });
 
 it("ohm parsea axiomas de bool con grammar autogenerada", () => {
-    const boolTad = parseTad(BOOL_TAD)!;
-
     const vars = new Map([
         ["alpha", ["a", "b"]],
         ["bool", ["x", "y"]],
     ]);
-    const generated = genGrammar("bool", boolTad.operaciones, vars);
+    const generated = genGrammar("bool", tadBool.operaciones, vars);
     const boolGrammar = ohm.grammar(generated);
 
-    BOOL_AXIOMS.forEach((axioma) => {
-        expect(boolGrammar.match(axioma).succeeded());
+    tadBool.axiomas.forEach((axioma: [string, string]) => {
+        axioma.forEach((expr: string) => {
+            const match = boolGrammar.match(expr);
+            expect(match.succeeded());
+        });
     });
 });
 
 it("ohm parsea expresiones random de bool con grammar autogenerada", () => {
-    const boolTad = parseTad(BOOL_TAD)!;
-
     const vars = new Map([
         ["alpha", ["a", "b"]],
         ["bool", ["x", "y"]],
     ]);
-    const generated = genGrammar("bool", boolTad.operaciones, vars);
+    const generated = genGrammar("bool", tadBool.operaciones, vars);
     const boolGrammar = ohm.grammar(generated);
 
     BOOL_RANDOM_EXPRS.forEach((expr) => {

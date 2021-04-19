@@ -27,33 +27,13 @@ export type Slot = {
 };
 
 export type Token = (Literal | Slot) & ParseReference;
-
-export type Aplicacion = {
-    type: "operacion";
-    operacion: Operacion;
-    args: Nodo[];
-};
-
-export type Variable = {
-    // letra (hoja del arbol)
-    type: "variable";
-    nombre: string;
-    genero: Genero;
-};
-
-export type Nodo = (Aplicacion | Variable) & ParseReference;
-
-export type Axioma = {
-    bindings: Nodo[]; // a la izquierda, uno por slot de la operacion
-    reemplazo: Nodo;
-} & ParseReference;
+export type Axioma = [string, string];
 
 export type Operacion = {
     nombre: string;
     tipo: "basico" | "generador" | "otra"; // TODO: observador
     tokens: Token[]; // como lo parseo a un nodo
     retorno: string;
-    axiomas: Axioma[];
     restriccion?: ExpresionLogica;
 } & ParseReference;
 
@@ -63,4 +43,5 @@ export type TAD = {
     // exporta por ahora no
     operaciones: Operacion[];
     variablesLibres: Map<Genero, string[]>;
+    axiomas: Axioma[];
 } & ParseReference;

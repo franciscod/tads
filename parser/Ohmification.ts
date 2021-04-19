@@ -65,15 +65,9 @@ export function genGrammar(
     }
 
     rules += "Expr = " + reglasParaExpr.join(" | ") + " | ParenExpr\n";
+    rules += `ParenExpr = "(" Expr ")"\n`
 
-    return `TAD${tadName} {
-  Input = Axioma | EvalTest | Expr
-  Axioma = Expr "===" Expr
-  EvalTest = Expr "=" Expr
-  ParenExpr = "(" Expr ")"
-
-// autogenerado
+      return `TAD${tadName} {
 ${rules}
-// fin autogenerado
 }`;
 }

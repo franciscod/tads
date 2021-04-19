@@ -92,10 +92,10 @@ export function parseAxioma(
     left: string,
     right: string,
     context?: ParseContext
-): Operacion | null {
+): [string, string] {
     // TODO: =)
     //context?.hints?.addMark('info', `${JSON.stringify(context.range)} ${left}\n\n\n\n-------------\n\n\n\n\n${right}`, context.range);
-    return null;
+    return [left, right];
 }
 
 export function parseOperacion(
@@ -124,7 +124,6 @@ export function parseOperacion(
         tipo: sectionToOpType(section),
         tokens: [],
         retorno: "",
-        axiomas: [],
         // restriccion: []
     };
 
@@ -192,6 +191,7 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
         generos: [],
         operaciones: [],
         variablesLibres: new Map<Genero, string[]>(),
+        axiomas: [],
         range: context?.range,
     };
 
@@ -358,7 +358,7 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
                             }),
                         };
                         if (section === "axiomas")
-                            parseAxioma(left, rightBuffer, ctx);
+                            tad.axiomas.push(parseAxioma(left, rightBuffer, ctx));
                         else {
                             const op: Operacion | null = parseOperacion(
                                 left,
@@ -388,7 +388,7 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
                         columnEnd: 1 + line.length,
                     }),
                 };
-                if (section === "axiomas") parseAxioma(left, rightBuffer, ctx);
+                if (section === "axiomas") tad.axiomas.push(parseAxioma(left, rightBuffer, ctx));
                 else {
                     const op: Operacion | null = parseOperacion(
                         left,
