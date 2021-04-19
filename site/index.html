@@ -8,7 +8,10 @@
     <body>
         <div class="header">
             <div class="title">🛠️ TADs &middot; AED2</div>
-            <div class="repo"><span id="repo-hash">v<span id="repo-count"><%= BUILD_COUNT %></span> (<%= BUILD_TIME_AGO %>)</div>
+            <a class="repo" href="https://github.com/franciscod/tads" target="_blank">
+                <span id="repo-hash">v<%= BUILD_COUNT %> (<%= BUILD_TIME_AGO %>)</span>
+                <div class="gh"></div>
+            </a>
         </div>
         <div class="tabs"></div>
         <div id="editor"></div>
