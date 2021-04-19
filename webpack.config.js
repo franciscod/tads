@@ -1,11 +1,12 @@
 const path = require('path');
+const git = require('git-rev-sync');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const config = {
     entry: "./site/index.ts",
     mode: process.env.MODE || 'development',
     output: {
-        path: path.resolve(__dirname, "public")
+        path: path.resolve(__dirname, "build")
     },
     module: {
         rules: [
@@ -21,7 +22,11 @@ const config = {
     },
     plugins: [
         new HtmlWebpackPlugin({
-            template: path.resolve(__dirname, "site/index.html")
+            template: path.resolve(__dirname, "site/index.html"),
+            templateParameters: {
+                "BUILD_HASH": git.short() + (git.isDirty() ? '-dirty' : ''),
+                "BUILD_TIME": new Date()
+            }
         })
     ],
     devServer: {
