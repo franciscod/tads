@@ -1,16 +1,13 @@
 import {
-    Aplicacion,
     Axioma,
     ExpresionLogica,
     Genero,
     Literal,
-    Nodo,
     Operacion,
     Range,
     Slot,
     TAD,
     Token,
-    Variable,
 } from "./Types";
 
 type MarkerSeverity = "error" | "warning" | "info" | "hint";
