@@ -16,7 +16,7 @@ export function auxAxiomasAST(tads: TAD[]): Axioma[] {
 
         const axiomasEsteTad: Axioma[] = [];
 
-        for(const [left, right] of tad.axiomas) {
+        for (const [left, right] of tad.axiomas) {
             const matchLeft = g.match(left);
             const matchRight = g.match(right);
             if (!matchLeft.succeeded()) {

@@ -28,12 +28,20 @@ const editor = monaco.editor.create(document.getElementById("editor")!, {
     model: null,
 });
 
-const debugCommandId = editor.addCommand(0, (_, tad: TAD) => {
-    openModal(generateDebugView(tad), 750);
-}, "");
-const evalCommandId = editor.addCommand(0, (_, expr: string, axiomas: Axioma[], fromAST: (ast: AST) => string) => {
-    openModal(generateEvalDebug(expr, axiomas, fromAST), 750);
-}, "");
+const debugCommandId = editor.addCommand(
+    0,
+    (_, tad: TAD) => {
+        openModal(generateDebugView(tad), 750);
+    },
+    ""
+);
+const evalCommandId = editor.addCommand(
+    0,
+    (_, expr: string, axiomas: Axioma[], fromAST: (ast: AST) => string) => {
+        openModal(generateEvalDebug(expr, axiomas, fromAST), 750);
+    },
+    ""
+);
 
 monaco.languages.registerCodeLensProvider("tad", {
     provideCodeLenses: (model: monaco.editor.ITextModel & ITextModelData) => {
@@ -105,7 +113,10 @@ class Tab {
 
     validate() {
         const hints = new EditorHints();
-        [this.tads, this.evals] = parseSource(this.model.getValue() + '\n\n\n' + (this._options.usarBasicos ? basicos.join('\n') : ''), hints);
+        [this.tads, this.evals] = parseSource(
+            this.model.getValue() + "\n\n\n" + (this._options.usarBasicos ? basicos.join("\n") : ""),
+            hints
+        );
 
         const ops = this.tads.reduce((p: Operacion[], c) => p.concat(c.operaciones), []);
         const [generated, unaries, fromAST] = genGrammar("Universe", ops, new Map());
@@ -113,7 +124,7 @@ class Tab {
         const axiomas = auxAxiomasAST(this.tads);
 
         console.log(this.tads, this.evals);
-        
+
         const toMonacoSeverity = (marker: Marker): monaco.MarkerSeverity => {
             switch (marker.severity) {
                 case "error":
@@ -127,43 +138,45 @@ class Tab {
             }
         };
 
-        const numLines = this.model.getValue().replace(/\r\n/g, '\n').split('\n').length;
+        const numLines = this.model.getValue().replace(/\r\n/g, "\n").split("\n").length;
         monaco.editor.setModelMarkers(
             this.model,
             "tad",
-            hints.markers.filter(m => m.range.startLine <= numLines).map(m => ({
-                severity: toMonacoSeverity(m),
-                startLineNumber: m.range.startLine,
-                startColumn: m.range.columnStart,
-                endLineNumber: m.range.endLine,
-                endColumn: m.range.columnEnd,
-                message: m.message,
-            }))
+            hints.markers
+                .filter(m => m.range.startLine <= numLines)
+                .map(m => ({
+                    severity: toMonacoSeverity(m),
+                    startLineNumber: m.range.startLine,
+                    startColumn: m.range.columnStart,
+                    endLineNumber: m.range.endLine,
+                    endColumn: m.range.columnEnd,
+                    message: m.message,
+                }))
         );
 
         const deltaDecorations: monaco.editor.IModelDeltaDecoration[] = [];
         this.lenses = [];
 
-        for(const tad of this.tads) {
-            for(const axioma of tad.axiomas) {
-                if(!axioma.range || axioma.range.startLine > numLines) continue;
+        for (const tad of this.tads) {
+            for (const axioma of tad.axiomas) {
+                if (!axioma.range || axioma.range.startLine > numLines) continue;
 
                 deltaDecorations.push({
                     range: {
                         startLineNumber: axioma.range.startLine,
                         startColumn: 1,
                         endLineNumber: axioma.range.startLine,
-                        endColumn: 1
+                        endColumn: 1,
                     },
                     options: {
-                        minimap: { position: monaco.editor.MinimapPosition.Gutter, color: 'rgba(255, 255, 0, 1.0)' },
-                        glyphMarginClassName: 'glyph-margin-warning',
-                        glyphMarginHoverMessage: { value: 'El axioma no tipa.' }
-                    }
+                        minimap: { position: monaco.editor.MinimapPosition.Gutter, color: "rgba(255, 255, 0, 1.0)" },
+                        glyphMarginClassName: "glyph-margin-warning",
+                        glyphMarginHoverMessage: { value: "El axioma no tipa." },
+                    },
                 });
             }
-            
-            if(!tad.range) continue;
+
+            if (!tad.range) continue;
 
             const tadRange = {
                 startLineNumber: tad.range.startLine,
@@ -182,47 +195,50 @@ class Tab {
             });
         }
 
-        for(const _eval of this.evals) {
-            if(!_eval.range) continue;
+        for (const _eval of this.evals) {
+            if (!_eval.range) continue;
 
             const evalRange = {
                 startLineNumber: _eval.range.startLine,
                 startColumn: _eval.range.columnStart,
                 endLineNumber: _eval.range.endLine,
-                endColumn: _eval.range.columnEnd
+                endColumn: _eval.range.columnEnd,
             };
 
             let ok = false;
             const match = grammar.match(_eval.expr);
-            if(match.succeeded()) {
+            if (match.succeeded()) {
                 const exprAST = toAST(match, unaries);
                 const evaluado = evalAxiomas(exprAST, axiomas);
                 ok = true;
-                
-                this.lenses.push({
-                    range: evalRange,
-                    id: "eval-" + evalRange.startLineNumber,
-                    command: {
-                        id: evalCommandId!,
-                        title: "👀 Ver eval",
-                        arguments: [exprAST, axiomas, fromAST],
+
+                this.lenses.push(
+                    {
+                        range: evalRange,
+                        id: "eval-" + evalRange.startLineNumber,
+                        command: {
+                            id: evalCommandId!,
+                            title: "👀 Ver eval",
+                            arguments: [exprAST, axiomas, fromAST],
+                        },
                     },
-                }, {
-                    range: evalRange,
-                    id: "eval-result-" + evalRange.startLineNumber,
-                    command: {
-                        id: "",
-                        title: fromAST(evaluado)
-                    },
-                });
+                    {
+                        range: evalRange,
+                        id: "eval-result-" + evalRange.startLineNumber,
+                        command: {
+                            id: "",
+                            title: fromAST(evaluado),
+                        },
+                    }
+                );
             }
 
             deltaDecorations.push({
                 range: evalRange,
                 options: {
                     isWholeLine: true,
-                    className: ok ? 'ok-line' : 'error-line'
-                }
+                    className: ok ? "ok-line" : "error-line",
+                },
             });
         }
 
@@ -247,18 +263,17 @@ const tabs: Tab[] = [
         title: "⚛️ TADs básicos 🔒",
         content: basicos.join(`\n\n${("-".repeat(100) + "\n").repeat(5)}\n\n`),
         readOnly: true,
-        usarBasicos: false
+        usarBasicos: false,
     }),
     new Tab({
         title: "🧪 Ejercicio",
         content: localStorage.getItem("store") || demo,
         readOnly: false,
-        usarBasicos: true
+        usarBasicos: true,
     }),
 ];
 
 (tabs.find(t => t.options.title === localStorage.getItem("tab")) || tabs[1]).switchTo();
-
 
 setTimeout(monaco.editor.remeasureFonts, 1000);
 

@@ -304,7 +304,7 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
             for (; i < lines.length; ) {
                 line = lines[i];
 
-                if(line.toLowerCase().startsWith("eval")) {
+                if (line.toLowerCase().startsWith("eval")) {
                     context?.hints?.addMark(
                         "error",
                         "Los evals no pueden estar adentro de los TADs",
@@ -318,7 +318,7 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
                     i++;
                     continue;
                 }
-        
+
                 if (checkSectionHeader(line) !== "none" || line.toUpperCase().startsWith("FIN TAD")) {
                     i--;
                     break;
@@ -397,7 +397,7 @@ export function parseSource(source: string, hints?: EditorHints): [TAD[], Eval[]
         if (line.trim().length === 0) continue; // skip empty lines
 
         // empieza TAD
-        if(line.toLowerCase().startsWith("eval")) {
+        if (line.toLowerCase().startsWith("eval")) {
             // ok
             evals.push({
                 expr: line.slice("eval".length),
@@ -406,7 +406,7 @@ export function parseSource(source: string, hints?: EditorHints): [TAD[], Eval[]
                     endLine: 1 + i,
                     columnStart: 1,
                     columnEnd: 1 + line.length,
-                }
+                },
             });
         } else if (line.toUpperCase().startsWith("TAD")) {
             const startLine = i;

@@ -34,15 +34,16 @@ function titleSlug(s: string): string {
     return s[0].toUpperCase() + s.substr(1).toLowerCase();
 }
 
-export function genGrammar(tadName: string, ops: Operacion[], variables: Map<Genero, string[]>): [string, string[], (ast: AST) => string] {
+export function genGrammar(
+    tadName: string,
+    ops: Operacion[],
+    variables: Map<Genero, string[]>
+): [string, string[], (ast: AST) => string] {
     const reglasParaExpr: string[] = [];
-    const printMapping: { [key: string]: (ast: AST) => string } = { };
+    const printMapping: { [key: string]: (ast: AST) => string } = {};
     const fromAST = (ast: AST): string => {
-        return printMapping[ast.type](ast)
-                .replace(/\s+/g, ' ')
-                .replace(/\( /g, '(')
-                .replace(/ \)/g, ')');
-    }
+        return printMapping[ast.type](ast).replace(/\s+/g, " ").replace(/\( /g, "(").replace(/ \)/g, ")");
+    };
 
     const unaryRuleNames: string[] = [];
     let rules = "";
@@ -82,13 +83,13 @@ export function genGrammar(tadName: string, ops: Operacion[], variables: Map<Gen
 
             printMapping[caseName] = (ast: AST): string => {
                 return op.tokens
-                        .map((tok, i) => {
-                            if (tok.type == "literal") return tok.symbol;
-                            if (tok.type == "slot") return ` ${printMapping[ast[i].type](ast[i])} `;
-                        })
-                        .join("");
+                    .map((tok, i) => {
+                        if (tok.type == "literal") return tok.symbol;
+                        if (tok.type == "slot") return ` ${printMapping[ast[i].type](ast[i])} `;
+                    })
+                    .join("");
             };
-            
+
             return `${caseName} = ${tokensRule}\n`;
         })
         .join("");

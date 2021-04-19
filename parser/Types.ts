@@ -46,4 +46,4 @@ export type TAD = {
     axiomas: Axioma[];
 } & ParseReference;
 
-export type Eval = { expr: string; } & ParseReference;
+export type Eval = { expr: string } & ParseReference;
