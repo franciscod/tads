@@ -260,6 +260,8 @@ const tabs: Tab[] = [
 (tabs.find(t => t.options.title === localStorage.getItem("tab")) || tabs[1]).switchTo();
 
 
+setTimeout(monaco.editor.remeasureFonts, 1000);
+
 // TODO: no funciona :C
 /*
 function updateViewState() {
