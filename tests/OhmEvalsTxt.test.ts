@@ -1,5 +1,6 @@
 import fs from "fs";
-import { genGrammar } from "../parser/Ohmification";
+import { genGrammar, getAST } from "../parser/Ohmification";
+import { evalAxiomas, auxAxiomasAST } from "../parser/Eval";
 import { parseTad } from "../parser/Parser";
 
 import ohm from "ohm-js";
@@ -12,7 +13,7 @@ const natTad = parseTad(NAT_TAD)!;
 
 // TODO: hacer algo un poco mas prolijo que juntar todas las operaciones?
 const ops = boolTad.operaciones.concat(natTad.operaciones);
-const [generated, _unused] = genGrammar("bool", ops, new Map());
+const [generated, unaries] = genGrammar("bool", ops, new Map());
 const g = ohm.grammar(generated);
 
 let enBool = true;
@@ -35,32 +36,25 @@ fs.readFileSync("tests/evals.txt", "utf-8")
             enConj = true;
         }
 
-        if (enBool) {
-            it(
-                "parsea casos bool evals.txt:" + (n + 1) + ":^" + line + "$",
-                () => {
-                    line = line.split("--")[0];
-                    if (!line) return;
-                    line.split(" = ").forEach((expr) => {
-                        expect(g.match(expr).succeeded()).toStrictEqual(true);
-                    })
-                }
-            );
-        }
-        if (enNat) {
-            it(
-                "parsea casos bool+nat evals.txt:" +
-                    (n + 1) +
-                    ":^" +
-                    line +
-                    "$",
-                () => {
-                    line = line.split("--")[0];
-                    if (!line) return;
-                    line.split(" = ").forEach((expr) => {
-                        expect(g.match(expr).succeeded()).toStrictEqual(true);
-                    })
-                }
-            );
-        }
+        if (!enBool && !enNat) return;
+
+            line = line.split("--")[0];
+            if (!line) return;
+            let parts = line.split(" = ");
+            const matches = parts.map((s) => g.match(s));
+
+        it("parsea evals.txt:" + (n + 1) + ":^" + line + "$", () => {
+            matches.forEach((match) => {
+                expect(match.succeeded()).toStrictEqual(true);
+            });
+         })
+
+        it("  eval evals.txt:" + (n + 1) + ":^" + line + "$", () => {
+            let exprL = getAST(matches[0], unaries);
+            let exprR = getAST(matches[1], unaries);
+
+            const axiomas = auxAxiomasAST(boolTad);
+
+            expect(evalAxiomas(exprL, axiomas)).toStrictEqual(exprR);
+        });
     });
