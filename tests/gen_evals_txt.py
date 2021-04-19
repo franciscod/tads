@@ -5,17 +5,17 @@ import unicodedata
 
 reader = csv.reader(fileinput.input())
 
-assert next(reader) == ['escritoPor', 'tipo de test', 'expresion', 'deberiaEvaluarA', 'comentario', 'deshabilitadoHasta']
+assert next(reader)[:6] == ['escritoPor', 'tipo de test', 'expresion', 'deberiaEvaluarA', 'comentario', 'deshabilitado...']
 print("-- autogenerado del csv")
 
 for row in reader:
-    escritoPor, tipoTest, expresion, deberiaEvaluarA, comentario, deshabilitadoHasta = row
+    escritoPor, tipoTest, expresion, deberiaEvaluarA, comentario, *deshabilitadoHasta = row
     if tipoTest != "eval":
         print('-- (linea que no es un caso de eval)')
         continue
 
-    if deshabilitadoHasta:
-        print('-- deshabilitadoHasta({}): '.format(deshabilitadoHasta), end='')
+    if ''.join(deshabilitadoHasta):
+        print('-- deshabilitadoHasta({}): '.format(','.join(deshabilitadoHasta)), end='')
 
     if expresion.lower() in ("true", "false"):
         expresion = expresion.lower()
