@@ -21,9 +21,9 @@ TADBoolAMano {
   Axioma = Expr "===" Expr
   ParenExpr = "(" Expr ")"
 
-  Expr = ParenExpr | OtraIfthenelsefi | OtraNeg | OtraOr | OtraAnd
+  Expr = OtraIfthenelsefi | OtraNeg | OtraOr | OtraAnd
               | OtraImp   | OtraOrl | OtraAndl | OtraImpl | OtraIfthenelsefi
-              | GeneradorTrue | GeneradorFalse | Var
+              | GeneradorTrue | GeneradorFalse | Var | ParenExpr
 
   GeneradorTrue = "true"
   GeneradorFalse = "false"
