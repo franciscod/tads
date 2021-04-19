@@ -24,11 +24,10 @@ jobs:
         run: npm run build
         
       - name: Deploy site to Netlify
-        uses: jsmrcaga/action-netlify-deploy@v1.1.0
+        uses: nwtgck/actions-netlify@v1.1
         with:
-          install_command: ""
-          build_command: ""
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          publish-dir: './build'
+          production-deploy: true
+        env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_DEPLOY_TO_PROD: true
-      
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
