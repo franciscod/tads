@@ -12,7 +12,7 @@ const natTad = parseTad(NAT_TAD)!;
 
 // TODO: hacer algo un poco mas prolijo que juntar todas las operaciones?
 const ops = boolTad.operaciones.concat(natTad.operaciones);
-const generated = genGrammar("bool", ops, new Map());
+const [generated, _unused] = genGrammar("bool", ops, new Map());
 const g = ohm.grammar(generated);
 
 let enBool = true;

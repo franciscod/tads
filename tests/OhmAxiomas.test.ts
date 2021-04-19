@@ -1,5 +1,5 @@
 import fs from "fs";
-import { genGrammar } from "../parser/Ohmification";
+import { genGrammar, getAST } from "../parser/Ohmification";
 import { parseTad } from "../parser/Parser";
 import { TAD } from "../parser/Types";
 
@@ -72,7 +72,7 @@ it("ohm parsea axiomas de bool con grammar autogenerada", () => {
         ["alpha", ["a", "b"]],
         ["bool", ["x", "y"]],
     ]);
-    const generated = genGrammar("bool", tadBool.operaciones, vars);
+    const [generated, _unused] = genGrammar("bool", tadBool.operaciones, vars);
     const boolGrammar = ohm.grammar(generated);
 
     tadBool.axiomas.forEach((axioma: [string, string]) => {
@@ -88,10 +88,48 @@ it("ohm parsea expresiones random de bool con grammar autogenerada", () => {
         ["alpha", ["a", "b"]],
         ["bool", ["x", "y"]],
     ]);
-    const generated = genGrammar("bool", tadBool.operaciones, vars);
+    const [generated, _unused] = genGrammar("bool", tadBool.operaciones, vars);
     const boolGrammar = ohm.grammar(generated);
 
     BOOL_RANDOM_EXPRS.forEach((expr) => {
         expect(boolGrammar.match(expr).succeeded());
+    });
+});
+
+it("obtiene el ast de ciertas expresiones con bool", () => {
+    let casos: [string, any][] = [];
+
+    casos.push([
+        "¬(false ∨ true)",
+        {
+            "1": {
+                "0": { type: "GeneradorFalse" },
+                "2": { type: "GeneradorTrue" },
+                type: "OtraOr",
+            },
+            type: "OtraNeg",
+        },
+    ]);
+
+    casos.push([
+        "if true then true else true fi",
+        {
+            "1": { type: "GeneradorTrue" },
+            "3": { type: "GeneradorTrue" },
+            "5": { type: "GeneradorTrue" },
+            type: "OtraIfthenelsefi",
+        },
+    ]);
+
+    casos.forEach(([expr, ast]) => {
+        const [generated, unaryRules] = genGrammar(
+            "bool",
+            tadBool.operaciones,
+            new Map()
+        );
+        const g = ohm.grammar(generated);
+        const match = g.match(expr);
+
+        expect(getAST(match, unaryRules)).toStrictEqual(ast);
     });
 });

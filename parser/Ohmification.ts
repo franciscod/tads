@@ -1,5 +1,8 @@
 import { Genero, Operacion } from "./Types";
 
+import ohm from "ohm-js";
+import { toAST } from "ohm-js/extras";
+
 function titleSlug(s: string): string {
     s = s.replace(/•/g, "");
     s = s.replace(/α/g, "alpha");
@@ -22,9 +25,10 @@ export function genGrammar(
     tadName: string,
     ops: Operacion[],
     variables: Map<Genero, string[]>
-): string {
+): [string, string[]] {
     const reglasParaExpr: string[] = [];
 
+    let unaryRuleNames: string[] = [];
     let rules = "";
 
     const varTerms: string[] = [];
@@ -56,6 +60,10 @@ export function genGrammar(
                 })
                 .join(" ");
 
+            if (op.tokens.filter((t) => t.type == "slot").length == 1) {
+                unaryRuleNames.push(caseName);
+            }
+
             return `${caseName} = ${tokensRule}\n`;
         })
         .join("");
@@ -64,10 +72,21 @@ export function genGrammar(
         reglasParaExpr.push("Var");
     }
 
-    rules += "Expr = " + reglasParaExpr.join(" | ") + " | ParenExpr\n";
-    rules += `ParenExpr = "(" Expr ")"\n`
+    let rulesHead: string = "";
+    rulesHead += "Expr = " + reglasParaExpr.join(" | ") + " | ParenExpr\n";
+    rulesHead += `ParenExpr = "(" Expr ")"\n`;
 
-      return `TAD${tadName} {
+    const grammarSource = `TAD${tadName} {
+${rulesHead}
 ${rules}
 }`;
+    return [grammarSource, unaryRuleNames];
+}
+
+export function getAST(match: ohm.MatchResult, unaries: string[]) {
+    let baseMapping: Record<string, any> = {};
+    unaries.forEach((r) => {
+        baseMapping[r] = undefined;
+    });
+    return toAST(match, baseMapping);
 }

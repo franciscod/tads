@@ -355,7 +355,9 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
                             }),
                         };
                         if (section === "axiomas")
-                            tad.axiomas.push(parseAxioma(left, rightBuffer, ctx));
+                            tad.axiomas.push(
+                                parseAxioma(left, rightBuffer, ctx)
+                            );
                         else {
                             const op: Operacion | null = parseOperacion(
                                 left,
@@ -385,7 +387,8 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
                         columnEnd: 1 + line.length,
                     }),
                 };
-                if (section === "axiomas") tad.axiomas.push(parseAxioma(left, rightBuffer, ctx));
+                if (section === "axiomas")
+                    tad.axiomas.push(parseAxioma(left, rightBuffer, ctx));
                 else {
                     const op: Operacion | null = parseOperacion(
                         left,
