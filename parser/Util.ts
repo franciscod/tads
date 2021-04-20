@@ -1,4 +1,3 @@
-
 export function titleSlug(s: string): string {
     s = s.replace(/•/g, "");
     s = s.replace(/α/g, "alpha");

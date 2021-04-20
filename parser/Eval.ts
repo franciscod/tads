@@ -1,6 +1,5 @@
 import { Axioma, Expr, Grammar } from "../parser/Types";
 
-
 export function evalGrammar(expr: Expr, grammar: Grammar): Expr {
     let run = true;
     let ret: Expr = expr;
