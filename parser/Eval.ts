@@ -5,14 +5,14 @@ export function evalGrammar(expr: Expr, grammar: Grammar): Expr {
     let run = true;
     let ret: Expr = expr;
     for (let i = 0; i < 50 && run; i++) {
-        [run, ret] = evalStep(ret, grammar.axiomas);
+        [run, ret] = evalStep(ret, grammar);
     }
 
     return ret;
 }
 
-export function evalStep(expr: Expr, axiomas: Axioma[]): [boolean, Expr] {
-    const axiomasEnRaiz = axiomas.filter(a => a[0].type === expr.type);
+export function evalStep(expr: Expr, grammar: Grammar): [boolean, Expr] {
+    const axiomasEnRaiz = grammar.axiomas.filter(a => a[0].type === expr.type);
 
     forAxiomaEnRaiz: for (const [left, right] of axiomasEnRaiz) {
         // console.log("expr", expr)
@@ -63,7 +63,7 @@ export function evalStep(expr: Expr, axiomas: Axioma[]): [boolean, Expr] {
 
     for (const child in expr) {
         if (child === "type") continue;
-        const [evaluoAlgo, sub] = evalStep(expr[child], axiomas);
+        const [evaluoAlgo, sub] = evalStep(expr[child], grammar);
         if (evaluoAlgo) {
             ret[child] = sub;
             return [true, ret];

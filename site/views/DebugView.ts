@@ -1,5 +1,5 @@
 import { Genero, Operacion, TAD, Token } from "../../parser/Types";
-import { genGrammar } from "../../parser/Ohmification";
+import { genGrammar } from "../../parser/OhmBackend";
 
 const generateGeneroTag = (genero: Genero): string => {
     return `<span class="keyword genero">${genero}</span>`;
@@ -37,7 +37,7 @@ const generateOperatorTable = (ops: Operacion[]): string => {
 };
 
 const generateDebugView = (tad: TAD): string => {
-    const [grammarSource] = genGrammar(tad.nombre, tad.operaciones, new Map());
+    const grammar = genGrammar([tad]);
     return `
         <div class="debug-title">${tad.nombre} (${tad.generos[0]})</div>
         <br>
@@ -47,7 +47,7 @@ const generateDebugView = (tad: TAD): string => {
         <br>
         <br>
         <div class="debug-section">Grammar generado</div>
-        <pre>${grammarSource}</pre>
+        <pre>${grammar.backendGrammar.source}</pre>
     `;
 
     return "report\n".repeat(500);

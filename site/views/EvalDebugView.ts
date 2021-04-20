@@ -1,17 +1,19 @@
-import { AST } from "../../parser/Ohmification";
-import { Axioma, evalStep } from "../../parser/Eval";
 
-const generateEvalDebug = (expr: AST, axiomas: Axioma[], fromAST: (ast: AST) => string): string => {
+import { evalStep } from "../../parser/Eval";
+import { fromExpr } from "../../parser/OhmBackend";
+import { Expr, Grammar } from "../../parser/Types";
+
+const generateEvalDebug = (expr: Expr, grammar: Grammar): string => {
     let steps = "";
     let run = true;
-    let ret: AST = expr;
+    let ret: Expr = expr;
     for (let i = 0; i < 50 && run; i++) {
         steps += `
             <div class="debug-section">STEP #${i}</div>
-            <pre>${fromAST(ret)}</pre>
+            <pre>${fromExpr(ret, grammar)}</pre>
             <br>
         `;
-        [run, ret] = evalStep(ret, axiomas);
+        [run, ret] = evalStep(ret, grammar);
     }
 
     return `

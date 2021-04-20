@@ -145,5 +145,5 @@ export function toExpr(input: string, grammar: Grammar): Expr | null {
 }
 
 export function fromExpr(expr: Expr, grammar: Grammar): string {
-    return "";
+    return (grammar.backendGrammar as OhmSourceResult).fromAST(expr);
 }

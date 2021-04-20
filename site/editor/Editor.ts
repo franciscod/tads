@@ -8,9 +8,9 @@ import timeago_es from "timeago.js/lib/lang/es";
 
 import { basicos, demo } from "../../tads";
 import { Marker, EditorHints, parseSource } from "../../parser/Parser";
-import { Eval, Operacion, TAD } from "../../parser/Types";
-import { auxAxiomasAST, Axioma, evalAxiomas } from "../../parser/Eval";
-import { AST, genGrammar, toAST } from "../../parser/Ohmification";
+import { Eval, Expr, Grammar, TAD } from "../../parser/Types";
+import { evalGrammar } from "../../parser/Eval";
+import { fromExpr, genGrammar, toExpr } from "../../parser/OhmBackend";
 import generateDebugView from "../views/DebugView";
 import { openModal } from "../views/Modal";
 import generateEvalDebug from "../views/EvalDebugView";
@@ -39,8 +39,8 @@ const debugCommandId = editor.addCommand(
 );
 const evalCommandId = editor.addCommand(
     0,
-    (_, expr: string, axiomas: Axioma[], fromAST: (ast: AST) => string) => {
-        openModal(generateEvalDebug(expr, axiomas, fromAST), 750);
+    (_, expr: Expr, grammar: Grammar) => {
+        openModal(generateEvalDebug(expr, grammar), 750);
     },
     ""
 );
@@ -120,12 +120,7 @@ class Tab {
             hints
         );
 
-        const ops = this.tads.reduce((p: Operacion[], c) => p.concat(c.operaciones), []);
-        const [generated, unaries, fromAST] = genGrammar("Universe", ops, new Map());
-        const grammar = ohm.grammar(generated);
-        const axiomas = auxAxiomasAST(this.tads);
-
-        console.log(this.tads, this.evals);
+        const grammar = genGrammar(this.tads);
 
         const toMonacoSeverity = (marker: Marker): monaco.MarkerSeverity => {
             switch (marker.severity) {
@@ -208,10 +203,9 @@ class Tab {
             };
 
             let ok = false;
-            const match = grammar.match(_eval.expr);
-            if (match.succeeded()) {
-                const exprAST = toAST(match, unaries);
-                const evaluado = evalAxiomas(exprAST, axiomas);
+            const expr = toExpr(_eval.expr, grammar);
+            if (expr) {
+                const evaluado = evalGrammar(expr, grammar);
                 ok = true;
 
                 this.lenses.push(
@@ -221,7 +215,7 @@ class Tab {
                         command: {
                             id: evalCommandId!,
                             title: "👀 Ver eval",
-                            arguments: [exprAST, axiomas, fromAST],
+                            arguments: [expr, grammar],
                         },
                     },
                     {
@@ -229,7 +223,7 @@ class Tab {
                         id: "eval-result-" + evalRange.startLineNumber,
                         command: {
                             id: "",
-                            title: fromAST(evaluado),
+                            title: fromExpr(evaluado, grammar),
                         },
                     }
                 );
