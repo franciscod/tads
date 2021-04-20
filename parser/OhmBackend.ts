@@ -10,7 +10,7 @@ type OhmSourceResult = {
     fromAST: (expr: Expr) => string;
 }
 
-export function ohmGenGrammarSource(ops: Operacion[], variables: Map<Genero, string[]>): OhmSourceResult {
+function ohmGenGrammarSource(ops: Operacion[], variables: Map<Genero, string[]>): OhmSourceResult {
     const reglasParaExpr: string[] = [];
     const printMapping: { [key: string]: (ast: Expr) => string } = {};
     const fromAST = (ast: Expr): string => {
@@ -87,7 +87,7 @@ ${rules}
     };
 }
 
-export function auxAxiomasAST(tads: TAD[]): Axioma[] {
+function auxAxiomasAST(tads: TAD[]): Axioma[] {
     let ret: Axioma[] = [];
 
     const opsTodos = tads.map(tad => tad.operaciones).reduce((ret, ops) => ret.concat(ops), []);
