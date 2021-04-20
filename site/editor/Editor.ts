@@ -2,7 +2,6 @@ import "./Colorization";
 import "./Suggestions";
 
 import * as monaco from "monaco-editor";
-import ohm from "ohm-js";
 import { register, render } from "timeago.js";
 import timeago_es from "timeago.js/lib/lang/es";
 
