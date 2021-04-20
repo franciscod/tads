@@ -59,4 +59,30 @@ warning cuando no hay axiomas para evaluar
 agregar un test donde inviertas el orden de los operadores y no muera
 
 
+API Ideal/Deseada:
 
+PARSING:
+parseSource(source: string): TAD[]
+└──parseTad(source: string): TAD
+   ├──parseOperacion: Operacion
+   ├──parseAxioma: RawAxioma
+   ├──parseVarLibres: Map<Genero, string[]>
+   └──parseExpresionLogica: jaja saludos
+
+GRAMMAR:
+genGrammar(tads: TAD[]): Grammar
+└──
+   ├──fromAST(string, Grammar): Expr
+   ├──toAST(Expr, Grammar): string
+   ├──
+   ├──
+   └──
+
+
+EVAL:
+evalGrammar(expr: Expr, gramar: Grammar): Expr
+└──evalStep:
+   ├──
+   ├──
+   ├──
+   └──

@@ -1,54 +1,17 @@
-import { AST, genGrammar, toAST } from "../parser/Ohmification";
-import { TAD } from "../parser/Types";
-import ohm from "ohm-js";
+import { Axioma, Expr, Grammar } from "../parser/Types";
 
-// TODO: los axiomas deberian tener info de tipos attacheada
-export type Axioma = [AST, AST];
 
-export function auxAxiomasAST(tads: TAD[]): Axioma[] {
-    let ret: Axioma[] = [];
-
-    const opsTodos = tads.map(tad => tad.operaciones).reduce((ret, ops) => ret.concat(ops), []);
-
-    tads.forEach(tad => {
-        const [generated, unaries] = genGrammar(tad.nombre, opsTodos, tad.variablesLibres);
-        const g = ohm.grammar(generated);
-
-        const axiomasEsteTad: Axioma[] = [];
-
-        for (const [left, right] of tad.axiomas) {
-            const matchLeft = g.match(left);
-            const matchRight = g.match(right);
-            if (!matchLeft.succeeded()) {
-                //console.log(left);
-                continue;
-            }
-
-            if (!matchRight.succeeded()) {
-                //console.log(right);
-                continue;
-            }
-
-            axiomasEsteTad.push([toAST(matchLeft, unaries), toAST(matchRight, unaries)]);
-        }
-
-        ret = ret.concat(axiomasEsteTad);
-    });
-
-    return ret;
-}
-
-export function evalAxiomas(expr: AST, axiomas: Axioma[]): AST {
+export function evalGrammar(expr: Expr, grammar: Grammar): Expr {
     let run = true;
-    let ret: AST = expr;
+    let ret: Expr = expr;
     for (let i = 0; i < 50 && run; i++) {
-        [run, ret] = evalStep(ret, axiomas);
+        [run, ret] = evalStep(ret, grammar.axiomas);
     }
 
     return ret;
 }
 
-export function evalStep(expr: AST, axiomas: Axioma[]): [boolean, AST] {
+export function evalStep(expr: Expr, axiomas: Axioma[]): [boolean, Expr] {
     const axiomasEnRaiz = axiomas.filter(a => a[0].type === expr.type);
 
     forAxiomaEnRaiz: for (const [left, right] of axiomasEnRaiz) {
@@ -75,7 +38,7 @@ export function evalStep(expr: AST, axiomas: Axioma[]): [boolean, AST] {
         }
 
         // bindeamos las variables de left a los valores que tienen en expr
-        const bindings: Map<string, AST> = conseguirBindings(left, expr, new Map());
+        const bindings: Map<string, Expr> = conseguirBindings(left, expr, new Map());
 
         // console.log("MAMA ENCONTRE MAS BINDINGS AHORA", bindings)
 
@@ -111,12 +74,12 @@ export function evalStep(expr: AST, axiomas: Axioma[]): [boolean, AST] {
     return [false, expr];
 }
 
-function reemplazar(expr: AST, bindings: Map<string, AST>): [boolean, AST] {
+function reemplazar(expr: Expr, bindings: Map<string, Expr>): [boolean, Expr] {
     if (bindings.has(expr.type)) {
-        return [true, bindings.get(expr.type)];
+        return [true, bindings.get(expr.type)!];
     }
 
-    const ret: AST = { type: expr.type };
+    const ret: Expr = { type: expr.type };
     let hizoAlgo = false;
 
     for (const child in expr) {
@@ -129,7 +92,7 @@ function reemplazar(expr: AST, bindings: Map<string, AST>): [boolean, AST] {
     return [hizoAlgo, ret];
 }
 
-function tienenLaMismaFormaSalvoVariables(template: AST, expr: AST): boolean {
+function tienenLaMismaFormaSalvoVariables(template: Expr, expr: Expr): boolean {
     if (template.type.startsWith("Var")) {
         return true;
     }
@@ -147,7 +110,7 @@ function tienenLaMismaFormaSalvoVariables(template: AST, expr: AST): boolean {
     return true;
 }
 
-function conseguirBindings(template: AST, expr: AST, bindings: Map<string, AST>): Map<string, AST> {
+function conseguirBindings(template: Expr, expr: Expr, bindings: Map<string, Expr>): Map<string, Expr> {
     if (template.type.startsWith("Var")) {
         bindings.set(template.type, expr);
         return bindings;
@@ -161,7 +124,7 @@ function conseguirBindings(template: AST, expr: AST, bindings: Map<string, AST>)
     return bindings;
 }
 
-function contieneVariables(expr: AST): boolean {
+function contieneVariables(expr: Expr): boolean {
     if (expr.type.startsWith("Var")) return true;
 
     for (const child in expr) {

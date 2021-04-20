@@ -27,7 +27,7 @@ export type Slot = {
 };
 
 export type Token = (Literal | Slot) & ParseReference;
-export type Axioma = [string, string] & ParseReference;
+export type RawAxioma = [string, string] & ParseReference;
 
 export type Operacion = {
     nombre: string;
@@ -43,7 +43,16 @@ export type TAD = {
     // exporta por ahora no
     operaciones: Operacion[];
     variablesLibres: Map<Genero, string[]>;
-    axiomas: Axioma[];
+    axiomas: RawAxioma[];
 } & ParseReference;
 
 export type Eval = { expr: string } & ParseReference;
+
+export type Expr = { type: string, [key: number]: Expr };
+
+export type Axioma = [Expr, Expr];
+
+export type Grammar = {
+    axiomas: Axioma[],
+    backendGrammar: any
+}
