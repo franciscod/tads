@@ -120,7 +120,7 @@ export function genGrammar(tads: TAD[]): Grammar {
     const ops = tads.reduce((p: Operacion[], c) => p.concat(c.operaciones), []);
     const result = ohmGenGrammarSource(ops, new Map());
     const axiomas = auxAxiomasAST(tads);
-    
+
     return {
         axiomas: axiomas,
         backendGrammar: result
