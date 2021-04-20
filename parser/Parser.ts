@@ -1,4 +1,4 @@
-import { Axioma, Eval, ExpresionLogica, Genero, Operacion, Range, Slot, TAD, Token } from "./Types";
+import { RawAxioma, Eval, ExpresionLogica, Genero, Operacion, Range, Slot, TAD, Token } from "./Types";
 
 type MarkerSeverity = "error" | "warning" | "info" | "hint";
 
@@ -60,8 +60,8 @@ export function parseVarLibres(input: string, context?: ParseContext): Map<Gener
     return result;
 }
 
-export function parseAxioma(left: string, right: string, context?: ParseContext): Axioma {
-    const axioma: Axioma = [left, right];
+export function parseAxioma(left: string, right: string, context?: ParseContext): RawAxioma {
+    const axioma: RawAxioma = [left, right];
     axioma.range = context?.range;
     return axioma;
 }
