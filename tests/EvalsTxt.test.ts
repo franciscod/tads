@@ -24,9 +24,9 @@ fs.readFileSync("tests/evals.txt", "utf-8")
     .forEach((line, n) => {
         line = line.split("--")[0];
         if (!line) return;
+        const parts = line.split(" = ");
 
-        it("parsea evals.txt:" + (n + 1) + ":" + line, () => {
-            const parts = line.split(" = ");
+        it(("parsea evals:" + (n + 1) + ":  " + parts[0]).padEnd(60) + " = " + parts[1].padStart(15), () => {
             const matches = parts.map(s => toExpr(s, grammar));
 
             matches.forEach(match => expect(match).not.toBeNull());
@@ -39,9 +39,9 @@ fs.readFileSync("tests/evals.txt", "utf-8")
     .forEach((line, n) => {
         line = line.split("--")[0];
         if (!line) return;
+        const parts = line.split(" = ");
 
-        it("eval evals.txt:" + (n + 1) + ":" + line, () => {
-            const parts = line.split(" = ");
+        it(("eval evals:" + (n + 1) + ":  " + parts[0]).padEnd(60) + " = " + parts[1].padStart(15), () => {
             const [exprL, exprR] = parts.map(s => toExpr(s, grammar));
 
             if(exprL && exprR)
