@@ -8,7 +8,7 @@ type OhmSourceResult = {
     grammar: ohm.Grammar;
     unaries: string[];
     fromAST: (expr: Expr) => string;
-}
+};
 
 function ohmGenGrammarSource(ops: Operacion[], variables: Map<Genero, string[]>): OhmSourceResult {
     const reglasParaExpr: string[] = [];
@@ -83,7 +83,7 @@ ${rules}
         source: grammarSource,
         grammar: ohm.grammar(grammarSource),
         unaries: unaryRuleNames,
-        fromAST
+        fromAST,
     };
 }
 
@@ -102,7 +102,7 @@ function auxAxiomasAST(tads: TAD[]): Axioma[] {
             const exprL = ohmToExpr(left, r);
             const exprR = ohmToExpr(right, r);
 
-            if(exprL === null || exprR === null) {
+            if (exprL === null || exprR === null) {
                 console.log("Axioma falló al parsearse", left);
                 continue;
             }
@@ -123,22 +123,21 @@ export function genGrammar(tads: TAD[]): Grammar {
 
     return {
         axiomas: axiomas,
-        backendGrammar: result
+        backendGrammar: result,
     };
 }
 
-function ohmToExpr(input:string, backend: OhmSourceResult): Expr | null {
+function ohmToExpr(input: string, backend: OhmSourceResult): Expr | null {
     const baseMapping: Record<string, any> = {};
-    backend.unaries.forEach(r => baseMapping[r] = undefined);
+    backend.unaries.forEach(r => (baseMapping[r] = undefined));
 
     const match = backend.grammar.match(input);
-    if(!match.succeeded()) {
+    if (!match.succeeded()) {
         return null;
     }
     // @ts-ignore
     return toAST(match, baseMapping);
 }
-
 
 export function toExpr(input: string, grammar: Grammar): Expr | null {
     return ohmToExpr(input, grammar.backendGrammar);

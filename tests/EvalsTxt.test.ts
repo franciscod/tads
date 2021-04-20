@@ -10,7 +10,7 @@ const NAT_TAD = fs.readFileSync("tads/nat.tad", "utf-8");
 const INT_TAD = fs.readFileSync("tads/int.tad", "utf-8");
 const CONJ_TAD = fs.readFileSync("tads/conj.tad", "utf-8");
 
-const [tads] = parseSource([BOOL_TAD, NAT_TAD, INT_TAD, CONJ_TAD].join('\n'));
+const [tads] = parseSource([BOOL_TAD, NAT_TAD, INT_TAD, CONJ_TAD].join("\n"));
 
 let grammar: Grammar;
 
@@ -44,7 +44,6 @@ fs.readFileSync("tests/evals.txt", "utf-8")
         it(("eval evals:" + (n + 1) + ":  " + parts[0]).padEnd(60) + " = " + parts[1].padStart(15), () => {
             const [exprL, exprR] = parts.map(s => toExpr(s, grammar));
 
-            if(exprL && exprR)
-                expect(evalGrammar(exprL, grammar)).toStrictEqual(exprR);
+            if (exprL && exprR) expect(evalGrammar(exprL, grammar)).toStrictEqual(exprR);
         });
     });
