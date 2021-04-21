@@ -33,11 +33,11 @@ axiomas ∀ n, m: nat, ∀ x, y: int
     |-n|          ≡ n
 
     +n + +m       ≡ +(n + m)
-    +n + -m       ≡ if m ≤ n then +(n − m) else -(m − n) fi
-    -n + +m       ≡ if n ≤ m then +(m − n) else -(n − m) fi
+    +n + -m       ≡ if m ≤ n then +(n - m) else -(m - n) fi
+    -n + +m       ≡ if n ≤ m then +(m - n) else -(n - m) fi
     -n + -m       ≡ -(n + m)
-     x − +n       ≡ if n =0? then x else x + -n fi
-     x − -n       ≡ x + +n
+     x - +n       ≡ if n =0? then x else x + -n fi
+     x - -n       ≡ x + +n
     +n × +m       ≡ +(n × m)
     +n × -m       ≡ if n =0? then +0 else -(n × m) fi
     -n × +m       ≡ if m =0? then +0 else -(n × m) fi
