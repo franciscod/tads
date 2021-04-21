@@ -1,6 +1,7 @@
-import {createToken, Lexer} from "chevrotain";
 import { Axioma, Expr, Genero, Grammar, Operacion, TAD } from "./Types";
 import { titleSlug } from "./Util";
+
+import { createToken, Lexer, CstParser } from "chevrotain";
 
 export function genGrammar(tads: TAD[]): Grammar {
     const ops = tads.reduce((p: Operacion[], c) => p.concat(c.operaciones), []);
@@ -23,7 +24,10 @@ export function fromExpr(expr: Expr, grammar: Grammar): string {
     return "lol"; //(grammar.backendGrammar as OhmSourceResult).fromAST(expr);
 }
 
-type ChevroContext = { lexer : any };
+type ChevroContext = {
+    lexer : any,
+//     parser : any,
+};
 
 function gen(ops: Operacion[], variables: Map<Genero, string[]>): ChevroContext {
     const whitespace = createToken({
@@ -37,12 +41,19 @@ function gen(ops: Operacion[], variables: Map<Genero, string[]>): ChevroContext 
 
     let allTokens = [whitespace, lparen, rparen];
 
+    let tokensDict : any = {
+        "WhiteSpace": whitespace,
+        "LParen": lparen,
+        "RParen": rparen,
+    };
+
     for (const op of ops) {
-        const opSlug = titleSlug(op.nombre);
+        const opSlug = titleSlug(op.tipo) + titleSlug(op.nombre);
         for (const tok of op.tokens) {
             if (tok.type == "literal") {
-                const literalToken = createToken({name: opSlug + titleSlug(tok.symbol), pattern: tok.symbol});
+                const literalToken = createToken({name: titleSlug(tok.symbol), pattern: tok.symbol});
                 allTokens.push(literalToken)
+                tokensDict[titleSlug(tok.symbol)] = literalToken;
             }
         }
     }
@@ -52,6 +63,7 @@ function gen(ops: Operacion[], variables: Map<Genero, string[]>): ChevroContext 
             const varName = "Var" + titleSlug(g) + titleSlug(n);
             const varToken = createToken({name: varName, pattern: n});
             allTokens.push(varToken)
+            tokensDict[varName] = varToken;
         });
     }
 
@@ -76,9 +88,49 @@ function gen(ops: Operacion[], variables: Map<Genero, string[]>): ChevroContext 
     // TODO: parser
 
     let lexer = new Lexer(allTokens)
+
+
+    let exprOr: any[] = [];
+
+    class BespokeParser extends CstParser {
+      constructor() {
+        super(allTokens)
+
+        const $: any = this
+
+    ops.forEach((op) => {
+            const opSlug = titleSlug(op.tipo) + titleSlug(op.nombre);
+            $.RULE(opSlug, () => {
+                op.tokens.forEach((tok, i) => {
+                    let s = i + '';
+                    if (i === 0) s = '';
+
+                    if (tok.type == "literal") {
+                        $['CONSUME' + s](tokensDict[titleSlug(tok.symbol)])
+                    } else if (tok.type == "slot") {
+                        $['SUBRULE' + s]($.expr);
+                    }
+                })
+            })
+            exprOr.unshift({nombrecin: opSlug, ALT : () => $.SUBRULE($[opSlug])})
+        })
+        console.log(exprOr);
+
+    $.RULE("expr", () => {
+        console.log($.input);
+    $.OR(exprOr);
+    })
+
+        this.performSelfAnalysis()
+      }
+    }
+
+    // const parser = new BespokeParser();
+
+
     return {
-        lexer
-    //parser: ohm.grammar(grammarSource),
+        lexer,
+    // parser,
     //   semanticFromAst:
     //   semanticPrint:
     };
@@ -86,8 +138,6 @@ function gen(ops: Operacion[], variables: Map<Genero, string[]>): ChevroContext 
 
 
 function auxAxiomasAST(tads: TAD[]): Axioma[] {
-    return [];
-
     let ret: Axioma[] = [];
 
     const opsTodos = tads.map(tad => tad.operaciones).reduce((ret, ops) => ret.concat(ops), []);
@@ -113,8 +163,17 @@ function auxAxiomasAST(tads: TAD[]): Axioma[] {
 }
 
 function toExprInternal(inputText: string, ctx: ChevroContext): Expr | null {
-    const tokens = ctx.lexer.tokenize(inputText);
-    // TODO: parse
+    const lexingResult = ctx.lexer.tokenize(inputText);
+    const tokens = lexingResult.tokens.map((t: any) => t.tokenType.name);
+    console.log("tokens", tokens);
+    // ctx.parser.input = lexingResult.tokens;
+    // console.log(ctx.parser.input)
+    // ctx.parser.expr()
+
+    // if (ctx.parser.errors.length > 0) {
+    //    return null;
+    // }
 
     return tokens;
+    //{"type": "algo hizo"};
 }

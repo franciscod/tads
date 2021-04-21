@@ -10,15 +10,19 @@ const NAT_TAD = fs.readFileSync("tads/nat.tad", "utf-8");
 const INT_TAD = fs.readFileSync("tads/int.tad", "utf-8");
 const CONJ_TAD = fs.readFileSync("tads/conj.tad", "utf-8");
 
-const [tads] = parseSource([BOOL_TAD,
-// NAT_TAD, INT_TAD, CONJ_TAD
-].join("\n"));
+const [tads] = parseSource(
+    [
+        BOOL_TAD,
+        // NAT_TAD, INT_TAD, CONJ_TAD
+    ].join("\n")
+);
 
 let grammar: Grammar;
 
 it("parsea los axiomas", () => {
     grammar = genGrammar(tads);
 });
+/*
 
 fs.readFileSync("tests/evals.txt", "utf-8")
     .replace(/\r\n/g, "\n")
@@ -34,8 +38,6 @@ fs.readFileSync("tests/evals.txt", "utf-8")
             matches.forEach(match => expect(match).not.toBeNull());
         });
     });
-
-/*
 fs.readFileSync("tests/evals.txt", "utf-8")
     .replace(/\r\n/g, "\n")
     .split("\n")
