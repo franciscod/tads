@@ -131,8 +131,22 @@ export function toExpr(input: string, grammar: Grammar): Expr | null {
     return process(input, (grammar.backendGrammar as CustomBackendData));
 }
 
+// TODO: ver que onda los parentesis que desambiguan
 export function fromExpr(expr: Expr, grammar: Grammar): string {
-    // TODO: ver que onda los parentesis
-    return "pepe";
+    const data = (grammar.backendGrammar as CustomBackendData);
+    const op = data.operaciones.find(op => op.nombre === expr.type);
+    if(!op) return "<ERROR>";
+
+    let buffer = "";
+    for(let i = 0; i < op.tokens.length; i++) {
+        const token = op.tokens[i];
+        if(token.type === 'literal') {
+            buffer += token.symbol;
+        } else {
+            buffer += fromExpr(expr[i], grammar);
+        }
+    }
+
+    return buffer;
 }
 
