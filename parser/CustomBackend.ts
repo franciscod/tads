@@ -1,4 +1,4 @@
-import { Axioma, Expr, Genero, Grammar, Operacion, TAD } from "./Types";
+import { Axioma, Expr, Genero, Grammar, Operacion, TAD, VariablesLibres } from "./Types";
 
 type CustomBackendData = {
     tads: TAD[];
@@ -10,11 +10,9 @@ function genAxiomas(data: CustomBackendData): Axioma[] {
     let axiomas: Axioma[] = [];
     
     for(const tad of data.tads) {
-        // tad.variablesLibres
-
         for (const [left, right] of tad.axiomas) {
-            const exprL = process(left, data);
-            const exprR = process(right, data);
+            const exprL = process(left, data, tad.variablesLibres);
+            const exprR = process(right, data, tad.variablesLibres);
 
             if (exprL === null) console.log("Axioma L falló al parsearse", left);
             if (exprR === null) console.log("Axioma R falló al parsearse", right);
@@ -66,7 +64,7 @@ export function genGrammar(tads: TAD[]): Grammar {
 // falta:
 // variables
 
-function process(input: string, data: CustomBackendData): Expr | null {
+function process(input: string, data: CustomBackendData, vars: VariablesLibres = { }): Expr | null {
     // console.log("===============================", input, "===============================");
     input = input.replace(/ /g, ""); // chau espacios
 
@@ -163,6 +161,18 @@ function process(input: string, data: CustomBackendData): Expr | null {
             }
         }
 
+        // variables
+        for(let varName in vars) {
+            if (input.startsWith(varName, index)) {
+                stack.push({
+                    type: 'Var_' + varName,
+                    genero: vars[varName]
+                });
+                index += varName.length;
+                continue forIndex;
+            }
+        }
+
         // si llego acá no pude consumir ningún token
         // console.log("SE ESPERABA TOKEN!");
         return null;
@@ -171,8 +181,8 @@ function process(input: string, data: CustomBackendData): Expr | null {
     return stack.length === 1 && typeof stack[0] !== "string" ? stack[0] : null;
 }
 
-export function toExpr(input: string, grammar: Grammar): Expr | null {
-    return process(input, grammar.backendGrammar as CustomBackendData);
+export function toExpr(input: string, grammar: Grammar, vars?: VariablesLibres): Expr | null {
+    return process(input, grammar.backendGrammar as CustomBackendData, vars);
 }
 
 // TODO: ver que onda los parentesis que desambiguan

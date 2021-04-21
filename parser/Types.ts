@@ -10,6 +10,7 @@ export type ParseReference = {
 };
 
 export type ExpresionLogica = any; // TODO
+export type VariablesLibres = { [varName: string]: Genero };
 
 export type Genero = string; // o es una variable (alpha, beta, etc) o es un tad especifico
 
@@ -42,7 +43,7 @@ export type TAD = {
     generos: string[];
     // exporta por ahora no
     operaciones: Operacion[];
-    variablesLibres: Map<Genero, string[]>;
+    variablesLibres: VariablesLibres,
     axiomas: RawAxioma[];
 } & ParseReference;
 
