@@ -1,4 +1,4 @@
-import { Expr, Grammar, Operacion, TAD } from "./Types";
+import { Expr, Genero, Grammar, Operacion, TAD } from "./Types";
 
 type CustomBackendData = {
     tads: TAD[];
@@ -58,6 +58,8 @@ function process(input: string, data: CustomBackendData): Expr | null {
 
             // armo expr por si termina siendo exitoso
             const expr: Expr = { type: op.nombre, genero: op.retorno };
+            // track para los templates (α)
+            let template: Genero | undefined = undefined;
 
             for (let i = 0; i < op.tokens.length; i++) {
                 const token = op.tokens[i];
@@ -76,15 +78,37 @@ function process(input: string, data: CustomBackendData): Expr | null {
                         continue forOp;
                     }
 
-                    const slot_expr = stack_elem as Expr;
                     // tiene que tener el mismo genero
-                    if (token.genero !== slot_expr.genero) {
-                        continue forOp;
+                    if(token.genero === 'α') {
+                        // el token es un género
+                        // entonces tengo que ver si matchea con el α
+                        // anterior o guardarlo si es nuevo
+                        if(template) {
+                            // ya había un α, me fijo que tengan el mismo género
+                            if(template !== stack_elem.genero) {
+                                // no matchea con el alpha anterior!
+                                continue forOp;
+                            }
+                        } else {
+                            // no hay α anterior, podemos setearlo
+                            template = stack_elem.genero;
+                        }
+                    } else {
+                        // son tipos definidos, hay que comparar
+                        if (token.genero !== stack_elem.genero) {
+                            continue forOp;
+                        }
                     }
 
                     // ta ok
-                    expr[i] = stack_elem as Expr;
+                    expr[i] = stack_elem;
                 }
+            }
+
+            // si el retorno es alpha y esta op retorna el alpha
+            // el género pasa a ser el asignado por alpha
+            if(op.retorno === 'α' && template) {
+                expr.genero = template;
             }
 
             stack = stack.slice(0, -op.tokens.length);
@@ -131,8 +155,8 @@ export function toExpr(input: string, grammar: Grammar): Expr | null {
 }
 
 // TODO: ver que onda los parentesis que desambiguan
-export function fromExpr(expr: Expr, grammar: Grammar): string {
-    const data = grammar.backendGrammar as CustomBackendData;
+
+function recFromExpr(expr: Expr, data: CustomBackendData): string {
     const op = data.operaciones.find(op => op.nombre === expr.type);
     if (!op) return "<ERROR>";
 
@@ -142,9 +166,14 @@ export function fromExpr(expr: Expr, grammar: Grammar): string {
         if (token.type === "literal") {
             buffer += token.symbol;
         } else {
-            buffer += fromExpr(expr[i], grammar);
+            buffer += ` ${recFromExpr(expr[i], data)} `;
         }
     }
 
     return buffer;
+}
+
+export function fromExpr(expr: Expr, grammar: Grammar): string {
+    const data = grammar.backendGrammar as CustomBackendData;
+    return recFromExpr(expr, data).replace(/\s+/g, " ").replace(/\( /g, "(").replace(/ \)/g, ")");
 }

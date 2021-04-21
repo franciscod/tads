@@ -39,8 +39,11 @@ for (const stmt of statements) {
 for (const stmt of statements) {
     it("stmt -> Expr -> stmt -> Expr --- " + stmt.padEnd(padSize), () => {
         const expr1 = toExpr(stmt, grammar);
+        expect(expr1).not.toBeNull();
         const stmt2 = fromExpr(expr1!, grammar);
+        expect(stmt2.length).toBeGreaterThan(0);
         const expr2 = toExpr(stmt2, grammar);
+        expect(expr2).not.toBeNull();
 
         expect(expr1).toStrictEqual(expr2);
     });
@@ -53,6 +56,9 @@ for (const stmt of statements) {
         const expr = toExpr(stmt, grammar);
         const expr_ref = toExpr_ref(stmt, ohmGrammar);
 
+        expect(expr).not.toBeNull();
+        expect(expr_ref).not.toBeNull();
+
         // genera un nuevo arbol de ohm sin los __${i}
         function cleanOhmExpr(ohmExpr: Expr): Expr {
             const result: Expr = { type: ohmExpr.type.split("__")[0] };
@@ -63,7 +69,7 @@ for (const stmt of statements) {
             return result;
         }
 
-        function typeToOhm(type: string) {
+        function typeToOhmType(type: string): string {
             const op = operaciones.find(op => op.nombre === type);
             if (!op) return "NULL";
             return [op.tipo, op.nombre].reduce((p, e) => p + titleSlug(e), "");
@@ -72,7 +78,7 @@ for (const stmt of statements) {
         // genera un nuevo arbol sin el genero y con los tipos
         // escritos en "formato de ohm"
         function cleanCustomExpr(expr: Expr): Expr {
-            const result: Expr = { type: typeToOhm(expr.type) };
+            const result: Expr = { type: typeToOhmType(expr.type) };
             for (const i in expr) {
                 if (i === "type" || i === "genero") continue;
                 result[i] = cleanCustomExpr(expr[i]);
