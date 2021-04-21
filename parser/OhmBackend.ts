@@ -35,9 +35,7 @@ function ohmGenGrammarSource(ops: Operacion[], variables: Map<Genero, string[]>)
     rules += ops
         .map((op, i) => {
             const ret: string = titleSlug(op.retorno);
-            const caseName = [op.tipo, op.nombre, `__${i}`].reduce((p, e) => {
-                return p + titleSlug(e);
-            }, "");
+            const caseName = [op.tipo, op.nombre, `__${i}`].reduce((p, e) => p + titleSlug(e), "");
 
             // TODO: hay que poner los infijos antes que los generadores
             reglasParaExpr.unshift(caseName);

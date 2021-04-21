@@ -1,9 +1,10 @@
 import fs from "fs";
 import { parseSource } from "../parser/Parser";
 
-import { Grammar } from "../parser/Types";
-import { genGrammar, toExpr } from "../parser/CustomBackend";
+import { Expr, Grammar, Operacion } from "../parser/Types";
+import { fromExpr, genGrammar, toExpr } from "../parser/CustomBackend";
 import { genGrammar as genGrammar_ref, toExpr as toExpr_ref } from "../parser/OhmBackend";
+import { titleSlug } from "../parser/Util";
 
 const BOOL_TAD = fs.readFileSync("tads/bool.tad", "utf-8");
 const NAT_TAD = fs.readFileSync("tads/nat.tad", "utf-8");
@@ -12,41 +13,72 @@ const CONJ_TAD = fs.readFileSync("tads/conj.tad", "utf-8");
 
 const [tads] = parseSource([BOOL_TAD, NAT_TAD, INT_TAD, CONJ_TAD].join('\n'));
 
-const grammar: Grammar = genGrammar(tads);;
-const refGrammar = genGrammar_ref(tads);
+const grammar: Grammar = genGrammar(tads);
+const ohmGrammar = genGrammar_ref(tads);
 
-fs.readFileSync("tests/evals.txt", "utf-8")
-    .replace(/\r\n/g, "\n")
-    .split("\n")
-    .forEach((line, n) => {
-        line = line.split("--")[0];
-        if (!line) return;
-        const parts = line.split(" = ");
-
-        it("matchea ref evals" + (n + 1).toString().padStart(3,'0') + ":  " + parts[0].padEnd(40) + " = " + parts[1].padStart(15), () => {
-            parts.forEach(p => expect(toExpr(p, grammar)).toStrictEqual(toExpr_ref(p, refGrammar)));
-        });
-    });
-
-/*
-const examples = [
-    'true',
-    'false',
-    'if true ∧ false then true else false fi',
-    'if if true then false else true fi then false else true fi',
-    'true ∧ false',
-    'true ∧ true ∧ true',
-    '0',
-    'suc(0)',
-    'suc(suc(0))',
-    '¬true',
-    '¬¬true',
-    'if true then false else true fi',
-    'if true then false else true fi ∧ if true then false else true fi',
+const statements: string[] = [
+    ...new Set(
+        fs.readFileSync("tests/evals.txt", "utf-8")
+        .replace(/\r\n/g, "\n")
+        .split("\n")
+        .map(l => l.split("--")[0])
+        .reduce((p: string[], c) => p.concat(c.split(" = ")), [])
+        .filter(p => p.length) // saco los vacíos
+    )
 ];
-for(const sample of examples) {
-    it("matchea con ref " + sample, () => {
-        expect(toExpr(sample, grammar)).toStrictEqual(toExpr_ref(sample, refGrammar));
+
+const padSize = statements.reduce((p, c) => Math.max(p, c.length), 0);
+
+it("vacio tiene que fallar", () => expect(toExpr("", grammar)).toBeNull());
+
+for(const stmt of statements) {
+    it("parsea --- " + stmt.padEnd(padSize), () => expect(toExpr(stmt, grammar)).not.toBeNull());
+}
+
+for(const stmt of statements) {
+    it("stmt -> Expr -> stmt -> Expr --- " + stmt.padEnd(padSize), () => {
+        const expr1 = toExpr(stmt, grammar);
+        const stmt2 = fromExpr(expr1!, grammar);
+        const expr2 = toExpr(stmt2, grammar);
+
+        expect(expr1).toStrictEqual(expr2);
     });
 }
-*/
+
+let operaciones = tads.reduce((p: Operacion[], c) => p.concat(c.operaciones), []);
+
+for(const stmt of statements) {
+    it("matchea ast ohm --- " + stmt.padEnd(padSize), () => {
+        const expr = toExpr(stmt, grammar);
+        const expr_ref = toExpr_ref(stmt, ohmGrammar);
+
+        // genera un nuevo arbol de ohm sin los __${i}
+        function cleanOhmExpr(ohmExpr: Expr): Expr {
+            const result: Expr = { type: ohmExpr.type.split("__")[0] };
+            for(let i in ohmExpr) {
+                if(i === 'type') continue;
+                result[i] = cleanOhmExpr(ohmExpr[i]);
+            }
+            return result;
+        }
+
+        function typeToOhm(type: string) {
+            const op = operaciones.find(op => op.nombre === type);
+            if(!op) return "NULL";
+            return [op.tipo, op.nombre].reduce((p, e) => p + titleSlug(e), "");
+        }
+
+        // genera un nuevo arbol sin el genero y con los tipos
+        // escritos en "formato de ohm"
+        function cleanCustomExpr(expr: Expr): Expr {
+            const result: Expr = { type: typeToOhm(expr.type) };
+            for(let i in expr) {
+                if(i === 'type' || i === 'genero') continue;
+                result[i] = cleanCustomExpr(expr[i]);
+            }
+            return result;
+        }
+
+        expect(cleanCustomExpr(expr!)).toStrictEqual(cleanOhmExpr(expr_ref!));
+    });
+}
