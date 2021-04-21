@@ -1,129 +1,138 @@
-import { Axioma, Expr, Genero, Grammar, Literal, Operacion, ParseReference, TAD } from "./Types";
-import { titleSlug } from "./Util";
+import { Expr, Grammar, Operacion, TAD } from "./Types";
 
 type CustomBackendData = {
-    tads: TAD[]
+    tads: TAD[],
+    tokens: string[],
+    operaciones: Operacion[]
 }
 
 export function genGrammar(tads: TAD[]): Grammar {
-    return {
-        axiomas: [],
-        backendGrammar: {
-            tads
+    let operaciones = tads.reduce((p: Operacion[], c) => p.concat(c.operaciones), []);
+
+    operaciones = operaciones.sort((a, b) => {
+        let slotsA = a.tokens.filter(t => t.type === 'slot').length;
+        let slotsB = b.tokens.filter(t => t.type === 'slot').length;
+        if(slotsA === slotsB) {
+            return b.tokens.length - a.tokens.length;
+        } else {
+            return slotsB - slotsA;
         }
-    };
-}
+    });
 
-// cosas:
-// |+0|: como está primero la operación |•| que +•, intenta generar una nueva operación usando el 2do
-//       "|" como apertura. Debería preferir cerrar una anteior? Filtrar ops? Veré
-// (0): los parentesis no funcionan actualmente
-
-function process(input: string, tads: TAD[]): Expr | null {
-    let stack: (Literal | Expr)[] = [];
-    let index = 0;
-    let k = 0;
-    forIndex: while(index < input.length || (stack.length > 1 || (stack.length === 1 && stack[0].type === 'literal'))) {
-        if(k++ > 500) {
-            console.log("F");
-            break;
-        }
-
-        for(const tad of tads) {
-            for(const op of tad.operaciones) {
-
-                // pruebo todos los corrimientos para esta operacion
-                // STACK (5): XXXXX
-                // TOKENS(3):   YYY    (matchea exactamente los ultimos 3 tokens)
-                //               YYY
-                //                YYY
-                //                 YYY (completamente nueva operacion) 
-                //                 ↑ k=0
-
-                const maxOff = Math.min(op.tokens.length, stack.length);
-                forOffset: for(let k = maxOff; k >= 0; k--) {
-                    // armo expr por si termina siendo exitoso
-                    const expr: Expr = { type: op.nombre, genero: op.retorno };
-
-                    // testear matches en el stack
-                    // intento matchear los más posibles en el stack,
-                    // si no matcheo uno acá (es obligatorio)
-                    // cancelo la búsqueda para este offset, no sirve
-                    let i = 0;
-                    for(; stack.length - k + i < stack.length; i++) {
-                        const token = op.tokens[i];
-                        const stack_elem = stack[stack.length - k + i];
-
-                        if(token.type === 'literal') {
-                            // si es un literal, tiene que matchear con lo que esta en el stack
-                            if(token === stack_elem) {
-                                // todo ok :)
-                                continue;
-                            } else {
-                                // :(
-                                // cancelar la busqueda para este offset
-                                continue forOffset;
-                            }
-                        }
-
-                        // este literal no coincide, bai
-                        if(stack_elem.type === 'literal') {
-                            continue forOffset;
-                        }
-
-                        // el token es un slot
-                        // checkear que el genero sea compatible
-                        if(token.genero !== (stack_elem as Expr).genero!) {
-                            // los generos no coinciden :(
-                            continue forOffset;
-                        }
-
-                        expr[i] = stack_elem;
-                    }
-
-                    if(i < op.tokens.length) {
-                        // si estoy aca le falta matchear algo
-
-                        // si lo siguiente a matchear es un literal,
-                        // me fijo si coincide
-                        //   si coincide, lo agrego al stack y sigo
-                        //   si no coincide este op+offset no funciona
-                        if(op.tokens[i].type === 'literal') {
-                            const symbol = (op.tokens[i] as Literal).symbol;
-                            if(input.startsWith(symbol, index)) {
-                                // agregamos el literal al stack
-                                stack.push(op.tokens[i]);
-                                index += symbol.length;
-                                continue forIndex;
-                            }
-                        }
-                        
-                        // si estoy acá falta matchear un slot
-                        // continúo...
-                        
-                    } else {
-                        // logró matchear todo, add to stack
-                        stack = stack.slice(0, -op.tokens.length);
-                        stack.push(expr);
-                        continue forIndex;
-                    }
-                }
+    const tokensSet = new Set<string>();
+    for(const op of operaciones) {
+        for(const token of op.tokens) {
+            if(token.type === 'literal') {
+                tokensSet.add(token.symbol);
             }
         }
     }
 
-    return stack.length > 0 ? stack[0] : null;
+    // TODO: orden por length es lo que queremos, o algo distinto?
+    const tokens = Array.from(tokensSet).sort((a, b) => b.length - a.length);
+    
+    return {
+        axiomas: [],
+        backendGrammar: {
+            tads,
+            tokens,
+            operaciones
+        }
+    };
 }
 
 
+// falta:
+// variables
+// alphas (templates)
+
+function process(input: string, data: CustomBackendData): Expr | null {
+    // console.log("===============================", input, "===============================");
+    input = input.replace(/ /g, ''); // chau espacios
+
+    let stack: (string | Expr)[] = [];
+    let index = 0;
+    forIndex: while(index < input.length || (stack.length > 1 || (stack.length === 1 && typeof stack[0] === 'string'))) {
+
+        // me fijo si matchea alguna operación la cola del stack
+        forOp: for(const op of data.operaciones) {
+            if(stack.length < op.tokens.length)
+                continue;
+
+            // armo expr por si termina siendo exitoso
+            const expr: Expr = { type: op.nombre, genero: op.retorno };
+
+            for(let i = 0; i < op.tokens.length; i++) {
+                const token = op.tokens[i];
+                const stack_elem = stack[stack.length - op.tokens.length + i];
+                
+                if(token.type === 'literal') {
+                    // tiene que matchear exacto el chirimbolo
+                    if(stack_elem !== token.symbol) {
+                        continue forOp;
+                    }
+                    // chirimobolo ok :)
+                } else { // token.type === 'slot'
+                    // tiene que ser un Expr
+                    if(typeof stack_elem === 'string') {
+                        continue forOp;
+                    }
+                    
+                    const slot_expr = stack_elem as Expr;
+                    // tiene que tener el mismo genero
+                    if(token.genero !== slot_expr.genero) {
+                        continue forOp;
+                    }
+
+                    // ta ok
+                    expr[i] = stack_elem as Expr;
+                }
+            }
+
+            stack = stack.slice(0, -op.tokens.length);
+            stack.push(expr);
+            continue forIndex;
+        }
+
+        // como parentesis (ya sé que no matcheo ninguna op)
+        // si en el stack hay "(" + expr + ")"
+        // entonces borro los literales de los paréntesis
+        if(stack.length >= 3 &&
+            stack[stack.length - 1] === ')' &&
+            stack[stack.length - 3] === '(' &&
+            typeof stack[stack.length - 2] !== 'string' // EXPR
+        ) {
+            stack.pop();
+            const expr = stack.pop();
+            stack.pop();
+            stack.push(expr!);
+            continue forIndex;
+        }
+
+        // como el proximo token
+        for(const token of data.tokens) {
+            if(input.startsWith(token, index)) {
+                // console.log("Matchea token", token);
+                stack.push(token);
+                index += token.length;
+                continue forIndex;
+            }
+        }
+
+        // si llego acá no pude consumir ningún token
+        // console.log("SE ESPERABA TOKEN!");
+        return null;
+    }
+
+    return stack.length === 1 && typeof stack[0] !== 'string' ? stack[0] : null;
+}
+
 export function toExpr(input: string, grammar: Grammar): Expr | null {
-    console.log("===============================", input, "===============================");
-    debugger;
-    const expr = process(input.replace(/ /g, ''), (grammar.backendGrammar as CustomBackendData).tads);
-    console.log("Result EXPR", expr);
-    return expr;
+    return process(input, (grammar.backendGrammar as CustomBackendData));
 }
 
 export function fromExpr(expr: Expr, grammar: Grammar): string {
+    // TODO: ver que onda los parentesis
     return "pepe";
 }
+
