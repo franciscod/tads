@@ -52,7 +52,7 @@ function gen(ops: Operacion[], variables: Map<Genero, string[]>): ChevroContext 
         for (const tok of op.tokens) {
             if (tok.type == "literal") {
                 const literalToken = createToken({name: titleSlug(tok.symbol), pattern: tok.symbol});
-                allTokens.push(literalToken)
+                allTokens.unshift(literalToken)
                 tokensDict[titleSlug(tok.symbol)] = literalToken;
             }
         }
@@ -165,6 +165,7 @@ function auxAxiomasAST(tads: TAD[]): Axioma[] {
 function toExprInternal(inputText: string, ctx: ChevroContext): Expr | null {
     const lexingResult = ctx.lexer.tokenize(inputText);
     const tokens = lexingResult.tokens.map((t: any) => t.tokenType.name);
+    console.log("input", inputText);
     console.log("tokens", tokens);
     // ctx.parser.input = lexingResult.tokens;
     // console.log(ctx.parser.input)
