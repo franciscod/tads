@@ -1,4 +1,4 @@
-import { Expr, Genero, Grammar, Operacion, TAD } from "./Types";
+import { Axioma, Expr, Genero, Grammar, Operacion, TAD } from "./Types";
 
 type CustomBackendData = {
     tads: TAD[];
@@ -6,6 +6,26 @@ type CustomBackendData = {
     operaciones: Operacion[];
 };
 
+function genAxiomas(data: CustomBackendData): Axioma[] {
+    let axiomas: Axioma[] = [];
+    
+    for(const tad of data.tads) {
+        // tad.variablesLibres
+
+        for (const [left, right] of tad.axiomas) {
+            const exprL = process(left, data);
+            const exprR = process(right, data);
+
+            if (exprL === null) console.log("Axioma L falló al parsearse", left);
+            if (exprR === null) console.log("Axioma R falló al parsearse", right);
+
+            if(exprL && exprR)
+                axiomas.push([exprL, exprR]);
+        }
+    }
+
+    return axiomas;
+}
 export function genGrammar(tads: TAD[]): Grammar {
     let operaciones = tads.reduce((p: Operacion[], c) => p.concat(c.operaciones), []);
 
@@ -31,19 +51,20 @@ export function genGrammar(tads: TAD[]): Grammar {
     // TODO: orden por length es lo que queremos, o algo distinto?
     const tokens = Array.from(tokensSet).sort((a, b) => b.length - a.length);
 
+    const data: CustomBackendData = {
+        tads,
+        tokens,
+        operaciones,
+    };
+
     return {
-        axiomas: [],
-        backendGrammar: {
-            tads,
-            tokens,
-            operaciones,
-        },
+        axiomas: genAxiomas(data),
+        backendGrammar: data,
     };
 }
 
 // falta:
 // variables
-// alphas (templates)
 
 function process(input: string, data: CustomBackendData): Expr | null {
     // console.log("===============================", input, "===============================");
@@ -94,7 +115,7 @@ function process(input: string, data: CustomBackendData): Expr | null {
                             template = stack_elem.genero;
                         }
                     } else {
-                        // son tipos definidos, hay que comparar
+                        // son tipos definidos, hay que asegurarse que tengan el mismo genero
                         if (token.genero !== stack_elem.genero) {
                             continue forOp;
                         }
@@ -116,8 +137,8 @@ function process(input: string, data: CustomBackendData): Expr | null {
             continue forIndex;
         }
 
-        // como parentesis (ya sé que no matcheo ninguna op)
-        // si en el stack hay "(" + expr + ")"
+        // consumo parentesis (ya sé que no matcheo ninguna op)
+        // si en el stack hay "(", Expr, ")"
         // entonces borro los literales de los paréntesis
         if (
             stack.length >= 3 &&
@@ -132,7 +153,7 @@ function process(input: string, data: CustomBackendData): Expr | null {
             continue forIndex;
         }
 
-        // como el proximo token
+        // consumo el proximo token
         for (const token of data.tokens) {
             if (input.startsWith(token, index)) {
                 // console.log("Matchea token", token);
@@ -170,7 +191,7 @@ function recFromExpr(expr: Expr, data: CustomBackendData): string {
         }
     }
 
-    return buffer;
+    return `(${buffer})`;
 }
 
 export function fromExpr(expr: Expr, grammar: Grammar): string {
