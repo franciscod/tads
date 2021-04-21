@@ -48,7 +48,7 @@ export type TAD = {
 
 export type Eval = { expr: string } & ParseReference;
 
-export type Expr = { type: string, [key: number]: Expr };
+export type Expr = { type: string, genero?: Genero, [key: number]: Expr };
 
 export type Axioma = [Expr, Expr];
 

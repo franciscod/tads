@@ -99,6 +99,7 @@ export function parseOperacion(
     const args = _args
         .split(/×|✕/)
         .map(arg => arg.trim())
+        .map(arg => arg.split(' ')[0]) // TODO: esto saca los nombres de las variables! ej: "nat n"
         .filter(arg => arg !== "");
     let ithSlot = 0;
 
