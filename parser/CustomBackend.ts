@@ -23,6 +23,7 @@ function genAxiomas(data: CustomBackendData): Axioma[] {
 
     return axiomas;
 }
+
 export function genGrammar(tads: TAD[]): Grammar {
     let operaciones = tads.reduce((p: Operacion[], c) => p.concat(c.operaciones), []);
 
@@ -60,16 +61,13 @@ export function genGrammar(tads: TAD[]): Grammar {
     };
 }
 
-// falta:
-// variables
-
 function process(input: string, data: CustomBackendData, vars: VariablesLibres = {}): Expr | null {
     // console.log("===============================", input, "===============================");
-    input = input.replace(/ /g, ""); // chau espacios
+    input = input.trimEnd();
 
     let stack: (string | Expr)[] = [];
     let index = 0;
-    forIndex: while (index < input.length || stack.length > 1 || (stack.length === 1 && typeof stack[0] === "string")) {
+    whileIdx: while (index < input.length || stack.length > 1 || (stack.length === 1 && typeof stack[0] === "string")) {
         // me fijo si matchea alguna operación la cola del stack
         forOp: for (const op of data.operaciones) {
             if (stack.length < op.tokens.length) continue;
@@ -131,7 +129,7 @@ function process(input: string, data: CustomBackendData, vars: VariablesLibres =
 
             stack = stack.slice(0, -op.tokens.length);
             stack.push(expr);
-            continue forIndex;
+            continue whileIdx;
         }
 
         // consumo parentesis (ya sé que no matcheo ninguna op)
@@ -147,7 +145,7 @@ function process(input: string, data: CustomBackendData, vars: VariablesLibres =
             const expr = stack.pop();
             stack.pop();
             stack.push(expr!);
-            continue forIndex;
+            continue whileIdx;
         }
 
         // variables si ninguna op parseó el último token
@@ -159,10 +157,14 @@ function process(input: string, data: CustomBackendData, vars: VariablesLibres =
                         type: "Var_" + varName,
                         genero: vars[varName],
                     });
-                    continue forIndex;
+                    continue whileIdx;
                 }
             }
         }
+
+        // consumir whitespace
+        while(index < input.length && (input[index] === ' ' || input[index] === '\t'))
+            index++;
 
         // consumo el proximo token
         for (const token of data.tokens) {
@@ -170,7 +172,7 @@ function process(input: string, data: CustomBackendData, vars: VariablesLibres =
                 // console.log("Matchea token", token);
                 stack.push(token);
                 index += token.length;
-                continue forIndex;
+                continue whileIdx;
             }
         }
 
@@ -179,7 +181,7 @@ function process(input: string, data: CustomBackendData, vars: VariablesLibres =
             if (input.startsWith(varName, index)) {
                 stack.push(varName);
                 index += varName.length;
-                continue forIndex;
+                continue whileIdx;
             }
         }
 
@@ -192,11 +194,8 @@ function process(input: string, data: CustomBackendData, vars: VariablesLibres =
 }
 
 export function toExpr(input: string, grammar: Grammar, vars?: VariablesLibres): Expr | null {
-    debugger;
     return process(input, grammar.backendGrammar as CustomBackendData, vars);
 }
-
-// TODO: ver que onda los parentesis que desambiguan
 
 function recFromExpr(expr: Expr, data: CustomBackendData): string {
     const op = data.operaciones.find(op => op.nombre === expr.type);
@@ -212,6 +211,8 @@ function recFromExpr(expr: Expr, data: CustomBackendData): string {
         }
     }
 
+    // TODO: ver que onda los parentesis que desambiguan
+    //       tratar de ponerlos solo cuando son necesarios
     return `(${buffer})`;
 }
 
