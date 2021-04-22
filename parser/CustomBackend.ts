@@ -151,6 +151,20 @@ function process(input: string, data: CustomBackendData, vars: VariablesLibres =
             continue forIndex;
         }
 
+        // variables si ninguna op parseó el último token
+        if(stack.length > 0) {
+            for(let varName in vars) {
+                if (varName === stack[stack.length - 1]) {
+                    stack.pop();
+                    stack.push({
+                        type: 'Var_' + varName,
+                        genero: vars[varName]
+                    });
+                    continue forIndex;
+                }
+            }
+        }
+
         // consumo el proximo token
         for (const token of data.tokens) {
             if (input.startsWith(token, index)) {
@@ -161,13 +175,10 @@ function process(input: string, data: CustomBackendData, vars: VariablesLibres =
             }
         }
 
-        // variables
+        // token de variables
         for(let varName in vars) {
             if (input.startsWith(varName, index)) {
-                stack.push({
-                    type: 'Var_' + varName,
-                    genero: vars[varName]
-                });
+                stack.push(varName);
                 index += varName.length;
                 continue forIndex;
             }
