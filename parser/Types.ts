@@ -43,7 +43,7 @@ export type TAD = {
     generos: string[];
     // exporta por ahora no
     operaciones: Operacion[];
-    variablesLibres: VariablesLibres,
+    variablesLibres: VariablesLibres;
     axiomas: RawAxioma[];
 } & ParseReference;
 

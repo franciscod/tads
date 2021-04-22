@@ -7,9 +7,9 @@ type CustomBackendData = {
 };
 
 function genAxiomas(data: CustomBackendData): Axioma[] {
-    let axiomas: Axioma[] = [];
-    
-    for(const tad of data.tads) {
+    const axiomas: Axioma[] = [];
+
+    for (const tad of data.tads) {
         for (const [left, right] of tad.axiomas) {
             const exprL = process(left, data, tad.variablesLibres);
             const exprR = process(right, data, tad.variablesLibres);
@@ -17,8 +17,7 @@ function genAxiomas(data: CustomBackendData): Axioma[] {
             if (exprL === null) console.log("Axioma L falló al parsearse", left, tad.variablesLibres);
             if (exprR === null) console.log("Axioma R falló al parsearse", right, tad.variablesLibres);
 
-            if(exprL && exprR)
-                axiomas.push([exprL, exprR]);
+            if (exprL && exprR) axiomas.push([exprL, exprR]);
         }
     }
 
@@ -64,7 +63,7 @@ export function genGrammar(tads: TAD[]): Grammar {
 // falta:
 // variables
 
-function process(input: string, data: CustomBackendData, vars: VariablesLibres = { }): Expr | null {
+function process(input: string, data: CustomBackendData, vars: VariablesLibres = {}): Expr | null {
     // console.log("===============================", input, "===============================");
     input = input.replace(/ /g, ""); // chau espacios
 
@@ -98,13 +97,13 @@ function process(input: string, data: CustomBackendData, vars: VariablesLibres =
                     }
 
                     // tiene que tener el mismo genero
-                    if(token.genero === 'α') {
+                    if (token.genero === "α") {
                         // el token es un género
                         // entonces tengo que ver si matchea con el α
                         // anterior o guardarlo si es nuevo
-                        if(template) {
+                        if (template) {
                             // ya había un α, me fijo que tengan el mismo género
-                            if(template !== stack_elem.genero) {
+                            if (template !== stack_elem.genero) {
                                 // no matchea con el alpha anterior!
                                 continue forOp;
                             }
@@ -126,7 +125,7 @@ function process(input: string, data: CustomBackendData, vars: VariablesLibres =
 
             // si el retorno es alpha y esta op retorna el alpha
             // el género pasa a ser el asignado por alpha
-            if(op.retorno === 'α' && template) {
+            if (op.retorno === "α" && template) {
                 expr.genero = template;
             }
 
@@ -152,13 +151,13 @@ function process(input: string, data: CustomBackendData, vars: VariablesLibres =
         }
 
         // variables si ninguna op parseó el último token
-        if(stack.length > 0) {
-            for(let varName in vars) {
+        if (stack.length > 0) {
+            for (const varName in vars) {
                 if (varName === stack[stack.length - 1]) {
                     stack.pop();
                     stack.push({
-                        type: 'Var_' + varName,
-                        genero: vars[varName]
+                        type: "Var_" + varName,
+                        genero: vars[varName],
                     });
                     continue forIndex;
                 }
@@ -176,7 +175,7 @@ function process(input: string, data: CustomBackendData, vars: VariablesLibres =
         }
 
         // token de variables
-        for(let varName in vars) {
+        for (const varName in vars) {
             if (input.startsWith(varName, index)) {
                 stack.push(varName);
                 index += varName.length;

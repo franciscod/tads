@@ -21,7 +21,7 @@ function ohmGenGrammarSource(ops: Operacion[], variables: VariablesLibres): OhmS
     let rules = "";
 
     const varTerms: string[] = [];
-    for(let n in variables) {
+    for (const n in variables) {
         const genVar = "Var" + titleSlug(variables[n]) + titleSlug(n);
         rules += `${genVar} = "${n}"\n`;
         varTerms.push(genVar);
@@ -114,7 +114,7 @@ function auxAxiomasAST(tads: TAD[]): Axioma[] {
 
 export function genGrammar(tads: TAD[]): Grammar {
     const ops = tads.reduce((p: Operacion[], c) => p.concat(c.operaciones), []);
-    const result = ohmGenGrammarSource(ops, { });
+    const result = ohmGenGrammarSource(ops, {});
     const axiomas = auxAxiomasAST(tads);
 
     return {

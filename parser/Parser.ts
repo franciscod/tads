@@ -41,7 +41,7 @@ export function parseExpresionLogica(input: string, context?: ParseContext): Exp
 
 export function parseVarLibres(input: string, context?: ParseContext): VariablesLibres {
     //context?.hints?.addMark('info', 'variables libres', context.range);
-    const result: VariablesLibres = { };
+    const result: VariablesLibres = {};
 
     input
         .split("∀")
@@ -54,8 +54,7 @@ export function parseVarLibres(input: string, context?: ParseContext): Variables
                 .filter(v => v.length);
             gen = gen.replace(/,/g, "").trim();
 
-            for(let _var of vars)
-                result[_var] = gen;
+            for (const _var of vars) result[_var] = gen;
         });
 
     return result;
@@ -160,7 +159,7 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
         nombre: "",
         generos: [],
         operaciones: [],
-        variablesLibres: { },
+        variablesLibres: {},
         axiomas: [],
         range: context?.range,
     };
