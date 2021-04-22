@@ -30,7 +30,7 @@ otras operaciones
     -- en el apunte de tads basicos esta en bool
     β       : bool          → nat
 
-axiomas ∀ n, m: nat
+axiomas ∀ n, m: nat, ∀ b: bool
     0 =0?        ≡ true
     suc(n) =0?   ≡ false
     pred(suc(n)) ≡ n
@@ -44,6 +44,6 @@ axiomas ∀ n, m: nat
     máx(n, m)    ≡ if m < n then n else m fi
 
     -- en el apunte de tads basicos esta en bool
-    β(n)         ≡ if n then suc(0) else 0 fi
+    β(b)         ≡ if b then suc(0) else 0 fi
 
 Fin TAD
