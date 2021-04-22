@@ -1,8 +1,7 @@
-import fs from "fs";
 import { parseTad } from "../parser/Parser";
 import { Slot, TAD, Token } from "../parser/Types";
 
-const BOOL_TAD = fs.readFileSync("tads/bool.tad", "utf-8");
+import { BOOL_TAD } from "./Common";
 
 function generosDeSlots(tokens: Token[]): string[] {
     return tokens

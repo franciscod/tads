@@ -20,12 +20,6 @@ monaco.languages.setMonarchTokensProvider("tad", {
     },
 });
 
-monaco.languages.setLanguageConfiguration("tad", {
-    comments: {
-        lineComment: "--",
-    },
-});
-
 monaco.editor.defineTheme("tad-dark", {
     base: "vs-dark",
     inherit: true,

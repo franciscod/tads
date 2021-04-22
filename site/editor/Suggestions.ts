@@ -73,3 +73,9 @@ monaco.languages.registerCompletionItemProvider("tad", {
         return { suggestions: suggestions };
     },
 });
+
+monaco.languages.setLanguageConfiguration("tad", {
+    comments: {
+        lineComment: "--",
+    },
+});

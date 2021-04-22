@@ -13,6 +13,8 @@ export function evalGrammar(expr: Expr, grammar: Grammar): Expr {
 export function evalStep(expr: Expr, grammar: Grammar): [boolean, Expr] {
     const axiomasEnRaiz = grammar.axiomas.filter(a => a[0].type === expr.type);
 
+    if (axiomasEnRaiz.length === 0) return [false, { type: "bad" }];
+
     forAxiomaEnRaiz: for (const [left, right] of axiomasEnRaiz) {
         // console.log("expr", expr)
         // console.log("left", left)

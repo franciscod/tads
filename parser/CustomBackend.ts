@@ -14,8 +14,8 @@ function genAxiomas(data: CustomBackendData): Axioma[] {
             const exprL = process(left, data, tad.variablesLibres);
             const exprR = process(right, data, tad.variablesLibres);
 
-            if (exprL === null) console.log("Axioma L falló al parsearse", left, tad.variablesLibres);
-            if (exprR === null) console.log("Axioma R falló al parsearse", right, tad.variablesLibres);
+            if (exprL === null) console.log("Axioma L falló al parsearse", left/*, tad.variablesLibres*/);
+            if (exprR === null) console.log("Axioma R falló al parsearse", right/*, tad.variablesLibres*/);
 
             if (exprL && exprR) axiomas.push([exprL, exprR]);
         }
@@ -163,8 +163,7 @@ function process(input: string, data: CustomBackendData, vars: VariablesLibres =
         }
 
         // consumir whitespace
-        while(index < input.length && (input[index] === ' ' || input[index] === '\t'))
-            index++;
+        while (index < input.length && (input[index] === " " || input[index] === "\t")) index++;
 
         // consumo el proximo token
         for (const token of data.tokens) {

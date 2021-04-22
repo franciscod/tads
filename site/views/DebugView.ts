@@ -1,5 +1,5 @@
 import { Genero, Operacion, TAD, Token } from "../../parser/Types";
-import { genGrammar } from "../../parser/OhmBackend";
+import { genGrammar } from "../../parser/CustomBackend";
 
 const generateGeneroTag = (genero: Genero): string => {
     return `<span class="keyword genero">${genero}</span>`;
