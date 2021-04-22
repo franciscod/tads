@@ -14,8 +14,8 @@ function genAxiomas(data: CustomBackendData): Axioma[] {
             const exprL = process(left, data, tad.variablesLibres);
             const exprR = process(right, data, tad.variablesLibres);
 
-            if (exprL === null) console.log("Axioma L falló al parsearse", left);
-            if (exprR === null) console.log("Axioma R falló al parsearse", right);
+            if (exprL === null) console.log("Axioma L falló al parsearse", left, tad.variablesLibres);
+            if (exprR === null) console.log("Axioma R falló al parsearse", right, tad.variablesLibres);
 
             if(exprL && exprR)
                 axiomas.push([exprL, exprR]);
@@ -193,6 +193,7 @@ function process(input: string, data: CustomBackendData, vars: VariablesLibres =
 }
 
 export function toExpr(input: string, grammar: Grammar, vars?: VariablesLibres): Expr | null {
+    debugger;
     return process(input, grammar.backendGrammar as CustomBackendData, vars);
 }
 

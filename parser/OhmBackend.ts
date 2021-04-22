@@ -99,7 +99,7 @@ function auxAxiomasAST(tads: TAD[]): Axioma[] {
             const exprR = ohmToExpr(right, r);
 
             if (exprL === null || exprR === null) {
-                console.log("Axioma falló al parsearse", left);
+                // console.log("Axioma falló al parsearse", left);
                 continue;
             }
 
