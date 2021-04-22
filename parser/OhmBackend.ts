@@ -14,7 +14,7 @@ function ohmGenGrammarSource(ops: Operacion[], variables: VariablesLibres): OhmS
     const reglasParaExpr: string[] = [];
     const printMapping: { [key: string]: (ast: Expr) => string } = {};
     const fromAST = (ast: Expr): string => {
-        return printMapping[ast.type](ast).replace(/\s+/g, " ").replace(/\( /g, "(").replace(/ \)/g, ")");
+        return printMapping[ast.nombre](ast).replace(/\s+/g, " ").replace(/\( /g, "(").replace(/ \)/g, ")");
     };
 
     const unaryRuleNames: string[] = [];
@@ -53,7 +53,7 @@ function ohmGenGrammarSource(ops: Operacion[], variables: VariablesLibres): OhmS
                 return op.tokens
                     .map((tok, i) => {
                         if (tok.type == "literal") return tok.symbol;
-                        if (tok.type == "slot") return ` ${printMapping[ast[i].type](ast[i])} `;
+                        if (tok.type == "slot") return ` ${printMapping[ast[i].nombre](ast[i])} `;
                     })
                     .join("");
             };

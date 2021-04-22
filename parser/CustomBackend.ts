@@ -14,8 +14,8 @@ function genAxiomas(data: CustomBackendData): Axioma[] {
             const exprL = process(left, data, tad.variablesLibres);
             const exprR = process(right, data, tad.variablesLibres);
 
-            if (exprL === null) console.log("Axioma L falló al parsearse", left/*, tad.variablesLibres*/);
-            if (exprR === null) console.log("Axioma R falló al parsearse", right/*, tad.variablesLibres*/);
+            if (exprL === null) console.log("Axioma L falló al parsearse", left /*, tad.variablesLibres*/);
+            if (exprR === null) console.log("Axioma R falló al parsearse", right /*, tad.variablesLibres*/);
 
             if (exprL && exprR) axiomas.push([exprL, exprR]);
         }
@@ -73,7 +73,7 @@ function process(input: string, data: CustomBackendData, vars: VariablesLibres =
             if (stack.length < op.tokens.length) continue;
 
             // armo expr por si termina siendo exitoso
-            const expr: Expr = { type: op.nombre, genero: op.retorno };
+            const expr: Expr = { tipo: "fijo", nombre: op.nombre, genero: op.retorno };
             // track para los templates (α)
             let template: Genero | undefined = undefined;
 
@@ -154,7 +154,8 @@ function process(input: string, data: CustomBackendData, vars: VariablesLibres =
                 if (varName === stack[stack.length - 1]) {
                     stack.pop();
                     stack.push({
-                        type: "Var_" + varName,
+                        tipo: "variable",
+                        nombre: varName,
                         genero: vars[varName],
                     });
                     continue whileIdx;
@@ -197,7 +198,7 @@ export function toExpr(input: string, grammar: Grammar, vars?: VariablesLibres):
 }
 
 function recFromExpr(expr: Expr, data: CustomBackendData): string {
-    const op = data.operaciones.find(op => op.nombre === expr.type);
+    const op = data.operaciones.find(op => op.nombre === expr.nombre);
     if (!op) return "<ERROR>";
 
     let buffer = "";

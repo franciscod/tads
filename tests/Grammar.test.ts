@@ -49,12 +49,17 @@ for (const stmt of STATEMENTS) {
         expect(expr).not.toBeNull();
         expect(expr_ref).not.toBeNull();
 
+        type ArbolAComparar = {
+            nombre: string;
+            [index: number]: ArbolAComparar;
+        };
+
         // genera un nuevo arbol de ohm sin los __${i}
-        function cleanOhmExpr(ohmExpr: Expr): Expr {
-            const result: Expr = { type: ohmExpr.type.split("__")[0] };
+        function cleanOhmExpr(ohmExpr: any): ArbolAComparar {
+            const result: ArbolAComparar = { nombre: ohmExpr.type.split("__")[0] };
             for (const i in ohmExpr) {
                 if (i === "type") continue;
-                result[i] = cleanOhmExpr(ohmExpr[i]);
+                result[(i as unknown) as number] = cleanOhmExpr(ohmExpr[i]);
             }
             return result;
         }
@@ -67,10 +72,10 @@ for (const stmt of STATEMENTS) {
 
         // genera un nuevo arbol sin el genero y con los tipos
         // escritos en "formato de ohm"
-        function cleanCustomExpr(expr: Expr): Expr {
-            const result: Expr = { type: typeToOhmType(expr.type) };
+        function cleanCustomExpr(expr: Expr): ArbolAComparar {
+            const result: ArbolAComparar = { nombre: typeToOhmType(expr.nombre) };
             for (const i in expr) {
-                if (i === "type" || i === "genero") continue;
+                if (i === "tipo" || i === "nombre" || i === "genero") continue;
                 result[i] = cleanCustomExpr(expr[i]);
             }
             return result;
