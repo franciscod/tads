@@ -1,4 +1,4 @@
-import { Axioma, Expr, Grammar } from "../parser/Types";
+import { Expr, Grammar } from "../parser/Types";
 
 export function evalGrammar(expr: Expr, grammar: Grammar): Expr {
     let run = true;
@@ -11,7 +11,7 @@ export function evalGrammar(expr: Expr, grammar: Grammar): Expr {
 }
 
 export function evalStep(expr: Expr, grammar: Grammar): [boolean, Expr] {
-    const axiomasEnRaiz = grammar.axiomas.filter(a => a[0].type === expr.type);
+    const axiomasEnRaiz = grammar.axiomas.filter(a => a[0].nombre === expr.nombre);
 
     forAxiomaEnRaiz: for (const [left, right] of axiomasEnRaiz) {
         // console.log("expr", expr)
@@ -61,7 +61,7 @@ export function evalStep(expr: Expr, grammar: Grammar): [boolean, Expr] {
     }
 
     for (const child in expr) {
-        if (child === "type") continue;
+        if (child === "tipo" || child === "nombre" || child === "genero") continue;
         const [evaluoAlgo, sub] = evalStep(expr[child], grammar);
         if (evaluoAlgo) {
             ret[child] = sub;
@@ -74,15 +74,15 @@ export function evalStep(expr: Expr, grammar: Grammar): [boolean, Expr] {
 }
 
 function reemplazar(expr: Expr, bindings: Map<string, Expr>): [boolean, Expr] {
-    if (bindings.has(expr.type)) {
-        return [true, bindings.get(expr.type)!];
+    if (bindings.has(expr.nombre)) {
+        return [true, bindings.get(expr.nombre)!];
     }
 
-    const ret: Expr = { type: expr.type };
+    const ret: Expr = { tipo: expr.tipo, nombre: expr.nombre, genero: expr.genero };
     let hizoAlgo = false;
 
     for (const child in expr) {
-        if (child === "type") continue;
+        if (child === "tipo" || child === "nombre" || child === "genero") continue;
         const [seReemplazo, sub] = reemplazar(expr[child], bindings);
         ret[child] = sub;
         hizoAlgo = hizoAlgo || seReemplazo;
@@ -92,17 +92,18 @@ function reemplazar(expr: Expr, bindings: Map<string, Expr>): [boolean, Expr] {
 }
 
 function tienenLaMismaFormaSalvoVariables(template: Expr, expr: Expr): boolean {
-    if (template.type.startsWith("Var")) {
+    if (template.tipo === "variable") {
         return true;
     }
 
-    if (template.type !== expr.type) return false;
+    // TODO: ver también el genero
+    if (template.nombre !== expr.nombre || template.tipo !== expr.tipo) return false;
 
     // son el mismo tipo, tienen la misma forma en la raiz
     // tienen los mismos hijos
 
     for (const child in template) {
-        if (child === "type") continue;
+        if (child === "tipo" || child === "nombre" || child === "genero") continue;
         if (!tienenLaMismaFormaSalvoVariables(template[child], expr[child])) return false;
     }
 
@@ -110,13 +111,13 @@ function tienenLaMismaFormaSalvoVariables(template: Expr, expr: Expr): boolean {
 }
 
 function conseguirBindings(template: Expr, expr: Expr, bindings: Map<string, Expr>): Map<string, Expr> {
-    if (template.type.startsWith("Var")) {
-        bindings.set(template.type, expr);
+    if (template.tipo === "variable") {
+        bindings.set(template.nombre, expr);
         return bindings;
     }
 
     for (const child in expr) {
-        if (child === "type") continue;
+        if (child === "tipo" || child === "nombre" || child === "genero") continue;
         bindings = conseguirBindings(template[child], expr[child], bindings);
     }
 
@@ -124,10 +125,10 @@ function conseguirBindings(template: Expr, expr: Expr, bindings: Map<string, Exp
 }
 
 function contieneVariables(expr: Expr): boolean {
-    if (expr.type.startsWith("Var")) return true;
+    if (expr.tipo === "variable") return true;
 
     for (const child in expr) {
-        if (child === "type") continue;
+        if (child === "tipo" || child === "nombre" || child === "genero") continue;
         if (contieneVariables(expr[child])) return true;
     }
 

@@ -2,14 +2,12 @@ import "./Colorization";
 import "./Suggestions";
 
 import * as monaco from "monaco-editor";
-import { register, render } from "timeago.js";
-import timeago_es from "timeago.js/lib/lang/es";
 
 import { basicos, demo } from "../../tads";
 import { Marker, EditorHints, parseSource } from "../../parser/Parser";
 import { Eval, Expr, Grammar, TAD } from "../../parser/Types";
 import { evalGrammar } from "../../parser/Eval";
-import { fromExpr, genGrammar, toExpr } from "../../parser/OhmBackend";
+import { fromExpr, genGrammar, toExpr } from "../../parser/CustomBackend";
 import generateDebugView from "../views/DebugView";
 import { openModal } from "../views/Modal";
 import generateEvalDebug from "../views/EvalDebugView";
@@ -272,9 +270,6 @@ const tabs: Tab[] = [
 
 setTimeout(monaco.editor.remeasureFonts, 1000);
 
-register("es", timeago_es);
-render(document.querySelectorAll(".moment"), "es");
-
 // TODO: no funciona :C
 /*
 function updateViewState() {
@@ -286,3 +281,11 @@ editor.onDidLayoutChange(updateViewState);
 const viewState = localStorage.getItem("view_state") as monaco.editor.ICodeEditorViewState | null;
 if(viewState) editor.restoreViewState(viewState);
 */
+
+// Header con el tiempo del commit
+
+import { register, render } from "timeago.js";
+import timeago_es from "timeago.js/lib/lang/es";
+
+register("es", timeago_es);
+render(document.querySelectorAll(".moment"), "es");

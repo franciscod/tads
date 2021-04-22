@@ -1,5 +1,5 @@
 import { evalStep } from "../../parser/Eval";
-import { fromExpr } from "../../parser/OhmBackend";
+import { fromExpr } from "../../parser/CustomBackend";
 import { Expr, Grammar } from "../../parser/Types";
 
 const generateEvalDebug = (expr: Expr, grammar: Grammar): string => {

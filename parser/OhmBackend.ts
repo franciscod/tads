@@ -1,6 +1,6 @@
 import ohm from "ohm-js";
 import { toAST } from "ohm-js/extras";
-import { Axioma, Expr, Genero, Grammar, Operacion, TAD } from "./Types";
+import { Axioma, Expr, Genero, Grammar, Operacion, TAD, VariablesLibres } from "./Types";
 import { titleSlug } from "./Util";
 
 type OhmSourceResult = {
@@ -10,23 +10,21 @@ type OhmSourceResult = {
     fromAST: (expr: Expr) => string;
 };
 
-function ohmGenGrammarSource(ops: Operacion[], variables: Map<Genero, string[]>): OhmSourceResult {
+function ohmGenGrammarSource(ops: Operacion[], variables: VariablesLibres): OhmSourceResult {
     const reglasParaExpr: string[] = [];
     const printMapping: { [key: string]: (ast: Expr) => string } = {};
     const fromAST = (ast: Expr): string => {
-        return printMapping[ast.type](ast).replace(/\s+/g, " ").replace(/\( /g, "(").replace(/ \)/g, ")");
+        return printMapping[ast.nombre](ast).replace(/\s+/g, " ").replace(/\( /g, "(").replace(/ \)/g, ")");
     };
 
     const unaryRuleNames: string[] = [];
     let rules = "";
 
     const varTerms: string[] = [];
-    for (const g of variables.keys()) {
-        (variables.get(g) || []).forEach(n => {
-            const genVar = "Var" + titleSlug(g) + titleSlug(n);
-            rules += `${genVar} = "${n}"\n`;
-            varTerms.push(genVar);
-        });
+    for (const n in variables) {
+        const genVar = "Var" + titleSlug(variables[n]) + titleSlug(n);
+        rules += `${genVar} = "${n}"\n`;
+        varTerms.push(genVar);
     }
     if (varTerms.length > 0) {
         rules += "Var = " + varTerms.join(" | ") + "\n";
@@ -35,9 +33,7 @@ function ohmGenGrammarSource(ops: Operacion[], variables: Map<Genero, string[]>)
     rules += ops
         .map((op, i) => {
             const ret: string = titleSlug(op.retorno);
-            const caseName = [op.tipo, op.nombre, `__${i}`].reduce((p, e) => {
-                return p + titleSlug(e);
-            }, "");
+            const caseName = [op.tipo, op.nombre, `__${i}`].reduce((p, e) => p + titleSlug(e), "");
 
             // TODO: hay que poner los infijos antes que los generadores
             reglasParaExpr.unshift(caseName);
@@ -57,7 +53,7 @@ function ohmGenGrammarSource(ops: Operacion[], variables: Map<Genero, string[]>)
                 return op.tokens
                     .map((tok, i) => {
                         if (tok.type == "literal") return tok.symbol;
-                        if (tok.type == "slot") return ` ${printMapping[ast[i].type](ast[i])} `;
+                        if (tok.type == "slot") return ` ${printMapping[ast[i].nombre](ast[i])} `;
                     })
                     .join("");
             };
@@ -103,7 +99,7 @@ function auxAxiomasAST(tads: TAD[]): Axioma[] {
             const exprR = ohmToExpr(right, r);
 
             if (exprL === null || exprR === null) {
-                console.log("Axioma falló al parsearse", left);
+                // console.log("Axioma falló al parsearse", left);
                 continue;
             }
 
@@ -118,7 +114,7 @@ function auxAxiomasAST(tads: TAD[]): Axioma[] {
 
 export function genGrammar(tads: TAD[]): Grammar {
     const ops = tads.reduce((p: Operacion[], c) => p.concat(c.operaciones), []);
-    const result = ohmGenGrammarSource(ops, new Map());
+    const result = ohmGenGrammarSource(ops, {});
     const axiomas = auxAxiomasAST(tads);
 
     return {

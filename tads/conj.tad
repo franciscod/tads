@@ -5,7 +5,7 @@ géneros conjDeAlpha
 parámetros formales
   -- géneros α
 
-exporta conjDeAlpha, generadores, observadores, ∅?, ∪, ∩, #, • − {•}, dameUno, sinUno, ⊆, • −
+exporta conjDeAlpha, generadores, observadores, ∅?, ∪, ∩, #, • - {•}, dameUno, sinUno, ⊆, • -
 
 usa     Bool, Nat
 
@@ -25,13 +25,13 @@ otras operaciones
     -- jaja salu2
     -- {•, . . . , •} : α × ... × α       → conjDeAlpha
     #              : conjDeAlpha           → nat
-    • − {•}        : conjDeAlpha × α       → conjDeAlpha
+    • - {•}        : conjDeAlpha × α       → conjDeAlpha
     • ∪ •          : conjDeAlpha × conjDeAlpha → conjDeAlpha
     • ∩ •          : conjDeAlpha × conjDeAlpha → conjDeAlpha
     dameUno        : conjDeAlpha c         → α       {¬∅?(c)}
     sinUno         : conjDeAlpha c         → conjDeAlpha {¬∅?(c)}
     • ⊆ •          : conjDeAlpha × conjDeAlpha → bool
-    • − •          : conjDeAlpha × conjDeAlpha → conjDeAlpha
+    • - •          : conjDeAlpha × conjDeAlpha → conjDeAlpha
 
 axiomas ∀ c, d: conjDeAlpha, ∀ a, b: α
     a ∈ ∅             ≡ false
@@ -41,18 +41,18 @@ axiomas ∀ c, d: conjDeAlpha, ∀ a, b: α
     vacio?(∅)         ≡ ∅?(∅)
     vacio?(Ag(b, c))  ≡ ∅?(Ag(b, c))
     #(∅)              ≡ 0
-    #(Ag(a, c))       ≡ suc(0) + #(c − { a })
+    #(Ag(a, c))       ≡ suc(0) + #(c - { a })
     -- TODO: ???
     -- {a1, ..., an}     ≡ Ag(an, ..., Ag(a1, ∅))
-    c − {a}           ≡ c − Ag(a, ∅)
+    c - {a}           ≡ c - Ag(a, ∅)
     ∅ ∪ c             ≡ c
     Ag(a, c) ∪ d      ≡ Ag(a, c ∪ d)
     ∅ ∩ c             ≡ ∅
     Ag(a, c) ∩ d      ≡ if a ∈ d then Ag(a, c ∩ d) else c ∩ d fi
     -- dameUno(c) ∈ c    ≡ true
-    sinUno(c)         ≡ c − {dameUno(c)}
+    sinUno(c)         ≡ c - {dameUno(c)}
     -- c ⊆ d             ≡ c ∩ d = c
-    ∅ − c             ≡ ∅
-    Ag(a, c) − d      ≡ if a ∈ d then c − d else Ag(a, c − d) fi
+    ∅ - c             ≡ ∅
+    Ag(a, c) - d      ≡ if a ∈ d then c - d else Ag(a, c - d) fi
 
 Fin TAD

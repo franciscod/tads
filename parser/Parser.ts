@@ -1,4 +1,4 @@
-import { RawAxioma, Eval, ExpresionLogica, Genero, Operacion, Range, Slot, TAD, Token } from "./Types";
+import { RawAxioma, Eval, ExpresionLogica, Operacion, Range, Slot, TAD, Token, VariablesLibres } from "./Types";
 
 type MarkerSeverity = "error" | "warning" | "info" | "hint";
 
@@ -39,9 +39,9 @@ export function parseExpresionLogica(input: string, context?: ParseContext): Exp
     return null;
 }
 
-export function parseVarLibres(input: string, context?: ParseContext): Map<Genero, string[]> {
+export function parseVarLibres(input: string, context?: ParseContext): VariablesLibres {
     //context?.hints?.addMark('info', 'variables libres', context.range);
-    const result = new Map<Genero, string[]>();
+    const result: VariablesLibres = {};
 
     input
         .split("∀")
@@ -54,7 +54,7 @@ export function parseVarLibres(input: string, context?: ParseContext): Map<Gener
                 .filter(v => v.length);
             gen = gen.replace(/,/g, "").trim();
 
-            result.set(gen, vars);
+            for (const _var of vars) result[_var] = gen;
         });
 
     return result;
@@ -99,6 +99,7 @@ export function parseOperacion(
     const args = _args
         .split(/×|✕/)
         .map(arg => arg.trim())
+        .map(arg => arg.split(" ")[0]) // TODO: esto saca los nombres de las variables! ej: "nat n"
         .filter(arg => arg !== "");
     let ithSlot = 0;
 
@@ -158,7 +159,7 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
         nombre: "",
         generos: [],
         operaciones: [],
-        variablesLibres: new Map<Genero, string[]>(),
+        variablesLibres: {},
         axiomas: [],
         range: context?.range,
     };
