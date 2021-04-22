@@ -46,7 +46,7 @@ axiomas ∀ n, m: nat, ∀ x, y: int
     +n < -m       ≡ false
     -n < +m       ≡ true
     -n < -m       ≡ m < n
-    -- x ≤ y         ≡ x < y ∨ x = y -- no tenemos igobs
+    x ≤ y         ≡ x < y ∨ x = y
     mín(x, y)     ≡ if x < y then x else y fi
     máx(x, y)     ≡ if x < y then y else x fi
 

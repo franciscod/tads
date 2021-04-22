@@ -24,7 +24,7 @@ otras operaciones
     • - •   : nat n × nat m → nat   {m ≤ n}
     • × •   : nat   × nat   → nat
     • < •   : nat   × nat   → bool
-    -- • ≤ •   : nat   × nat   → bool  -- todavia no tenemos igobs
+    • ≤ •   : nat   × nat   → bool  -- todavia no tenemos igobs
     mín     : nat   × nat   → nat
     máx     : nat   × nat   → nat
     -- en el apunte de tads basicos esta en bool
@@ -39,7 +39,7 @@ axiomas ∀ n, m: nat, ∀ b: bool
     n - m        ≡ if m =0? then n else pred(n) - pred(m) fi
     n × m        ≡ if m =0? then 0 else (n × pred(m)) + n fi -- parentesis por precedencia
     n < m        ≡ (¬(m =0?)) ∧L (n =0? ∨L pred(n) < pred(m))
-    -- n ≤ m        ≡ n < m ∨ n = m -- todavia no tenemos igobs
+    n ≤ m        ≡ n < m ∨ n = m
     mín(n, m)    ≡ if m < n then m else n fi
     máx(n, m)    ≡ if m < n then n else m fi
 
