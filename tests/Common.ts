@@ -4,9 +4,10 @@ export const EVALS_TXT = fs.readFileSync("tests/evals.txt", "utf-8");
 export const BOOL_TAD = fs.readFileSync("tads/bool.tad", "utf-8");
 export const NAT_TAD = fs.readFileSync("tads/nat.tad", "utf-8");
 export const INT_TAD = fs.readFileSync("tads/int.tad", "utf-8");
+export const PAR_TAD = fs.readFileSync("tads/par.tad", "utf-8");
 export const CONJ_TAD = fs.readFileSync("tads/conj.tad", "utf-8");
 
-export const TADS = [BOOL_TAD, NAT_TAD, INT_TAD, CONJ_TAD];
+export const TADS = [BOOL_TAD, NAT_TAD, INT_TAD, PAR_TAD, CONJ_TAD];
 
 export const EVALS: { left: string; right: string; line: number }[] = EVALS_TXT.replace(/\r\n/g, "\n")
     .split("\n")
