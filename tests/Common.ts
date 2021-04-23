@@ -1,6 +1,7 @@
 import fs from "fs";
 
 export const EVALS_TXT = fs.readFileSync("tests/evals.txt", "utf-8");
+export const INVALIDS_TXT = fs.readFileSync("tests/invalid_statements.txt", "utf-8");
 export const BOOL_TAD = fs.readFileSync("tads/bool.tad", "utf-8");
 export const NAT_TAD = fs.readFileSync("tads/nat.tad", "utf-8");
 export const INT_TAD = fs.readFileSync("tads/int.tad", "utf-8");
@@ -30,3 +31,9 @@ export const EVALS: { left: string; right: string; line: number }[] = EVALS_TXT.
 export const STATEMENTS: string[] = Array.from(
     new Set(EVALS.reduce((p: string[], c) => p.concat(c.left, c.right), []))
 );
+
+// estos son statements que deberían fallar al parsear
+export const INVALID_STATEMENTS: string[] = INVALIDS_TXT
+    .replace(/\r\n/g, "\n")
+    .split("\n")
+    .map(l => l.split("--")[0]);

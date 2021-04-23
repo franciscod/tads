@@ -4,7 +4,7 @@ import { Expr, Operacion } from "../parser/Types";
 import { fromExpr, genGrammar, toExpr } from "../parser/CustomBackend";
 import ohmB from "../parser/OhmBackend";
 
-import { STATEMENTS, TADS } from "./Common";
+import { INVALID_STATEMENTS, STATEMENTS, TADS } from "./Common";
 
 const [tads] = parseSource(TADS.join("\n"));
 
@@ -80,5 +80,12 @@ for (const stmt of STATEMENTS) {
         }
 
         expect(cleanCustomExpr(expr!)).toStrictEqual(cleanOhmExpr(expr_ref!));
+    });
+}
+
+for (const stmt of INVALID_STATEMENTS) {
+    it("no debería parsear --- " + stmt.padEnd(padSize), () => {
+        const expr = toExpr(stmt, grammar);
+        expect(expr).toBeNull();
     });
 }
