@@ -10,9 +10,18 @@ export type SourceReference = {
 };
 
 export type ExpresionLogica = any; // TODO
-export type VariablesLibres = { [nombreVar: string]: Genero };
+export type VariablesLibres = { [nombreVar: string]: GeneroParametrizado };
 
 export type Genero = string; // o es una variable (alpha, beta, etc) o es un tad especifico
+
+export type Parametros = {
+    [paramName: string]: GeneroParametrizado;
+};
+
+export type GeneroParametrizado = {
+    base: Genero;
+    parametros: Parametros;
+};
 
 // tokens para sintaxis: corchetes, simbolos, etc
 export type Literal = {
@@ -24,7 +33,7 @@ export type Literal = {
 export type Slot = {
     type: "slot";
     nombre?: string; // los slots pueden tener nombres ej. nat _n_
-    genero: Genero;
+    genero: GeneroParametrizado;
 };
 
 export type Token = Literal | Slot;
@@ -38,7 +47,7 @@ export type Operacion = {
     type: "observador" | "generador" | "otra";
     nombre: string;
     tokens: Token[]; // como lo parseo a un nodo
-    retorno: Genero;
+    retorno: GeneroParametrizado;
     restriccion?: ExpresionLogica;
 } & SourceReference;
 
@@ -65,8 +74,8 @@ export type Operandos = {
 export type Expr = {
     type: "fijo" | "variable";
     nombre: string;
-    genero: Genero;
-    operandos: Operandos
+    genero: GeneroParametrizado;
+    operandos: Operandos;
 };
 
 export type Axioma = [Expr, Expr];

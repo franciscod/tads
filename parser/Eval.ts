@@ -1,9 +1,9 @@
-import { Axioma, Expr, Grammar } from "../parser/Types";
+import { Expr, Grammar } from "../parser/Types";
 
 export function evalGrammar(expr: Expr, grammar: Grammar): Expr {
     let run = true;
     let ret: Expr = expr;
-    for (let i = 0; i < 500 && run; i++) {
+    for (let i = 0; i < 200 && run; i++) {
         [run, ret] = evalStep(ret, grammar);
     }
 
@@ -58,7 +58,7 @@ export function evalStep(expr: Expr, grammar: Grammar): [boolean, Expr] {
         type: expr.type,
         nombre: expr.nombre,
         genero: expr.genero,
-        operandos: { }
+        operandos: {},
     };
 
     for (const child in expr.operandos) {
@@ -82,7 +82,12 @@ function reemplazar(expr: Expr, bindings: Map<string, Expr>): [boolean, Expr] {
         return [true, bindings.get(expr.nombre)!];
     }
 
-    const ret: Expr = { type: expr.type, nombre: expr.nombre, genero: expr.genero, operandos: { } };
+    const ret: Expr = {
+        type: expr.type,
+        nombre: expr.nombre,
+        genero: expr.genero,
+        operandos: {},
+    };
     let hizoAlgo = false;
 
     for (const child in expr.operandos) {
@@ -97,8 +102,7 @@ function reemplazar(expr: Expr, bindings: Map<string, Expr>): [boolean, Expr] {
 function tienenLaMismaFormaSalvoVariables(template: Expr, expr: Expr): boolean {
     if (template.type === "variable") {
         // TODO: el genero de la expresion puede depender de alpha
-        return template.genero === expr.genero ||
-               template.genero === 'α';
+        return JSON.stringify(template.genero) === JSON.stringify(expr.genero) || template.genero.base === "α";
     }
 
     // TODO: ver también el genero

@@ -1,4 +1,4 @@
-import { Axioma, Expr, Genero, Grammar, Operacion, Operandos, TAD, VariablesLibres } from "./Types";
+import { Axioma, Expr, Grammar, Operacion, Operandos, Parametros, TAD, VariablesLibres } from "./Types";
 
 type CustomBackendData = {
     tads: TAD[];
@@ -40,7 +40,7 @@ export function genGrammar(tads: TAD[]): Grammar {
 
     const data: CustomBackendData = {
         tads,
-        tokens
+        tokens,
     };
 
     return {
@@ -48,6 +48,13 @@ export function genGrammar(tads: TAD[]): Grammar {
         backendGrammar: data,
     };
 }
+
+/*function aplicarParametros(genero: Genero, parametros: Parametros) {
+    for(let templateName in parametros) {
+        genero = genero.split(templateName).join(parametros[templateName]);
+    }
+    return genero;
+}*/
 
 function process(input: string, data: CustomBackendData, vars: VariablesLibres = {}): Expr | null {
     // console.log("===============================", input, "===============================");
@@ -57,14 +64,14 @@ function process(input: string, data: CustomBackendData, vars: VariablesLibres =
     let index = 0;
     whileIdx: while (index < input.length || stack.length > 1 || (stack.length === 1 && typeof stack[0] === "string")) {
         // me fijo si matchea alguna operación la cola del stack
-        for(const tad of data.tads) {
+        for (const tad of data.tads) {
             forOp: for (const op of tad.operaciones) {
                 if (stack.length < op.tokens.length) continue;
 
-                // armo expr por si termina siendo exitoso
-                const operandos: Operandos = { };
-                // track para los templates (α, b etc)
-                let templates: { [templateName: string]: Genero } = { };
+                // armo los operandos por si termina siendo exitoso
+                const operandos: Operandos = {};
+                // track para los templates (α, β etc)
+                const parametros: Parametros = {};
 
                 for (let i = 0; i < op.tokens.length; i++) {
                     const token = op.tokens[i];
@@ -83,26 +90,50 @@ function process(input: string, data: CustomBackendData, vars: VariablesLibres =
                             continue forOp;
                         }
 
-                        // tiene que tener el mismo genero
-                        if (tad.parametros.includes(token.genero) || token.genero === 'α') {
-                            // el slot es un parametro
-                            // entonces tengo que ver si matchea con el α
-                            // anterior o guardarlo si es nuevo
-                            if (token.genero in templates) {
-                                // ya había un α, me fijo que tengan el mismo género
-                                if (templates[token.genero] !== stack_elem.genero) {
-                                    // no matchea con el alpha anterior!
+                        // ver si el parametro es un parámetro
+                        // TODO: creo que lo de token.genero.base === 'α' habría que hacerlo por separado...
+                        if (tad.parametros.includes(token.genero.base) || token.genero.base === "α") {
+                            // ahora veo que no haya conflictos
+                            // con otro uso de este parametro antes
+                            if (token.genero.base in parametros) {
+                                // si estaba antes, tiene que matchear el genero exactamente
+                                if (
+                                    JSON.stringify(parametros[token.genero.base]) !== JSON.stringify(stack_elem.genero)
+                                ) {
                                     continue forOp;
                                 }
+                                // matchea exacto, seguimos bien
                             } else {
-                                // no hay α anterior, podemos setearlo
-                                templates[token.genero] = stack_elem.genero;
+                                // el parametro no se había visto antes, todo ok
+                                parametros[token.genero.base] = stack_elem.genero;
                             }
                         } else {
-                            // son tipos definidos, hay que asegurarse que tengan el mismo genero
-                            if (token.genero !== stack_elem.genero) {
+                            // el género de stack_elem tiene que estar contenido en el de token.genero
+
+                            // si la base no coincide ya perdí de una
+                            if (token.genero.base !== stack_elem.genero.base) {
                                 continue forOp;
                             }
+
+                            // me fijo que todos los parámetros en stack_elem coincidan con los de token.genero
+                            // si uno no estaba, lo agrego a parametros
+                            for (const paramName in stack_elem.genero.parametros) {
+                                if (paramName in parametros) {
+                                    // si estaba antes, tiene que matchear el genero exactamente
+                                    if (
+                                        JSON.stringify(parametros[paramName]) !==
+                                        JSON.stringify(stack_elem.genero.parametros[paramName])
+                                    ) {
+                                        continue forOp;
+                                    }
+                                    // matchea exacto, seguimos bien
+                                } else {
+                                    // el parametro no se había visto antes, todo ok
+                                    parametros[paramName] = stack_elem.genero.parametros[paramName];
+                                }
+                            }
+
+                            // todos los parametros matchea, todo ok
                         }
 
                         // ta ok
@@ -113,15 +144,16 @@ function process(input: string, data: CustomBackendData, vars: VariablesLibres =
                 const expr: Expr = {
                     type: "fijo",
                     nombre: op.nombre,
-                    genero: op.retorno,
-                    operandos
+                    genero:
+                        op.retorno.base in parametros
+                            ? parametros[op.retorno.base]
+                            : {
+                                  base: op.retorno.base,
+                                  // TODO: verificar que op.retorno.parametros coinciden!!!!
+                                  parametros,
+                              },
+                    operandos,
                 };
-
-                // reemplaza los generos concretos en
-                // el genero de op.retorno
-                for(let templateName in templates) {
-                    expr.genero = expr.genero.split(templateName).join(templates[templateName]);
-                }
 
                 stack = stack.slice(0, -op.tokens.length);
                 stack.push(expr);
@@ -154,7 +186,7 @@ function process(input: string, data: CustomBackendData, vars: VariablesLibres =
                         type: "variable",
                         nombre: varName,
                         genero: vars[varName],
-                        operandos: { }
+                        operandos: {},
                     });
                     continue whileIdx;
                 }
@@ -197,9 +229,9 @@ export function toExpr(input: string, grammar: Grammar, vars?: VariablesLibres):
 
 function recFromExpr(expr: Expr, data: CustomBackendData): string {
     let opExpr: Operacion | null = null;
-    for(const tad of data.tads) {
-        for(const op of tad.operaciones) {
-            if(op.nombre === expr.nombre) {
+    for (const tad of data.tads) {
+        for (const op of tad.operaciones) {
+            if (op.nombre === expr.nombre) {
                 opExpr = op;
                 break;
             }

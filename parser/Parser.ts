@@ -21,7 +21,15 @@ export type ParseContext = {
     hints?: EditorHints;
 };
 
-type Section = "none" | "parametros" | "generos" | "igualdad" | "observadores" | "generadores" | "otras operaciones" | "axiomas";
+type Section =
+    | "none"
+    | "parametros"
+    | "generos"
+    | "igualdad"
+    | "observadores"
+    | "generadores"
+    | "otras operaciones"
+    | "axiomas";
 
 function checkSectionHeader(line: string): Section {
     line = line.trimRight();
@@ -55,7 +63,7 @@ export function parseVarLibres(input: string, context?: ParseContext): Variables
                 .filter(v => v.length);
             gen = gen.replace(/,/g, "").trim();
 
-            for (const _var of vars) result[_var] = gen;
+            for (const _var of vars) result[_var] = { base: gen, parametros: {} }; // TODO: parametros
         });
 
     return result;
@@ -92,7 +100,7 @@ export function parseOperacion(
         nombre: left.replace(/ /g, "").trim(),
         type: sectionToOpType(section),
         tokens: [],
-        retorno: "",
+        retorno: { base: "<bad>", parametros: {} },
         // restriccion: []
     };
 
@@ -109,7 +117,7 @@ export function parseOperacion(
         const i = left.indexOf("•");
         if (i == 0) {
             const genName: string = args[ithSlot++];
-            const slot: Slot = { type: "slot", genero: genName };
+            const slot: Slot = { type: "slot", genero: { base: genName, parametros: {} } }; // TODO: PARAMETROS
             op.tokens.push(slot);
             hasSlots = true;
 
@@ -129,7 +137,7 @@ export function parseOperacion(
     if (!hasSlots && args.length > 0) {
         const functionStyleArgs: Token[] = args.map(gen => ({
             type: "slot",
-            genero: gen,
+            genero: { base: gen, parametros: {} }, // TODO: PARAMETROS
         }));
 
         const parenLeft: Token = { type: "literal", symbol: "(" };
@@ -146,7 +154,7 @@ export function parseOperacion(
         op.tokens.push(parenRight);
     }
 
-    op.retorno = retorno.trim();
+    op.retorno = { base: retorno.trim(), parametros: {} }; // TODO: parametros
 
     return op;
 }
@@ -232,8 +240,7 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
             continue;
         }
 
-        if(line.trim() === "parametros formales")
-            continue; // no es elegante pero funciona saludos
+        if (line.trim() === "parametros formales") continue; // no es elegante pero funciona saludos
 
         // inicio de sección
         const section: Section = checkSectionHeader(line);
@@ -277,7 +284,7 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
                 }
                 tad.generos.push(generos[j]);
             }
-        } else if(section == 'parametros') {
+        } else if (section == "parametros") {
             const parametros = line
                 .trim()
                 .slice("generos".length)
@@ -439,9 +446,17 @@ export function parseSource(source: string, hints?: EditorHints): [TAD[], Eval[]
 }
 
 // TODO: name this, put reasonable type annotations instead of any
-function lombiStep(offsetRange: any, i: any, left: any, context: any,
-                   startLine: any, line: any, tad: any, rightBuffer: any,
-                   section: any) {
+function lombiStep(
+    offsetRange: any,
+    i: any,
+    left: any,
+    context: any,
+    startLine: any,
+    line: any,
+    tad: any,
+    rightBuffer: any,
+    section: any
+) {
     if (left.length > 0) {
         const ctx: ParseContext = {
             hints: context?.hints,

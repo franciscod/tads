@@ -8,7 +8,7 @@ const generateGeneroTag = (genero: Genero): string => {
 const generateToken = (token: Token): string => {
     return token.type === "literal"
         ? `<span class="keyword ${token.type}">${token.symbol}</span>`
-        : generateGeneroTag(token.genero);
+        : generateGeneroTag(token.genero.base);
 };
 
 const generateTokens = (tokens: Token[]): string => {
@@ -20,7 +20,7 @@ const generateOperatorRow = (op: Operacion): string => {
         <tr>
             <td>${generateTokens(op.tokens)}</td>
             <td>➔</td>
-            <td>${generateGeneroTag(op.retorno)}</td>
+            <td>${generateGeneroTag(op.retorno.base)}</td>
         </tr>
     `;
 };

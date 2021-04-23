@@ -1,6 +1,6 @@
 import ohm from "ohm-js";
 import { toAST } from "ohm-js/extras";
-import { Axioma, Expr, Grammar, Operacion, TAD, VariablesLibres } from "./Types";
+import { Axioma, Grammar, Operacion, TAD, VariablesLibres } from "./Types";
 
 type OhmSourceResult = {
     source: string;
@@ -12,7 +12,7 @@ type OhmSourceResult = {
 type OhmExpr = {
     type: string;
     [key: number]: OhmExpr;
-}
+};
 
 function ohmGenGrammarSource(ops: Operacion[], variables: VariablesLibres): OhmSourceResult {
     const reglasParaExpr: string[] = [];
@@ -26,7 +26,7 @@ function ohmGenGrammarSource(ops: Operacion[], variables: VariablesLibres): OhmS
 
     const varTerms: string[] = [];
     for (const n in variables) {
-        const genVar = "Var" + titleSlug(variables[n]) + titleSlug(n);
+        const genVar = "Var" + titleSlug(variables[n].base) + titleSlug(n);
         rules += `${genVar} = "${n}"\n`;
         varTerms.push(genVar);
     }
@@ -36,7 +36,7 @@ function ohmGenGrammarSource(ops: Operacion[], variables: VariablesLibres): OhmS
 
     rules += ops
         .map((op, i) => {
-            const ret: string = titleSlug(op.retorno);
+            const ret: string = titleSlug(op.retorno.base);
             const caseName = [op.type, op.nombre, `__${i}`].reduce((p, e) => p + titleSlug(e), "");
 
             // TODO: hay que poner los infijos antes que los generadores
