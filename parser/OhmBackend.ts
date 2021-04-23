@@ -6,14 +6,19 @@ type OhmSourceResult = {
     source: string;
     grammar: ohm.Grammar;
     unaries: string[];
-    fromAST: (expr: Expr) => string;
+    fromAST: (expr: OhmExpr) => string;
 };
+
+export type OhmExpr = {
+    type: string;
+    [key: number]: OhmExpr;
+}
 
 function ohmGenGrammarSource(ops: Operacion[], variables: VariablesLibres): OhmSourceResult {
     const reglasParaExpr: string[] = [];
-    const printMapping: { [key: string]: (ast: Expr) => string } = {};
-    const fromAST = (ast: Expr): string => {
-        return printMapping[ast.nombre](ast).replace(/\s+/g, " ").replace(/\( /g, "(").replace(/ \)/g, ")");
+    const printMapping: { [key: string]: (ast: OhmExpr) => string } = {};
+    const fromAST = (ast: OhmExpr): string => {
+        return printMapping[ast.type](ast).replace(/\s+/g, " ").replace(/\( /g, "(").replace(/ \)/g, ")");
     };
 
     const unaryRuleNames: string[] = [];
@@ -32,7 +37,7 @@ function ohmGenGrammarSource(ops: Operacion[], variables: VariablesLibres): OhmS
     rules += ops
         .map((op, i) => {
             const ret: string = titleSlug(op.retorno);
-            const caseName = [op.tipo, op.nombre, `__${i}`].reduce((p, e) => p + titleSlug(e), "");
+            const caseName = [op.type, op.nombre, `__${i}`].reduce((p, e) => p + titleSlug(e), "");
 
             // TODO: hay que poner los infijos antes que los generadores
             reglasParaExpr.unshift(caseName);
@@ -48,7 +53,7 @@ function ohmGenGrammarSource(ops: Operacion[], variables: VariablesLibres): OhmS
                 unaryRuleNames.push(caseName);
             }
 
-            printMapping[caseName] = (ast: Expr): string => {
+            printMapping[caseName] = (ast: any): string => {
                 return op.tokens
                     .map((tok, i) => {
                         if (tok.type == "literal") return tok.symbol;
@@ -93,15 +98,17 @@ function auxAxiomasAST(tads: TAD[]): Axioma[] {
 
         const axiomasEsteTad: Axioma[] = [];
 
-        for (const [left, right] of tad.axiomas) {
-            const exprL = ohmToExpr(left, r);
-            const exprR = ohmToExpr(right, r);
+        for (const rawAxioma of tad.rawAxiomas) {
+            const exprL = ohmToExpr(rawAxioma.left, r);
+            const exprR = ohmToExpr(rawAxioma.right, r);
 
             if (exprL === null || exprR === null) {
                 // console.log("Axioma falló al parsearse", left);
                 continue;
             }
 
+            // mmmmmmmmm
+            // @ts-ignore
             axiomasEsteTad.push([exprL, exprR]);
         }
 
@@ -122,7 +129,7 @@ export function genGrammar(tads: TAD[]): Grammar {
     };
 }
 
-function ohmToExpr(input: string, backend: OhmSourceResult): Expr | null {
+function ohmToExpr(input: string, backend: OhmSourceResult): OhmExpr | null {
     const baseMapping: Record<string, any> = {};
     backend.unaries.forEach(r => (baseMapping[r] = undefined));
 
@@ -134,11 +141,11 @@ function ohmToExpr(input: string, backend: OhmSourceResult): Expr | null {
     return toAST(match, baseMapping);
 }
 
-export function toExpr(input: string, grammar: Grammar): Expr | null {
+export function toExpr(input: string, grammar: Grammar): OhmExpr | null {
     return ohmToExpr(input, grammar.backendGrammar);
 }
 
-export function fromExpr(expr: Expr, grammar: Grammar): string {
+export function fromExpr(expr: OhmExpr, grammar: Grammar): string {
     return (grammar.backendGrammar as OhmSourceResult).fromAST(expr);
 }
 

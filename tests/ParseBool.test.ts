@@ -18,8 +18,8 @@ it("parsea bool", () => {
     expect(tad.nombre).toStrictEqual("Bool");
     expect(tad.generos).toStrictEqual(["bool"]);
 
-    const generadores = tad.operaciones.filter(op => op.tipo == "generador");
-    const otrasOperaciones = tad.operaciones.filter(op => op.tipo == "otra");
+    const generadores = tad.operaciones.filter(op => op.type == "generador");
+    const otrasOperaciones = tad.operaciones.filter(op => op.type == "otra");
 
     const [genTrue, genFalse] = generadores;
 

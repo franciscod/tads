@@ -66,16 +66,15 @@ for (const stmt of STATEMENTS) {
         function typeToOhmType(type: string): string {
             const op = operaciones.find(op => op.nombre === type);
             if (!op) return "NULL";
-            return [op.tipo, op.nombre].reduce((p, e) => p + titleSlug(e), "");
+            return [op.type, op.nombre].reduce((p, e) => p + titleSlug(e), "");
         }
 
         // genera un nuevo arbol sin el genero y con los tipos
         // escritos en "formato de ohm"
         function cleanCustomExpr(expr: Expr): ArbolAComparar {
             const result: ArbolAComparar = { nombre: typeToOhmType(expr.nombre) };
-            for (const i in expr) {
-                if (i === "tipo" || i === "nombre" || i === "genero") continue;
-                result[i] = cleanCustomExpr(expr[i]);
+            for (const i in expr.operandos) {
+                result[i] = cleanCustomExpr(expr.operandos[i]);
             }
             return result;
         }

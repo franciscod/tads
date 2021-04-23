@@ -61,8 +61,7 @@ export function parseVarLibres(input: string, context?: ParseContext): Variables
 }
 
 export function parseAxioma(left: string, right: string, context?: ParseContext): RawAxioma {
-    const axioma: RawAxioma = [left, right];
-    axioma.range = context?.range;
+    const axioma: RawAxioma = { left, right };
     return axioma;
 }
 
@@ -82,14 +81,14 @@ export function parseOperacion(
     right = right.split("{")[0];
 
     const sectionToOpType = (section: Section) => {
-        if (section === "observadores") return "basico";
+        if (section === "observadores") return "observador";
         if (section === "generadores") return "generador";
         return "otra";
     };
 
     const op: Operacion = {
         nombre: left.replace(/ /g, "").trim(),
-        tipo: sectionToOpType(section),
+        type: sectionToOpType(section),
         tokens: [],
         retorno: "",
         // restriccion: []
@@ -160,7 +159,7 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
         generos: [],
         operaciones: [],
         variablesLibres: {},
-        axiomas: [],
+        rawAxiomas: [],
         range: context?.range,
     };
 
@@ -338,7 +337,7 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
                                 columnEnd: 1 + line.length,
                             }),
                         };
-                        if (section === "axiomas") tad.axiomas.push(parseAxioma(left, rightBuffer, ctx));
+                        if (section === "axiomas") tad.rawAxiomas.push(parseAxioma(left, rightBuffer, ctx));
                         else {
                             const op: Operacion | null = parseOperacion(left, rightBuffer, section, ctx);
                             if (op) tad.operaciones.push(op);
@@ -363,7 +362,7 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
                         columnEnd: 1 + line.length,
                     }),
                 };
-                if (section === "axiomas") tad.axiomas.push(parseAxioma(left, rightBuffer, ctx));
+                if (section === "axiomas") tad.rawAxiomas.push(parseAxioma(left, rightBuffer, ctx));
                 else {
                     const op: Operacion | null = parseOperacion(left, rightBuffer, section, ctx);
                     if (op) tad.operaciones.push(op);

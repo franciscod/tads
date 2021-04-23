@@ -1,4 +1,4 @@
-import { Axioma, Expr, Genero, Grammar, Operacion, TAD, VariablesLibres } from "./Types";
+import { Axioma, Expr, Genero, Grammar, Operacion, Operandos, TAD, VariablesLibres } from "./Types";
 
 type CustomBackendData = {
     tads: TAD[];
@@ -10,12 +10,12 @@ function genAxiomas(data: CustomBackendData): Axioma[] {
     const axiomas: Axioma[] = [];
 
     for (const tad of data.tads) {
-        for (const [left, right] of tad.axiomas) {
-            const exprL = process(left, data, tad.variablesLibres);
-            const exprR = process(right, data, tad.variablesLibres);
+        for (const rawAxioma of tad.rawAxiomas) {
+            const exprL = process(rawAxioma.left, data, tad.variablesLibres);
+            const exprR = process(rawAxioma.right, data, tad.variablesLibres);
 
-            if (exprL === null) console.log("Axioma L falló al parsearse", left /*, tad.variablesLibres*/);
-            if (exprR === null) console.log("Axioma R falló al parsearse", right /*, tad.variablesLibres*/);
+            if (exprL === null) console.log("Axioma L falló al parsearse", rawAxioma.left /*, tad.variablesLibres*/);
+            if (exprR === null) console.log("Axioma R falló al parsearse", rawAxioma.right /*, tad.variablesLibres*/);
 
             if (exprL && exprR) axiomas.push([exprL, exprR]);
         }
@@ -73,7 +73,7 @@ function process(input: string, data: CustomBackendData, vars: VariablesLibres =
             if (stack.length < op.tokens.length) continue;
 
             // armo expr por si termina siendo exitoso
-            const expr: Expr = { tipo: "fijo", nombre: op.nombre, genero: op.retorno };
+            const operandos: Operandos = { };
             // track para los templates (α)
             let template: Genero | undefined = undefined;
 
@@ -117,9 +117,16 @@ function process(input: string, data: CustomBackendData, vars: VariablesLibres =
                     }
 
                     // ta ok
-                    expr[i] = stack_elem;
+                    operandos[i] = stack_elem;
                 }
             }
+
+            const expr: Expr = {
+                type: "fijo",
+                nombre: op.nombre,
+                genero: op.retorno,
+                operandos
+            };
 
             // si el retorno es alpha y esta op retorna el alpha
             // el género pasa a ser el asignado por alpha
@@ -154,9 +161,10 @@ function process(input: string, data: CustomBackendData, vars: VariablesLibres =
                 if (varName === stack[stack.length - 1]) {
                     stack.pop();
                     stack.push({
-                        tipo: "variable",
+                        type: "variable",
                         nombre: varName,
                         genero: vars[varName],
+                        operandos: { }
                     });
                     continue whileIdx;
                 }
@@ -207,7 +215,7 @@ function recFromExpr(expr: Expr, data: CustomBackendData): string {
         if (token.type === "literal") {
             buffer += token.symbol;
         } else {
-            buffer += ` ${recFromExpr(expr[i], data)} `;
+            buffer += ` ${recFromExpr(expr.operandos[i], data)} `;
         }
     }
 

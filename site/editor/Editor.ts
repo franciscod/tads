@@ -152,7 +152,8 @@ class Tab {
         this.lenses = [];
 
         for (const tad of this.tads) {
-            for (const axioma of tad.axiomas) {
+            for (const rawAxioma of tad.rawAxiomas) {
+                /*
                 if (!axioma.range || axioma.range.startLine > numLines) continue;
 
                 deltaDecorations.push({
@@ -168,6 +169,7 @@ class Tab {
                         glyphMarginHoverMessage: { value: "El axioma no tipa." },
                     },
                 });
+                */
             }
 
             if (!tad.range) continue;

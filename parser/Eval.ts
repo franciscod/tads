@@ -3,7 +3,7 @@ import { Expr, Grammar } from "../parser/Types";
 export function evalGrammar(expr: Expr, grammar: Grammar): Expr {
     let run = true;
     let ret: Expr = expr;
-    for (let i = 0; i < 50 && run; i++) {
+    for (let i = 0; i < 500 && run; i++) {
         [run, ret] = evalStep(ret, grammar);
     }
 
@@ -54,17 +54,21 @@ export function evalStep(expr: Expr, grammar: Grammar): [boolean, Expr] {
     // no se pudo aplicar un axioma en la raiz
     // va a evaluar cada uno de los hijos recursivamente
 
-    const ret: any = {};
+    const ret: Expr = {
+        type: expr.type,
+        nombre: expr.nombre,
+        genero: expr.genero,
+        operandos: { }
+    };
 
-    for (const child in expr) {
-        ret[child] = expr[child];
+    for (const child in expr.operandos) {
+        ret.operandos[child] = expr.operandos[child];
     }
 
-    for (const child in expr) {
-        if (child === "tipo" || child === "nombre" || child === "genero") continue;
-        const [evaluoAlgo, sub] = evalStep(expr[child], grammar);
+    for (const child in expr.operandos) {
+        const [evaluoAlgo, sub] = evalStep(expr.operandos[child], grammar);
         if (evaluoAlgo) {
-            ret[child] = sub;
+            ret.operandos[child] = sub;
             return [true, ret];
         }
     }
@@ -78,13 +82,12 @@ function reemplazar(expr: Expr, bindings: Map<string, Expr>): [boolean, Expr] {
         return [true, bindings.get(expr.nombre)!];
     }
 
-    const ret: Expr = { tipo: expr.tipo, nombre: expr.nombre, genero: expr.genero };
+    const ret: Expr = { type: expr.type, nombre: expr.nombre, genero: expr.genero, operandos: { } };
     let hizoAlgo = false;
 
-    for (const child in expr) {
-        if (child === "tipo" || child === "nombre" || child === "genero") continue;
-        const [seReemplazo, sub] = reemplazar(expr[child], bindings);
-        ret[child] = sub;
+    for (const child in expr.operandos) {
+        const [seReemplazo, sub] = reemplazar(expr.operandos[child], bindings);
+        ret.operandos[child] = sub;
         hizoAlgo = hizoAlgo || seReemplazo;
     }
 
@@ -92,44 +95,41 @@ function reemplazar(expr: Expr, bindings: Map<string, Expr>): [boolean, Expr] {
 }
 
 function tienenLaMismaFormaSalvoVariables(template: Expr, expr: Expr): boolean {
-    if (template.tipo === "variable") {
+    if (template.type === "variable") {
         return true;
     }
 
     // TODO: ver también el genero
-    if (template.nombre !== expr.nombre || template.tipo !== expr.tipo) return false;
+    if (template.nombre !== expr.nombre || template.type !== expr.type) return false;
 
     // son el mismo tipo, tienen la misma forma en la raiz
     // tienen los mismos hijos
 
-    for (const child in template) {
-        if (child === "tipo" || child === "nombre" || child === "genero") continue;
-        if (!tienenLaMismaFormaSalvoVariables(template[child], expr[child])) return false;
+    for (const child in template.operandos) {
+        if (!tienenLaMismaFormaSalvoVariables(template.operandos[child], expr.operandos[child])) return false;
     }
 
     return true;
 }
 
 function conseguirBindings(template: Expr, expr: Expr, bindings: Map<string, Expr>): Map<string, Expr> {
-    if (template.tipo === "variable") {
+    if (template.type === "variable") {
         bindings.set(template.nombre, expr);
         return bindings;
     }
 
-    for (const child in expr) {
-        if (child === "tipo" || child === "nombre" || child === "genero") continue;
-        bindings = conseguirBindings(template[child], expr[child], bindings);
+    for (const child in expr.operandos) {
+        bindings = conseguirBindings(template.operandos[child], expr.operandos[child], bindings);
     }
 
     return bindings;
 }
 
 function contieneVariables(expr: Expr): boolean {
-    if (expr.tipo === "variable") return true;
+    if (expr.type === "variable") return true;
 
-    for (const child in expr) {
-        if (child === "tipo" || child === "nombre" || child === "genero") continue;
-        if (contieneVariables(expr[child])) return true;
+    for (const child in expr.operandos) {
+        if (contieneVariables(expr.operandos[child])) return true;
     }
 
     return false;
