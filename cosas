@@ -1,8 +1,3 @@
-interfaces
-    que gengrammar reciba un tad? o tad[]?
-
-que los unarios prefijos como el ¬ o el + o el - no requieran parentesis y bindeen con precedencia
-
 al evaluar, si no hay axiomas disponibles tirar un warning y cancelar la evaluacion
 
 snippets
@@ -23,16 +18,6 @@ parsear una expresion usando las secuencias de tokens conocidas
     hintear si te olvidaste del fi o del else
 
 ver que este bien escrito el tad
-    que las variables cuantificadas para los axiomas se usen bien
-        o sea, que si escribo esto se rompa:
-            if 4 then true else <> fi
-                - porque 4 no es bool
-                - porque true y <> no pueden ser el mismo "alpha"
-
-            forall x, y: bool
-            if y then x else z fi
-                - z no esta entre las variables libres del tad
-
     chequear restricciones
         que si trato de evaluar una expresion y no estoy cumpliendo la
         restriccion, sea un error
@@ -41,16 +26,8 @@ ver que este bien escrito el tad
         todos los observadores tienen que estar bien definidos para todos
         los generadores (o para una instancia generica)
 
-
 mostrar ejemplos de un axioma
     inventar valores para las variables, reemplazar y reducir la expresion de la derecha
-
-evaluar una expresion
-    > false v true v false v true
-    true
-
-    > mitad([1,2,3,4,5,6])
-    [1,2,3]
 
 export a latex
 
@@ -59,31 +36,6 @@ warning cuando no hay axiomas para evaluar
 agregar un test donde inviertas el orden de los operadores y no muera
 
 estaría bueno hacer bien el tema de los colores (Colorization.ts)
-
-API Ideal/Deseada:
-
-PARSING:
-parseSource(source: string): TAD[]
-└──parseTad(source: string): TAD
-   ├──parseOperacion: Operacion
-   ├──parseAxioma: RawAxioma
-   ├──parseVarLibres: Map<Genero, string[]>
-   └──parseExpresionLogica: jaja saludos
-
-GRAMMAR:
-genGrammar(tads: TAD[]): Grammar
-└──
-   ├──fromAST(string, Grammar): Expr
-   ├──toAST(Expr, Grammar): string
-   ├──
-   ├──
-   └──
-
-
-EVAL:
-evalGrammar(expr: Expr, gramar: Grammar): Expr
-└──evalStep:
-   ├──
-   ├──
-   ├──
-   └──
+    agregar mas colores
+    paleta mas linda
+    que se sienta menos vacio
