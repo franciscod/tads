@@ -1,4 +1,4 @@
-import { Expr, Grammar } from "../parser/Types";
+import { Axioma, Expr, Grammar } from "../parser/Types";
 
 export function evalGrammar(expr: Expr, grammar: Grammar): Expr {
     let run = true;
@@ -96,11 +96,13 @@ function reemplazar(expr: Expr, bindings: Map<string, Expr>): [boolean, Expr] {
 
 function tienenLaMismaFormaSalvoVariables(template: Expr, expr: Expr): boolean {
     if (template.type === "variable") {
-        return true;
+        // TODO: el genero de la expresion puede depender de alpha
+        return template.genero === expr.genero ||
+               template.genero === 'α';
     }
 
     // TODO: ver también el genero
-    if (template.nombre !== expr.nombre || template.type !== expr.type) return false;
+    if (template.nombre !== expr.nombre) return false;
 
     // son el mismo tipo, tienen la misma forma en la raiz
     // tienen los mismos hijos
