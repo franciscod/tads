@@ -74,8 +74,8 @@ function process(input: string, data: CustomBackendData, vars: VariablesLibres =
 
             // armo expr por si termina siendo exitoso
             const operandos: Operandos = { };
-            // track para los templates (α)
-            let template: Genero | undefined = undefined;
+            // track para los templates (α, b etc)
+            let templates: { [templateName: string]: Genero } = { };
 
             for (let i = 0; i < op.tokens.length; i++) {
                 const token = op.tokens[i];
@@ -95,19 +95,19 @@ function process(input: string, data: CustomBackendData, vars: VariablesLibres =
                     }
 
                     // tiene que tener el mismo genero
-                    if (token.genero === "α") {
-                        // el token es un género
+                    if (op.tad.parametros.includes(token.genero) || token.genero === 'α') {
+                        // el slot es un parametro
                         // entonces tengo que ver si matchea con el α
                         // anterior o guardarlo si es nuevo
-                        if (template) {
+                        if (token.genero in templates) {
                             // ya había un α, me fijo que tengan el mismo género
-                            if (template !== stack_elem.genero) {
+                            if (templates[token.genero] !== stack_elem.genero) {
                                 // no matchea con el alpha anterior!
                                 continue forOp;
                             }
                         } else {
                             // no hay α anterior, podemos setearlo
-                            template = stack_elem.genero;
+                            templates[token.genero] = stack_elem.genero;
                         }
                     } else {
                         // son tipos definidos, hay que asegurarse que tengan el mismo genero
@@ -128,10 +128,10 @@ function process(input: string, data: CustomBackendData, vars: VariablesLibres =
                 operandos
             };
 
-            // si el retorno es alpha y esta op retorna el alpha
-            // el género pasa a ser el asignado por alpha
-            if (op.retorno === "α" && template) {
-                expr.genero = template;
+            // reemplaza los generos concretos en
+            // el genero de op.retorno
+            for(let templateName in templates) {
+                expr.genero = expr.genero.split(templateName).join(templates[templateName]);
             }
 
             stack = stack.slice(0, -op.tokens.length);

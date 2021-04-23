@@ -152,6 +152,7 @@ export function fromExpr(expr: OhmExpr, grammar: Grammar): string {
 export function titleSlug(s: string): string {
     s = s.replace(/•/g, "");
     s = s.replace(/α/g, "alpha");
+    s = s.replace(/π/g, "pi");
     s = s.replace(/¬/g, "neg");
     s = s.replace(/∨/g, "or");
     s = s.replace(/∧/g, "and");
@@ -163,6 +164,9 @@ export function titleSlug(s: string): string {
     s = s.replace(/×/g, "times");
     s = s.replace(/</g, "lt");
     s = s.replace(/≤/g, "le");
+    s = s.replace(/,/g, "comma");
+    s = s.replace(/\(/g, "lparen");
+    s = s.replace(/\)/g, "rparen");
 
     s = s.replace(/#/g, "hash");
     s = s.replace(/\|/g, "pipe");
@@ -174,6 +178,8 @@ export function titleSlug(s: string): string {
     s = s.replace(/∪/g, "cup");
     s = s.replace(/⊆/g, "contains");
     s = s.replace(/∈/g, "in");
+    s = s.replace(/⟨/g, "langle");
+    s = s.replace(/⟩/g, "rangle");
 
     return s[0].toUpperCase() + s.substr(1).toLowerCase();
 }

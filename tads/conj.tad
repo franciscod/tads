@@ -1,39 +1,39 @@
-TAD ConjuntoDeAlpha
+TAD Conjunto(α)
 
-géneros conjDeAlpha
+géneros conj(α)
 
 parámetros formales
   -- géneros α
 
-exporta conjDeAlpha, generadores, observadores, ∅?, ∪, ∩, #, • - {•}, dameUno, sinUno, ⊆, • -
+exporta conj(α), generadores, observadores, ∅?, ∪, ∩, #, • - {•}, dameUno, sinUno, ⊆, • -
 
 usa     Bool, Nat
 
 igualdad observacional
-    (∀c, c': conjDeAlpha) (c =obs c' ⇔ ((∀a : α)(a ∈ c =obs a ∈ c')))
+    (∀c, c': conj(α)) (c =obs c' ⇔ ((∀a : α)(a ∈ c =obs a ∈ c')))
 
 observadores básicos
-    • ∈ •     : α × conjDeAlpha → bool
+    • ∈ •     : α × conj(α) → bool
 
 generadores
-    ∅         :             → conjDeAlpha
-    Ag        : α × conjDeAlpha → conjDeAlpha
+    ∅         :             → conj(α)
+    Ag        : α × conj(α) → conj(α)
 
 otras operaciones
-    ∅?             : conjDeAlpha           → bool
-    vacio?         : conjDeAlpha           → bool
+    ∅?             : conj(α)           → bool
+    vacio?         : conj(α)           → bool
     -- jaja salu2
-    -- {•, . . . , •} : α × ... × α       → conjDeAlpha
-    #              : conjDeAlpha           → nat
-    • - {•}        : conjDeAlpha × α       → conjDeAlpha
-    • ∪ •          : conjDeAlpha × conjDeAlpha → conjDeAlpha
-    • ∩ •          : conjDeAlpha × conjDeAlpha → conjDeAlpha
-    dameUno        : conjDeAlpha c         → α       {¬∅?(c)}
-    sinUno         : conjDeAlpha c         → conjDeAlpha {¬∅?(c)}
-    • ⊆ •          : conjDeAlpha × conjDeAlpha → bool
-    • - •          : conjDeAlpha × conjDeAlpha → conjDeAlpha
+    -- {•, . . . , •} : α × ... × α       → conj(α)
+    #              : conj(α)           → nat
+    • - {•}        : conj(α) × α       → conj(α)
+    • ∪ •          : conj(α) × conj(α) → conj(α)
+    • ∩ •          : conj(α) × conj(α) → conj(α)
+    dameUno        : conj(α) c         → α       {¬∅?(c)}
+    sinUno         : conj(α) c         → conj(α) {¬∅?(c)}
+    • ⊆ •          : conj(α) × conj(α) → bool
+    • - •          : conj(α) × conj(α) → conj(α)
 
-axiomas ∀ c, d: conjDeAlpha, ∀ a, b: α
+axiomas ∀ c, d: conj(α), ∀ a, b: α
     a ∈ ∅             ≡ false
     -- a ∈ Ag(b, c)      ≡ (a = b) ∨ (a ∈ c)
     ∅?(∅)             ≡ true
