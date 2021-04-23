@@ -15,7 +15,7 @@ observadores básicos
     π2    : par(α1,α2) → α2
 
 generadores
-    ⟨•,•⟩ :            → par(α1,α2)
+    ⟨•,•⟩  : α1 × α2    → par(α1,α2)
 
 axiomas ∀a1: α1, ∀a2: α2
     π1(⟨a1,a2⟩) ≡ a1

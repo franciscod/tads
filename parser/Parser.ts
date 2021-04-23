@@ -21,10 +21,11 @@ export type ParseContext = {
     hints?: EditorHints;
 };
 
-type Section = "none" | "generos" | "igualdad" | "observadores" | "generadores" | "otras operaciones" | "axiomas";
+type Section = "none" | "parametros" | "generos" | "igualdad" | "observadores" | "generadores" | "otras operaciones" | "axiomas";
 
 function checkSectionHeader(line: string): Section {
     line = line.trimRight();
+    if (line.match(/\s+g[ée]neros/i)) return "parametros";
     if (line.match(/^g[ée]neros/i)) return "generos";
     if (line.match(/^ig(ualdad)? ?obs(ervacional)?$/i)) return "igualdad";
     if (line.match(/^obs(ervadores b[áa]sicos)?$/i)) return "observadores";
@@ -156,6 +157,7 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
         .map(l => l.split("--")[0].trimRight());
     const tad: TAD = {
         nombre: "",
+        parametros: [],
         generos: [],
         operaciones: [],
         variablesLibres: {},
@@ -229,6 +231,9 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
             continue;
         }
 
+        if(line.trim() === "parametros formales")
+            continue; // no es elegante pero funciona saludos
+
         // inicio de sección
         const section: Section = checkSectionHeader(line);
 
@@ -244,11 +249,12 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
                 })
             );
         } else if (section === "generos") {
-            const generos = line
+            /*const generos = line
                 .slice("generos".length)
                 .split(",")
                 .map(g => g.trim())
-                .filter(g => g.length);
+                .filter(g => g.length)*/
+            const generos = [line.slice("generos".length).trim()];
 
             for (let j = 0; j < generos.length; j++) {
                 if (tad.generos.length > 0) {
@@ -270,6 +276,17 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
                 }
                 tad.generos.push(generos[j]);
             }
+        } else if(section == 'parametros') {
+            const parametros = line
+                .trim()
+                .slice("generos".length)
+                .split(",")
+                .map(g => g.trim())
+                .filter(g => g.length);
+            
+            tad.parametros = tad.parametros.concat(parametros);
+            console.log(tad.parametros);
+            
         } else if (section == "igualdad") {
             // jaja saludos
         } else {

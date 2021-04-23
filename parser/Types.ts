@@ -49,6 +49,7 @@ export type Operacion = {
 //       si es transitiva o no, etc
 export type TAD = {
     nombre: string;
+    parametros: string[];
     generos: Genero[];
     operaciones: Operacion[];
     rawAxiomas: RawAxioma[];
