@@ -70,6 +70,7 @@ export function parseOperacion(
     left: string,
     right: string,
     section: Section,
+    tad: TAD,
     context?: ParseContext
 ): Operacion | null {
     // left:   • ∨L •
@@ -88,6 +89,7 @@ export function parseOperacion(
     };
 
     const op: Operacion = {
+        tad,
         nombre: left.replace(/ /g, "").trim(),
         type: sectionToOpType(section),
         tokens: [],
@@ -356,7 +358,7 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
                         };
                         if (section === "axiomas") tad.rawAxiomas.push(parseAxioma(left, rightBuffer, ctx));
                         else {
-                            const op: Operacion | null = parseOperacion(left, rightBuffer, section, ctx);
+                            const op: Operacion | null = parseOperacion(left, rightBuffer, section, tad, ctx);
                             if (op) tad.operaciones.push(op);
                         }
                     }
@@ -381,7 +383,7 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
                 };
                 if (section === "axiomas") tad.rawAxiomas.push(parseAxioma(left, rightBuffer, ctx));
                 else {
-                    const op: Operacion | null = parseOperacion(left, rightBuffer, section, ctx);
+                    const op: Operacion | null = parseOperacion(left, rightBuffer, section, tad, ctx);
                     if (op) tad.operaciones.push(op);
                 }
             }
