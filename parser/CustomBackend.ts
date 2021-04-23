@@ -3,7 +3,6 @@ import { Axioma, Expr, Genero, Grammar, Operacion, Operandos, TAD, VariablesLibr
 type CustomBackendData = {
     tads: TAD[];
     tokens: string[];
-    operaciones: Operacion[];
 };
 
 function genAxiomas(data: CustomBackendData): Axioma[] {
@@ -25,23 +24,13 @@ function genAxiomas(data: CustomBackendData): Axioma[] {
 }
 
 export function genGrammar(tads: TAD[]): Grammar {
-    let operaciones = tads.reduce((p: Operacion[], c) => p.concat(c.operaciones), []);
-
-    operaciones = operaciones.sort((a, b) => {
-        const slotsA = a.tokens.filter(t => t.type === "slot").length;
-        const slotsB = b.tokens.filter(t => t.type === "slot").length;
-        if (slotsA === slotsB) {
-            return b.tokens.length - a.tokens.length;
-        } else {
-            return slotsB - slotsA;
-        }
-    });
-
     const tokensSet = new Set<string>();
-    for (const op of operaciones) {
-        for (const token of op.tokens) {
-            if (token.type === "literal") {
-                tokensSet.add(token.symbol);
+    for (const tad of tads) {
+        for (const op of tad.operaciones) {
+            for (const token of op.tokens) {
+                if (token.type === "literal") {
+                    tokensSet.add(token.symbol);
+                }
             }
         }
     }
@@ -51,8 +40,7 @@ export function genGrammar(tads: TAD[]): Grammar {
 
     const data: CustomBackendData = {
         tads,
-        tokens,
-        operaciones,
+        tokens
     };
 
     return {
@@ -69,74 +57,76 @@ function process(input: string, data: CustomBackendData, vars: VariablesLibres =
     let index = 0;
     whileIdx: while (index < input.length || stack.length > 1 || (stack.length === 1 && typeof stack[0] === "string")) {
         // me fijo si matchea alguna operación la cola del stack
-        forOp: for (const op of data.operaciones) {
-            if (stack.length < op.tokens.length) continue;
+        for(const tad of data.tads) {
+            forOp: for (const op of tad.operaciones) {
+                if (stack.length < op.tokens.length) continue;
 
-            // armo expr por si termina siendo exitoso
-            const operandos: Operandos = { };
-            // track para los templates (α, b etc)
-            let templates: { [templateName: string]: Genero } = { };
+                // armo expr por si termina siendo exitoso
+                const operandos: Operandos = { };
+                // track para los templates (α, b etc)
+                let templates: { [templateName: string]: Genero } = { };
 
-            for (let i = 0; i < op.tokens.length; i++) {
-                const token = op.tokens[i];
-                const stack_elem = stack[stack.length - op.tokens.length + i];
+                for (let i = 0; i < op.tokens.length; i++) {
+                    const token = op.tokens[i];
+                    const stack_elem = stack[stack.length - op.tokens.length + i];
 
-                if (token.type === "literal") {
-                    // tiene que matchear exacto el chirimbolo
-                    if (stack_elem !== token.symbol) {
-                        continue forOp;
-                    }
-                    // chirimobolo ok :)
-                } else {
-                    // token.type === 'slot'
-                    // tiene que ser un Expr
-                    if (typeof stack_elem === "string") {
-                        continue forOp;
-                    }
-
-                    // tiene que tener el mismo genero
-                    if (op.tad.parametros.includes(token.genero) || token.genero === 'α') {
-                        // el slot es un parametro
-                        // entonces tengo que ver si matchea con el α
-                        // anterior o guardarlo si es nuevo
-                        if (token.genero in templates) {
-                            // ya había un α, me fijo que tengan el mismo género
-                            if (templates[token.genero] !== stack_elem.genero) {
-                                // no matchea con el alpha anterior!
-                                continue forOp;
-                            }
-                        } else {
-                            // no hay α anterior, podemos setearlo
-                            templates[token.genero] = stack_elem.genero;
-                        }
-                    } else {
-                        // son tipos definidos, hay que asegurarse que tengan el mismo genero
-                        if (token.genero !== stack_elem.genero) {
+                    if (token.type === "literal") {
+                        // tiene que matchear exacto el chirimbolo
+                        if (stack_elem !== token.symbol) {
                             continue forOp;
                         }
+                        // chirimobolo ok :)
+                    } else {
+                        // token.type === 'slot'
+                        // tiene que ser un Expr
+                        if (typeof stack_elem === "string") {
+                            continue forOp;
+                        }
+
+                        // tiene que tener el mismo genero
+                        if (tad.parametros.includes(token.genero) || token.genero === 'α') {
+                            // el slot es un parametro
+                            // entonces tengo que ver si matchea con el α
+                            // anterior o guardarlo si es nuevo
+                            if (token.genero in templates) {
+                                // ya había un α, me fijo que tengan el mismo género
+                                if (templates[token.genero] !== stack_elem.genero) {
+                                    // no matchea con el alpha anterior!
+                                    continue forOp;
+                                }
+                            } else {
+                                // no hay α anterior, podemos setearlo
+                                templates[token.genero] = stack_elem.genero;
+                            }
+                        } else {
+                            // son tipos definidos, hay que asegurarse que tengan el mismo genero
+                            if (token.genero !== stack_elem.genero) {
+                                continue forOp;
+                            }
+                        }
+
+                        // ta ok
+                        operandos[i] = stack_elem;
                     }
-
-                    // ta ok
-                    operandos[i] = stack_elem;
                 }
+
+                const expr: Expr = {
+                    type: "fijo",
+                    nombre: op.nombre,
+                    genero: op.retorno,
+                    operandos
+                };
+
+                // reemplaza los generos concretos en
+                // el genero de op.retorno
+                for(let templateName in templates) {
+                    expr.genero = expr.genero.split(templateName).join(templates[templateName]);
+                }
+
+                stack = stack.slice(0, -op.tokens.length);
+                stack.push(expr);
+                continue whileIdx;
             }
-
-            const expr: Expr = {
-                type: "fijo",
-                nombre: op.nombre,
-                genero: op.retorno,
-                operandos
-            };
-
-            // reemplaza los generos concretos en
-            // el genero de op.retorno
-            for(let templateName in templates) {
-                expr.genero = expr.genero.split(templateName).join(templates[templateName]);
-            }
-
-            stack = stack.slice(0, -op.tokens.length);
-            stack.push(expr);
-            continue whileIdx;
         }
 
         // consumo parentesis (ya sé que no matcheo ninguna op)
@@ -206,12 +196,21 @@ export function toExpr(input: string, grammar: Grammar, vars?: VariablesLibres):
 }
 
 function recFromExpr(expr: Expr, data: CustomBackendData): string {
-    const op = data.operaciones.find(op => op.nombre === expr.nombre);
-    if (!op) return "<ERROR>";
+    let opExpr: Operacion | null = null;
+    for(const tad of data.tads) {
+        for(const op of tad.operaciones) {
+            if(op.nombre === expr.nombre) {
+                opExpr = op;
+                break;
+            }
+        }
+    }
+
+    if (opExpr === null) return "<ERROR>";
 
     let buffer = "";
-    for (let i = 0; i < op.tokens.length; i++) {
-        const token = op.tokens[i];
+    for (let i = 0; i < opExpr.tokens.length; i++) {
+        const token = opExpr.tokens[i];
         if (token.type === "literal") {
             buffer += token.symbol;
         } else {

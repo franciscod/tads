@@ -89,7 +89,6 @@ export function parseOperacion(
     };
 
     const op: Operacion = {
-        tad,
         nombre: left.replace(/ /g, "").trim(),
         type: sectionToOpType(section),
         tokens: [],
@@ -287,8 +286,6 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
                 .filter(g => g.length);
             
             tad.parametros = tad.parametros.concat(parametros);
-            console.log(tad.parametros);
-            
         } else if (section == "igualdad") {
             // jaja saludos
         } else {

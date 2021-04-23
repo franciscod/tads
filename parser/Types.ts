@@ -40,7 +40,6 @@ export type Operacion = {
     tokens: Token[]; // como lo parseo a un nodo
     retorno: Genero;
     restriccion?: ExpresionLogica;
-    tad: TAD;
 } & SourceReference;
 
 // TODO: falta exporta, usa
