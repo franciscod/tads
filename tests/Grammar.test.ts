@@ -2,8 +2,7 @@ import { parseSource } from "../parser/Parser";
 
 import { Expr, Operacion } from "../parser/Types";
 import { fromExpr, genGrammar, toExpr } from "../parser/CustomBackend";
-import { genGrammar as genGrammar_ohm, toExpr as toExpr_ohm } from "../parser/OhmBackend";
-import { titleSlug } from "../parser/Util";
+import { genGrammar as genGrammar_ohm, toExpr as toExpr_ohm, titleSlug } from "../parser/OhmBackend";
 
 import { STATEMENTS, TADS } from "./Common";
 
