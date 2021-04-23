@@ -1,0 +1,24 @@
+TAD Par(α1,α2)
+
+parámetros formales
+    géneros α1, α2
+
+géneros par(α1,α2)
+
+igualdad observacional
+    (∀p, p': par(α1,α2) (p =obs p' ⇔ (π1(p) =obs π1(p') ∧ π2(p) =obs π2(p')))
+
+exporta par(α1,α2), generadores, observadores
+
+observadores básicos
+    π1    : par(α1,α2) → α1
+    π2    : par(α1,α2) → α2
+
+generadores
+    ⟨•,•⟩ :            → par(α1,α2)
+
+axiomas ∀a1: α1, ∀a2: α2
+    π1(⟨a1,a2⟩) ≡ a1
+    π2(⟨a1,a2⟩) ≡ a2
+
+Fin TAD
