@@ -41,3 +41,5 @@ estaría bueno hacer bien el tema de los colores (Colorization.ts)
     que se sienta menos vacio
 
 hacer que el evals.txt se genere con padding (como estaba al principio)
+
+quizas hacer un flamegraph para visualizar mejor el arbol de la expresion
