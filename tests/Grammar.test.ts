@@ -2,14 +2,14 @@ import { parseSource } from "../parser/Parser";
 
 import { Expr, Operacion } from "../parser/Types";
 import { fromExpr, genGrammar, toExpr } from "../parser/CustomBackend";
-import { genGrammar as genGrammar_ohm, toExpr as toExpr_ohm, titleSlug } from "../parser/OhmBackend";
+import ohmB from "../parser/OhmBackend";
 
 import { STATEMENTS, TADS } from "./Common";
 
 const [tads] = parseSource(TADS.join("\n"));
 
 const grammar = genGrammar(tads);
-const ohmGrammar = genGrammar_ohm(tads);
+const ohmGrammar = ohmB.genGrammar(tads);
 
 const padSize = 60;
 
@@ -43,7 +43,7 @@ for (const stmt of STATEMENTS) {
     // este test volará algún día?
     it("matchea ast ohm --- " + stmt.padEnd(padSize), () => {
         const expr = toExpr(stmt, grammar);
-        const expr_ref = toExpr_ohm(stmt, ohmGrammar);
+        const expr_ref = ohmB.toExpr(stmt, ohmGrammar);
 
         expect(expr).not.toBeNull();
         expect(expr_ref).not.toBeNull();
@@ -66,7 +66,7 @@ for (const stmt of STATEMENTS) {
         function typeToOhmType(type: string): string {
             const op = operaciones.find(op => op.nombre === type);
             if (!op) return "NULL";
-            return [op.type, op.nombre].reduce((p, e) => p + titleSlug(e), "");
+            return [op.type, op.nombre].reduce((p, e) => p + ohmB.titleSlug(e), "");
         }
 
         // genera un nuevo arbol sin el genero y con los tipos

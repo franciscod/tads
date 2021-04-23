@@ -284,7 +284,7 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
                 .split(",")
                 .map(g => g.trim())
                 .filter(g => g.length);
-            
+
             tad.parametros = tad.parametros.concat(parametros);
         } else if (section == "igualdad") {
             // jaja saludos
@@ -343,22 +343,7 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
                 const split = line.split(splitter);
                 if (split.length === 2) {
                     // anterior
-                    if (left.length > 0) {
-                        const ctx: ParseContext = {
-                            hints: context?.hints,
-                            range: offsetRange({
-                                startLine: 1 + startLine - 1,
-                                endLine: 1 + i - 1,
-                                columnStart: 1,
-                                columnEnd: 1 + line.length,
-                            }),
-                        };
-                        if (section === "axiomas") tad.rawAxiomas.push(parseAxioma(left, rightBuffer, ctx));
-                        else {
-                            const op: Operacion | null = parseOperacion(left, rightBuffer, section, tad, ctx);
-                            if (op) tad.operaciones.push(op);
-                        }
-                    }
+                    lombiStep(offsetRange, i, left, context, startLine, line, tad, rightBuffer, section);
                     startLine = i;
                     left = split[0];
                     rightBuffer = split[1];
@@ -368,22 +353,7 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
 
                 i++;
             }
-            if (left.length > 0) {
-                const ctx: ParseContext = {
-                    hints: context?.hints,
-                    range: offsetRange({
-                        startLine: 1 + startLine - 1,
-                        endLine: 1 + i - 1,
-                        columnStart: 1,
-                        columnEnd: 1 + line.length,
-                    }),
-                };
-                if (section === "axiomas") tad.rawAxiomas.push(parseAxioma(left, rightBuffer, ctx));
-                else {
-                    const op: Operacion | null = parseOperacion(left, rightBuffer, section, tad, ctx);
-                    if (op) tad.operaciones.push(op);
-                }
-            }
+            lombiStep(offsetRange, i, left, context, startLine, line, tad, rightBuffer, section);
         }
     }
 
@@ -466,4 +436,26 @@ export function parseSource(source: string, hints?: EditorHints): [TAD[], Eval[]
     }
 
     return [tads, evals];
+}
+
+// TODO: name this, put reasonable type annotations instead of any
+function lombiStep(offsetRange: any, i: any, left: any, context: any,
+                   startLine: any, line: any, tad: any, rightBuffer: any,
+                   section: any) {
+    if (left.length > 0) {
+        const ctx: ParseContext = {
+            hints: context?.hints,
+            range: offsetRange({
+                startLine: 1 + startLine - 1,
+                endLine: 1 + i - 1,
+                columnStart: 1,
+                columnEnd: 1 + line.length,
+            }),
+        };
+        if (section === "axiomas") tad.rawAxiomas.push(parseAxioma(left, rightBuffer, ctx));
+        else {
+            const op: Operacion | null = parseOperacion(left, rightBuffer, section, tad, ctx);
+            if (op) tad.operaciones.push(op);
+        }
+    }
 }
