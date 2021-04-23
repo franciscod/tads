@@ -9,7 +9,7 @@ type OhmSourceResult = {
     fromAST: (expr: OhmExpr) => string;
 };
 
-export type OhmExpr = {
+type OhmExpr = {
     type: string;
     [key: number]: OhmExpr;
 }
@@ -118,7 +118,7 @@ function auxAxiomasAST(tads: TAD[]): Axioma[] {
     return ret;
 }
 
-export function genGrammar(tads: TAD[]): Grammar {
+function genGrammar(tads: TAD[]): Grammar {
     const ops = tads.reduce((p: Operacion[], c) => p.concat(c.operaciones), []);
     const result = ohmGenGrammarSource(ops, {});
     const axiomas = auxAxiomasAST(tads);
@@ -141,15 +141,15 @@ function ohmToExpr(input: string, backend: OhmSourceResult): OhmExpr | null {
     return toAST(match, baseMapping);
 }
 
-export function toExpr(input: string, grammar: Grammar): OhmExpr | null {
+function toExpr(input: string, grammar: Grammar): OhmExpr | null {
     return ohmToExpr(input, grammar.backendGrammar);
 }
 
-export function fromExpr(expr: OhmExpr, grammar: Grammar): string {
+function fromExpr(expr: OhmExpr, grammar: Grammar): string {
     return (grammar.backendGrammar as OhmSourceResult).fromAST(expr);
 }
 
-export function titleSlug(s: string): string {
+function titleSlug(s: string): string {
     s = s.replace(/•/g, "");
     s = s.replace(/α/g, "alpha");
     s = s.replace(/π/g, "pi");
@@ -183,3 +183,10 @@ export function titleSlug(s: string): string {
 
     return s[0].toUpperCase() + s.substr(1).toLowerCase();
 }
+
+export default {
+    genGrammar,
+    toExpr,
+    fromExpr,
+    titleSlug,
+};
