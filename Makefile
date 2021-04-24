@@ -1,6 +1,10 @@
 test:
-	make -C tests/
 	NO_COLOR=1 npm run test
+
+gen: gentests test
+
+gentests:
+	make -C tests/
 
 testloop:
 	NO_COLOR=1 ls parser/* tests/* | entr -c npm run test
@@ -17,4 +21,4 @@ format:
 lint:
 	npm run lint
 
-.PHONY: test testloop todo dev run format lint
+.PHONY: test testloop todo dev run format lint gen gentests

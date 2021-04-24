@@ -20,6 +20,27 @@ export function evalGrammar(expr: Expr, grammar: Grammar): Expr {
 }
 
 export function evalStep(expr: Expr, grammar: Grammar): [boolean, Expr] {
+
+    if (expr.nombre ===  "•=•") {
+        // IGUALDAD OBSERVACIONAL
+
+        // TODO: mejorar, usando la def de igobs del tad
+
+        // en ningun lado dice que dos cosas con la misma syntax son igobs,
+        // pero si no vale estamos fritos
+
+        const igobs = JSON.stringify(expr.operandos[0]) === JSON.stringify(expr.operandos[2])
+
+        const ret: Expr = {
+            type: "fijo",
+            nombre: "" + igobs,
+            genero: {base: "bool", parametros: {}},
+            operandos: {},
+        }
+
+        return [true, ret];
+    }
+
     const axiomasEnRaiz = grammar.axiomas.filter(a => a[0].nombre === expr.nombre);
 
     forAxiomaEnRaiz: for (const [left, right] of axiomasEnRaiz) {

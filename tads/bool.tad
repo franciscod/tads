@@ -22,6 +22,9 @@ otras operaciones
     • ⇒L •                : bool × bool  → bool
     -- β esta definida en Nat
 
+    -- yapa del lenguaje: IGUALDAD OBSERVACIONAL
+    • = •                : α × α → bool
+
 axiomas ∀ x, y: bool, ∀ a, b: α
     if true  then a else b fi ≡ a
     if false then a else b fi ≡ b
@@ -33,5 +36,7 @@ axiomas ∀ x, y: bool, ∀ a, b: α
     x ∧L y                    ≡ if x then y else false fi
     x ⇒L y                    ≡ (¬x) ∨L y -- parentesis por la precedencia
     -- β esta axiomatizada en Nat
+
+    -- a = b no se axiomatiza, el eval tiene magia. pero devuelve bool
 
 Fin TAD
