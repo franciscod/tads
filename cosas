@@ -51,7 +51,9 @@ vs-services stuff:
         Nombre de TAD incompleto
         Se esperaba un FIN TAD
     
-    autocomplete:
-        tokens (facil)
+    autocomplete: tokens (facil)
     
-    
+    hover: te da info de lo que esté hovereado
+        - 
+
+    definitions: control + click para navegar
