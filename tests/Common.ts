@@ -19,7 +19,7 @@ function parsePares(input: string, sep: string) : { left: string; right: string;
         .split("\n")
         .map((l, i) => {
             l = l.split("--")[0];
-            if (!l) return null;
+            if (!l) return { left: "", right: "", line: -1 };
 
             const s = l.split(sep);
             return {
@@ -28,7 +28,7 @@ function parsePares(input: string, sep: string) : { left: string; right: string;
                 line: i,
             };
         })
-        .filter(e => e !== null);
+        .filter(e => e.line >= 0);
 }
 
 export const EVALS   = parsePares(EVALS_TXT + IGOBS_TXT + NOIGOBS_TXT,  " -> ");
