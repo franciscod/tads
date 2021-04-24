@@ -1,4 +1,5 @@
 test:
+	make -C tests/
 	NO_COLOR=1 npm run test
 
 testloop:

@@ -4,7 +4,7 @@ import { Expr, Operacion } from "../parser/Types";
 import { fromExpr, genGrammar, toExpr } from "../parser/CustomBackend";
 import ohmB from "../parser/OhmBackend";
 
-import { INVALID_STATEMENTS, STATEMENTS, TADS } from "./Common";
+import { INVALID_STATEMENTS, VALID_STATEMENTS, TADS } from "./Common";
 
 const [tads] = parseSource(TADS.join("\n"));
 
@@ -15,11 +15,11 @@ const padSize = 60;
 
 it("vacio tiene que fallar", () => expect(toExpr("", grammar)).toBeNull());
 
-for (const stmt of STATEMENTS) {
+for (const stmt of VALID_STATEMENTS) {
     it("parsea --- " + stmt.padEnd(padSize), () => expect(toExpr(stmt, grammar)).not.toBeNull());
 }
 
-for (const stmt of STATEMENTS) {
+for (const stmt of VALID_STATEMENTS) {
     it("stmt -> Expr -> stmt -> Expr --- " + stmt.padEnd(padSize), () => {
         const expr1 = toExpr(stmt, grammar);
         expect(expr1).not.toBeNull();
@@ -43,11 +43,11 @@ const excepciones_ohm = [
     "π2(⟨ false, suc(0) ⟩) + suc(0)"
 ];
 
-for (const stmt of STATEMENTS) {
+for (const stmt of VALID_STATEMENTS) {
     if (excepciones_ohm.includes(stmt)) continue;
 
-    // este test volará algún día?
-    it("matchea ast ohm --- " + stmt.padEnd(padSize), () => {
+    // este test volará algún día? yes
+    0 && it("matchea ast ohm --- " + stmt.padEnd(padSize), () => {
         const expr = toExpr(stmt, grammar);
         const expr_ref = ohmB.toExpr(stmt, ohmGrammar);
 

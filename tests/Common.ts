@@ -1,7 +1,9 @@
 import fs from "fs";
 
-export const EVALS_TXT = fs.readFileSync("tests/evals.txt", "utf-8");
-export const INVALIDS_TXT = fs.readFileSync("tests/invalid_statements.txt", "utf-8");
+export const EVALS_TXT = fs.readFileSync("tests/casos_eval.txt", "utf-8");
+export const INVALIDS_TXT = fs.readFileSync("tests/casos_noparse.txt", "utf-8");
+export const VALIDS_TXT = fs.readFileSync("tests/casos_parse.txt", "utf-8");
+
 export const BOOL_TAD = fs.readFileSync("tads/bool.tad", "utf-8");
 export const NAT_TAD = fs.readFileSync("tads/nat.tad", "utf-8");
 export const INT_TAD = fs.readFileSync("tads/int.tad", "utf-8");
@@ -28,7 +30,7 @@ export const EVALS: { left: string; right: string; line: number }[] = EVALS_TXT.
 // los statements son todas expresiones validas
 // sacadas de ambos lados de los evals
 // sirven para checkear parsing y otras cosas
-export const STATEMENTS: string[] = Array.from(
+const EVAL_STATEMENTS: string[] = Array.from(
     new Set(EVALS.reduce((p: string[], c) => p.concat(c.left, c.right), []))
 );
 
@@ -36,4 +38,13 @@ export const STATEMENTS: string[] = Array.from(
 export const INVALID_STATEMENTS: string[] = INVALIDS_TXT
     .replace(/\r\n/g, "\n")
     .split("\n")
-    .map(l => l.split("--")[0]);
+    .map(l => l.split("--")[0])
+    .filter(l => l.length > 0);
+
+// estos son statements que no deberían fallar al parsear
+export const VALID_STATEMENTS: string[] = VALIDS_TXT
+    .replace(/\r\n/g, "\n")
+    .split("\n")
+    .map(l => l.split("--")[0])
+    .filter(l => l.length > 0)
+    .concat(EVAL_STATEMENTS);

@@ -2,6 +2,10 @@ import csv
 import fileinput
 import hashlib
 import unicodedata
+import sys
+
+filtro_tipo = sys.argv[1]
+del sys.argv[1]
 
 reader = csv.reader(fileinput.input())
 
@@ -10,8 +14,8 @@ print("-- autogenerado del csv")
 
 for row in reader:
     escritoPor, tipoTest, expresion, deberiaEvaluarA, comentario, *deshabilitadoHasta = row
-    if tipoTest != "eval":
-        print('-- (linea que no es un caso de eval)')
+    if tipoTest != filtro_tipo:
+        print('-- (linea que no es un caso de tipo "{}")'.format(filtro_tipo))
         continue
 
     if ''.join(deshabilitadoHasta):
@@ -22,4 +26,9 @@ for row in reader:
 
     if deberiaEvaluarA.lower() in ("true", "false"):
         deberiaEvaluarA = deberiaEvaluarA.lower()
-    print("".join([expresion.strip(), " = ", deberiaEvaluarA.strip()]) + ((" --" + comentario) if comentario else ""))
+
+    joiner = {"eval": " = "}
+    print("".join([expresion.strip(),
+                   joiner.get(tipoTest, ""),
+                   deberiaEvaluarA.strip()]) +
+          ((" --" + comentario) if comentario else ""))
