@@ -1,7 +1,5 @@
 -- autogenerado del csv
 
-if false then ⟨ false, suc(0) ⟩ else ⟨ true, 0 ⟩ fi = ⟨ false, suc(0) ⟩
-
 true = true
 false = false
 if true then true else true fi = true
@@ -156,3 +154,5 @@ negativo?(+suc(0)) = false
 π2(⟨ ⟨ true, 0 ⟩, ⟨ +0, ⟨ suc(0), ∅ ⟩ ⟩ ⟩) = ⟨ +0, ⟨ suc(0), ∅ ⟩ ⟩
 π1(π1(⟨⟨0,0⟩,⟨0,0⟩⟩)) + 0 = 0
 π1(π2(⟨ ⟨ true, 0 ⟩, ⟨ +0, ⟨ suc(0), ∅ ⟩ ⟩ ⟩)) + +0 = +0
+if true then ⟨ false, suc(0) ⟩ else ⟨ true, 0 ⟩ fi = ⟨ false, suc(0) ⟩
+if false then ⟨ false, suc(0) ⟩ else ⟨ true, 0 ⟩ fi = ⟨ true, 0 ⟩
