@@ -12,7 +12,7 @@ function debuglog(x: any) {
 export function evalGrammar(expr: Expr, grammar: Grammar): Expr {
     let run = true;
     let ret: Expr = expr;
-    for (let i = 0; i < 200 && run; i++) {
+    for (let i = 0; i < 400 && run; i++) {
         [run, ret] = evalStep(ret, grammar);
     }
 

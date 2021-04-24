@@ -126,7 +126,7 @@ a + 0
 mín(true, 0)
 mín(+0, 0)
 máx(0, suc())
--- deshabilitadoHasta(restricciones,): pred(0)
+-- deshabilitadoHasta(restricciones): pred(0)
 0 ≤ +0
 negativo?(0)
 |0|
