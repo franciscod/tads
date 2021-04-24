@@ -27,8 +27,19 @@ for row in reader:
     if deberiaEvaluarA.lower() in ("true", "false"):
         deberiaEvaluarA = deberiaEvaluarA.lower()
 
-    joiner = {"eval": " = "}
+    joiner = {
+                "eval":    " -> ",
+                "igobs":   " = ",
+                "noigobs": " = ",
+             }
+
+    trailer = {
+                "igobs":   " -> true",
+                "noigobs": " -> false",
+             }
+
     print("".join([expresion.strip(),
                    joiner.get(tipoTest, ""),
                    deberiaEvaluarA.strip()]) +
+          trailer.get(tipoTest, "") +
           ((" --" + comentario) if comentario else ""))

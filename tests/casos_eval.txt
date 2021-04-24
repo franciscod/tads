@@ -1,105 +1,103 @@
 -- autogenerado del csv
-true = true
-false = false
-if true then true else true fi = true
-if true then true else false fi = true
-if true then false else true fi = false
-if true then false else false fi = false
-if false then true else true fi = true
-if false then true else false fi = false
-if false then false else true fi = true
-if false then false else false fi = false
-¬true = false --not
-¬false = true
-¬¬true = true
-¬¬false = false
-true ∨ true = true --or
-true ∨ false = true
-false ∨ true = true
-false ∨ false = false
-true ∧ true = true --and
-true ∧ false = false
-false ∧ true = false
-false ∧ false = false
-true ∨L false = true
-true ⇒ true = true --then
-true ⇒ false = false
-false ⇒ true = true
-false ⇒ false = true
-false ∨ (false ∧ true) = false
-true ∧ (false ∨ true) = true
-¬ if true then false else true fi = true
-if ¬true then ¬false else ¬true fi = false
-¬false ∨ ¬false = true
-(¬false) ∨ (¬false) = true
-0 = 0
-suc(0) = suc(0)
-suc(suc(0)) = suc(suc(0))
-0 =0? = true
-suc(0) =0? = false
-0 + 0 = 0
-0 - 0 = 0
-suc(0) + 0 = suc(0)
-0 + suc(0) = suc(0)
-suc(0) - 0 = suc(0)
-suc(0) + suc(0) = suc(suc(0))
-suc(0) - suc(0) = 0
-suc(0) × 0 = 0
-0 × suc(0) = 0
-suc(0) × suc(0) = suc(0)
-suc(suc(0)) × suc(0) = suc(suc(0))
-0 < suc(0) = true
-0 < 0 = false
-suc(0) < suc(0) = false
--- deshabilitadoHasta(tenerIgual,): suc(0) ≤ suc(0) = true
-mín(suc(0), 0) = 0
-máx(suc(0), 0) = suc(0)
-mín(suc(0), suc(suc(0))) = suc(0)
-máx(suc(0), suc(suc(0))) = suc(suc(0))
-suc(suc(suc(0))) - suc(suc(0)) = suc(0)
-suc(suc(suc(0))) + suc(suc(0)) = suc(suc(suc(suc(suc(0)))))
-β(false) = 0
-β(true) = suc(0)
-β(if true then false else true fi) = 0
-β(suc(0) < suc(suc(0))) = suc(0)
-pred(suc(0)) = 0
-suc(pred(suc(0))) = suc(0)
-pred(β(true)) = 0
-pred(máx(suc(0), suc(suc(0)))) = suc(0)
-pred(suc(β(false ∨ true))) = suc(0)
-mín(suc(suc(0)), máx(0, suc(0))) = suc(0)
-¬ suc(suc(0)) < suc(0) = true
-∅?(∅) = true
-#(∅) = 0
-∅ ∪ ∅ = ∅
-#(∅ ∪ ∅) = 0
--- deshabilitadoHasta(tenerIgual,): #(Ag(0, Ag(0, ∅))) = suc(0)
--- deshabilitadoHasta(tenerIgual,): #(Ag(0, Ag(suc(0), ∅))) = suc(suc(0))
+true -> true
+false -> false
+if true then true else true fi -> true
+if true then true else false fi -> true
+if true then false else true fi -> false
+if true then false else false fi -> false
+if false then true else true fi -> true
+if false then true else false fi -> false
+if false then false else true fi -> true
+if false then false else false fi -> false
+¬true -> false --not
+¬false -> true
+¬¬true -> true
+¬¬false -> false
+true ∨ true -> true --or
+true ∨ false -> true
+false ∨ true -> true
+false ∨ false -> false
+true ∧ true -> true --and
+true ∧ false -> false
+false ∧ true -> false
+false ∧ false -> false
+true ∨L false -> true
+true ⇒ true -> true --then
+true ⇒ false -> false
+false ⇒ true -> true
+false ⇒ false -> true
+false ∨ (false ∧ true) -> false
+true ∧ (false ∨ true) -> true
+¬ if true then false else true fi -> true
+if ¬true then ¬false else ¬true fi -> false
+¬false ∨ ¬false -> true
+(¬false) ∨ (¬false) -> true
+0 -> 0
+suc(0) -> suc(0)
+suc(suc(0)) -> suc(suc(0))
+0 =0? -> true
+suc(0) =0? -> false
+0 + 0 -> 0
+0 - 0 -> 0
+suc(0) + 0 -> suc(0)
+0 + suc(0) -> suc(0)
+suc(0) - 0 -> suc(0)
+suc(0) + suc(0) -> suc(suc(0))
+suc(0) - suc(0) -> 0
+suc(0) × 0 -> 0
+0 × suc(0) -> 0
+suc(0) × suc(0) -> suc(0)
+suc(suc(0)) × suc(0) -> suc(suc(0))
+0 < suc(0) -> true
+0 < 0 -> false
+suc(0) < suc(0) -> false
+-- deshabilitadoHasta(tenerIgual,): suc(0) ≤ suc(0) -> true
+mín(suc(0), 0) -> 0
+máx(suc(0), 0) -> suc(0)
+mín(suc(0), suc(suc(0))) -> suc(0)
+máx(suc(0), suc(suc(0))) -> suc(suc(0))
+suc(suc(suc(0))) - suc(suc(0)) -> suc(0)
+suc(suc(suc(0))) + suc(suc(0)) -> suc(suc(suc(suc(suc(0)))))
+β(false) -> 0
+β(true) -> suc(0)
+β(if true then false else true fi) -> 0
+β(suc(0) < suc(suc(0))) -> suc(0)
+pred(suc(0)) -> 0
+suc(pred(suc(0))) -> suc(0)
+pred(β(true)) -> 0
+pred(máx(suc(0), suc(suc(0)))) -> suc(0)
+pred(suc(β(false ∨ true))) -> suc(0)
+mín(suc(suc(0)), máx(0, suc(0))) -> suc(0)
+¬ suc(suc(0)) < suc(0) -> true
+∅?(∅) -> true
+#(∅) -> 0
+∅ ∪ ∅ -> ∅
+#(∅ ∪ ∅) -> 0
+-- deshabilitadoHasta(tenerIgual,): #(Ag(0, Ag(0, ∅))) -> suc(0)
+-- deshabilitadoHasta(tenerIgual,): #(Ag(0, Ag(suc(0), ∅))) -> suc(suc(0))
 -- (linea que no es un caso de tipo "eval")
-negativo?(-|-suc(suc(0))|) = true
--- deshabilitadoHasta(,menosInt, menorIgual): |-suc(suc(0))|-|suc(suc(0))| = 0
--- (linea que no es un caso de tipo "eval")
--- (linea que no es un caso de tipo "eval")
-negativo?(-suc(0)) = true
-negativo?(+0) = false
-negativo?(+suc(0)) = false
-| +0 | = 0
-| -suc(0) | = suc(0)
-| +suc(0) | = suc(0)
--- (linea que no es un caso de tipo "eval")
-+suc(0) + +suc(0) = +suc(suc(0))
--- (linea que no es un caso de tipo "eval")
-⟨ 0, true ⟩ = ⟨ 0, true ⟩
-π1(⟨ false, suc(0) ⟩) = false
-π2(⟨ false, suc(0) ⟩) + suc(0) = suc(suc(0))
-π2(⟨ false, suc(0) ⟩) = suc(0)
-π2(⟨ ⟨ true, 0 ⟩, ⟨ +0, ⟨ suc(0), ∅ ⟩ ⟩ ⟩) = ⟨ +0, ⟨ suc(0), ∅ ⟩ ⟩
-π1(π1(⟨⟨0,0⟩,⟨0,0⟩⟩)) + 0 = 0
-π1(π2(⟨ ⟨ true, 0 ⟩, ⟨ +0, ⟨ suc(0), ∅ ⟩ ⟩ ⟩)) + +0 = +0
-if true then ⟨ false, suc(0) ⟩ else ⟨ true, 0 ⟩ fi = ⟨ false, suc(0) ⟩
-if false then ⟨ false, suc(0) ⟩ else ⟨ true, 0 ⟩ fi = ⟨ true, 0 ⟩
+negativo?(-|-suc(suc(0))|) -> true
+-- deshabilitadoHasta(,menosInt, menorIgual): |-suc(suc(0))|-|suc(suc(0))| -> 0
 -- (linea que no es un caso de tipo "eval")
 -- (linea que no es un caso de tipo "eval")
+negativo?(-suc(0)) -> true
+negativo?(+0) -> false
+negativo?(+suc(0)) -> false
+| +0 | -> 0
+| -suc(0) | -> suc(0)
+| +suc(0) | -> suc(0)
+-- (linea que no es un caso de tipo "eval")
++suc(0) + +suc(0) -> +suc(suc(0))
+-- (linea que no es un caso de tipo "eval")
+⟨ 0, true ⟩ -> ⟨ 0, true ⟩
+π1(⟨ false, suc(0) ⟩) -> false
+π2(⟨ false, suc(0) ⟩) + suc(0) -> suc(suc(0))
+π2(⟨ false, suc(0) ⟩) -> suc(0)
+π2(⟨ ⟨ true, 0 ⟩, ⟨ +0, ⟨ suc(0), ∅ ⟩ ⟩ ⟩) -> ⟨ +0, ⟨ suc(0), ∅ ⟩ ⟩
+π1(π1(⟨⟨0,0⟩,⟨0,0⟩⟩)) + 0 -> 0
+π1(π2(⟨ ⟨ true, 0 ⟩, ⟨ +0, ⟨ suc(0), ∅ ⟩ ⟩ ⟩)) + +0 -> +0
+if true then ⟨ false, suc(0) ⟩ else ⟨ true, 0 ⟩ fi -> ⟨ false, suc(0) ⟩
+if false then ⟨ false, suc(0) ⟩ else ⟨ true, 0 ⟩ fi -> ⟨ true, 0 ⟩
 -- (linea que no es un caso de tipo "eval")
 -- (linea que no es un caso de tipo "eval")
 -- (linea que no es un caso de tipo "eval")
@@ -139,58 +137,65 @@ if false then ⟨ false, suc(0) ⟩ else ⟨ true, 0 ⟩ fi = ⟨ true, 0 ⟩
 -- (linea que no es un caso de tipo "eval")
 -- (linea que no es un caso de tipo "eval")
 -- (linea que no es un caso de tipo "eval")
--- deshabilitadoHasta(,sumaInt, menorIgual): +suc(0) + -suc(0) = +0
--- deshabilitadoHasta(,sumaInt, menorIgual): (+suc(0)) + -suc(0) = +0
--- deshabilitadoHasta(,sumaInt, menorIgual): -suc(0) + +suc(0) = +0
--- deshabilitadoHasta(,sumaInt, menorIgual): (-suc(0)) + +suc(0) = +0
--- deshabilitadoHasta(,sumaInt, menorIgual): -suc(0) - -suc(0) = +0
--- deshabilitadoHasta(,sumaInt, menorIgual): (-suc(0)) - -suc(0) = +0
 -- (linea que no es un caso de tipo "eval")
--- deshabilitadoHasta(,sumaInt, menorIgual): -suc(0) + -suc(0) = -suc(suc(0))
--- deshabilitadoHasta(,sumaInt, menorIgual): +0 + +suc(0) = +suc(0)
--- deshabilitadoHasta(,sumaInt, menorIgual): +suc(0) + +0 = +suc(0)
--- deshabilitadoHasta(,sumaInt, menorIgual): +0 + -suc(0) = -suc(0)
 -- (linea que no es un caso de tipo "eval")
--- deshabilitadoHasta(,sumaInt, menorIgual): -suc(0) + +0 = -suc(0)
--- deshabilitadoHasta(,sumaInt, menorIgual): -(suc(0)) + +0 = -suc(0)
--- deshabilitadoHasta(,sumaInt, menorIgual): +0 - +suc(0) = -suc(0)
--- deshabilitadoHasta(,sumaInt, menorIgual): (+0) - +suc(0) = -suc(0)
--- deshabilitadoHasta(,sumaInt, menorIgual): +0 - -suc(0) = +suc(0)
--- deshabilitadoHasta(,sumaInt, menorIgual): (+0) - -suc(0) = +suc(0)
--- deshabilitadoHasta(,sumaInt, menorIgual): -suc(0) + +0 = -suc(0)
--- deshabilitadoHasta(,sumaInt, menorIgual): (-suc(0)) + +0 = -suc(0)
--- deshabilitadoHasta(,sumaInt, menorIgual): -suc(0) - +0 = -suc(0)
--- deshabilitadoHasta(,sumaInt, menorIgual): (-suc(0)) - +0 = -suc(0)
--- deshabilitadoHasta(,sumaInt, menorIgual): -suc(0) - +(0) = -suc(0)
--- deshabilitadoHasta(,sumaInt, menorIgual): (-suc(0)) - +(0) = -suc(0)
+-- deshabilitadoHasta(,sumaInt, menorIgual): +suc(0) + -suc(0) -> +0
+-- deshabilitadoHasta(,sumaInt, menorIgual): (+suc(0)) + -suc(0) -> +0
+-- deshabilitadoHasta(,sumaInt, menorIgual): -suc(0) + +suc(0) -> +0
+-- deshabilitadoHasta(,sumaInt, menorIgual): (-suc(0)) + +suc(0) -> +0
+-- deshabilitadoHasta(,sumaInt, menorIgual): -suc(0) - -suc(0) -> +0
+-- deshabilitadoHasta(,sumaInt, menorIgual): (-suc(0)) - -suc(0) -> +0
 -- (linea que no es un caso de tipo "eval")
--- deshabilitadoHasta(,sumaInt, menorIgual): +0 × +suc(0) = +0
--- deshabilitadoHasta(,sumaInt, menorIgual): +0 × -suc(0) = +0
--- deshabilitadoHasta(,sumaInt, menorIgual): +suc(0) × +0 = +0
--- deshabilitadoHasta(,sumaInt, menorIgual): -suc(0) × +0 = +0
--- deshabilitadoHasta(,sumaInt, menorIgual): +suc(0) × +suc(0) = +suc(0)
--- deshabilitadoHasta(sugar numeros,sumaInt, menorIgual): +suc(0) × +suc(0) = +1
--- deshabilitadoHasta(,sumaInt, menorIgual): +suc(0) × -suc(0) = -suc(0)
--- deshabilitadoHasta(sugar numeros,sumaInt, menorIgual): +suc(0) × -suc(0) = -1
--- deshabilitadoHasta(,sumaInt, menorIgual): -suc(0) × +suc(0) = -suc(0)
--- deshabilitadoHasta(sugar numeros,sumaInt, menorIgual): -suc(0) × +suc(0) = -1
--- deshabilitadoHasta(,sumaInt, menorIgual): -suc(0) × -suc(0) = +suc(0)
--- deshabilitadoHasta(sugar numeros,sumaInt, menorIgual): -suc(0) × -suc(0) = +1
--- deshabilitadoHasta(,sumaInt, menorIgual): +0 × +0 = +0
--- deshabilitadoHasta(,sumaInt, menorIgual): +suc(suc(0)) × +suc(0) = +suc(suc(0))
--- deshabilitadoHasta(sugar numeros,sumaInt, menorIgual): +suc(suc(0)) × +suc(0) = +2
--- deshabilitadoHasta(,sumaInt, menorIgual): +suc(suc(0)) × -suc(0) = -suc(suc(0))
--- deshabilitadoHasta(sugar numeros,sumaInt, menorIgual): +suc(suc(0)) × -suc(0) = -2
--- deshabilitadoHasta(,sumaInt, menorIgual): +suc(suc(0)) × +suc(suc(0)) = +suc(suc(suc(suc(0))))
--- deshabilitadoHasta(sugar numeros,sumaInt, menorIgual): +suc(suc(0)) × +suc(suc(0)) = +4
--- deshabilitadoHasta(,sumaInt, menorIgual): +suc(suc(0)) × -suc(suc(0)) = -suc(suc(suc(suc(0))))
--- deshabilitadoHasta(sugar numeros,sumaInt, menorIgual): +suc(suc(0)) × -suc(suc(0)) = -4
--- deshabilitadoHasta(,sumaInt, menorIgual): -suc(suc(0)) × -suc(0) = +suc(suc(0))
--- deshabilitadoHasta(sugar numeros,sumaInt, menorIgual): -suc(suc(0)) × -suc(0) = +2
--- deshabilitadoHasta(,sumaInt, menorIgual): -suc(suc(0)) × -suc(suc(0)) = +suc(suc(suc(suc(0))))
--- deshabilitadoHasta(sugar numeros,sumaInt, menorIgual): -suc(suc(0)) × -suc(suc(0)) = +4
+-- deshabilitadoHasta(,sumaInt, menorIgual): -suc(0) + -suc(0) -> -suc(suc(0))
+-- deshabilitadoHasta(,sumaInt, menorIgual): +0 + +suc(0) -> +suc(0)
+-- deshabilitadoHasta(,sumaInt, menorIgual): +suc(0) + +0 -> +suc(0)
+-- deshabilitadoHasta(,sumaInt, menorIgual): +0 + -suc(0) -> -suc(0)
 -- (linea que no es un caso de tipo "eval")
--- deshabilitadoHasta(,sumaInt, menorIgual): suc(suc(0)) × suc(suc(suc(0))) + suc(suc(suc(suc(suc(0))))) = suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(0))))))))))) --precedencia
--- deshabilitadoHasta(,sumaInt, menorIgual): suc(suc(suc(suc(suc(0))))) + suc(suc(suc(0))) × suc(suc(0)) = suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(0))))))))))) --precedencia
--- deshabilitadoHasta(sugar numeros,sumaInt, menorIgual): 2 × 3 + 5 = 11 --precedencia, numeros
--- deshabilitadoHasta(sugar numeros,sumaInt, menorIgual): 5 + 3 × 2 = 11 --precedencia, numeros
+-- deshabilitadoHasta(,sumaInt, menorIgual): -suc(0) + +0 -> -suc(0)
+-- deshabilitadoHasta(,sumaInt, menorIgual): -(suc(0)) + +0 -> -suc(0)
+-- deshabilitadoHasta(,sumaInt, menorIgual): +0 - +suc(0) -> -suc(0)
+-- deshabilitadoHasta(,sumaInt, menorIgual): (+0) - +suc(0) -> -suc(0)
+-- deshabilitadoHasta(,sumaInt, menorIgual): +0 - -suc(0) -> +suc(0)
+-- deshabilitadoHasta(,sumaInt, menorIgual): (+0) - -suc(0) -> +suc(0)
+-- deshabilitadoHasta(,sumaInt, menorIgual): -suc(0) + +0 -> -suc(0)
+-- deshabilitadoHasta(,sumaInt, menorIgual): (-suc(0)) + +0 -> -suc(0)
+-- deshabilitadoHasta(,sumaInt, menorIgual): -suc(0) - +0 -> -suc(0)
+-- deshabilitadoHasta(,sumaInt, menorIgual): (-suc(0)) - +0 -> -suc(0)
+-- deshabilitadoHasta(,sumaInt, menorIgual): -suc(0) - +(0) -> -suc(0)
+-- deshabilitadoHasta(,sumaInt, menorIgual): (-suc(0)) - +(0) -> -suc(0)
+-- (linea que no es un caso de tipo "eval")
+-- deshabilitadoHasta(,sumaInt, menorIgual): +0 × +suc(0) -> +0
+-- deshabilitadoHasta(,sumaInt, menorIgual): +0 × -suc(0) -> +0
+-- deshabilitadoHasta(,sumaInt, menorIgual): +suc(0) × +0 -> +0
+-- deshabilitadoHasta(,sumaInt, menorIgual): -suc(0) × +0 -> +0
+-- deshabilitadoHasta(,sumaInt, menorIgual): +suc(0) × +suc(0) -> +suc(0)
+-- deshabilitadoHasta(sugar numeros,sumaInt, menorIgual): +suc(0) × +suc(0) -> +1
+-- deshabilitadoHasta(,sumaInt, menorIgual): +suc(0) × -suc(0) -> -suc(0)
+-- deshabilitadoHasta(sugar numeros,sumaInt, menorIgual): +suc(0) × -suc(0) -> -1
+-- deshabilitadoHasta(,sumaInt, menorIgual): -suc(0) × +suc(0) -> -suc(0)
+-- deshabilitadoHasta(sugar numeros,sumaInt, menorIgual): -suc(0) × +suc(0) -> -1
+-- deshabilitadoHasta(,sumaInt, menorIgual): -suc(0) × -suc(0) -> +suc(0)
+-- deshabilitadoHasta(sugar numeros,sumaInt, menorIgual): -suc(0) × -suc(0) -> +1
+-- deshabilitadoHasta(,sumaInt, menorIgual): +0 × +0 -> +0
+-- deshabilitadoHasta(,sumaInt, menorIgual): +suc(suc(0)) × +suc(0) -> +suc(suc(0))
+-- deshabilitadoHasta(sugar numeros,sumaInt, menorIgual): +suc(suc(0)) × +suc(0) -> +2
+-- deshabilitadoHasta(,sumaInt, menorIgual): +suc(suc(0)) × -suc(0) -> -suc(suc(0))
+-- deshabilitadoHasta(sugar numeros,sumaInt, menorIgual): +suc(suc(0)) × -suc(0) -> -2
+-- deshabilitadoHasta(,sumaInt, menorIgual): +suc(suc(0)) × +suc(suc(0)) -> +suc(suc(suc(suc(0))))
+-- deshabilitadoHasta(sugar numeros,sumaInt, menorIgual): +suc(suc(0)) × +suc(suc(0)) -> +4
+-- deshabilitadoHasta(,sumaInt, menorIgual): +suc(suc(0)) × -suc(suc(0)) -> -suc(suc(suc(suc(0))))
+-- deshabilitadoHasta(sugar numeros,sumaInt, menorIgual): +suc(suc(0)) × -suc(suc(0)) -> -4
+-- deshabilitadoHasta(,sumaInt, menorIgual): -suc(suc(0)) × -suc(0) -> +suc(suc(0))
+-- deshabilitadoHasta(sugar numeros,sumaInt, menorIgual): -suc(suc(0)) × -suc(0) -> +2
+-- deshabilitadoHasta(,sumaInt, menorIgual): -suc(suc(0)) × -suc(suc(0)) -> +suc(suc(suc(suc(0))))
+-- deshabilitadoHasta(sugar numeros,sumaInt, menorIgual): -suc(suc(0)) × -suc(suc(0)) -> +4
+-- (linea que no es un caso de tipo "eval")
+-- deshabilitadoHasta(,sumaInt, menorIgual): suc(suc(0)) × suc(suc(suc(0))) + suc(suc(suc(suc(suc(0))))) -> suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(0))))))))))) --precedencia
+-- deshabilitadoHasta(,sumaInt, menorIgual): suc(suc(suc(suc(suc(0))))) + suc(suc(suc(0))) × suc(suc(0)) -> suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(0))))))))))) --precedencia
+-- deshabilitadoHasta(sugar numeros,sumaInt, menorIgual): 2 × 3 + 5 -> 11 --precedencia, numeros
+-- deshabilitadoHasta(sugar numeros,sumaInt, menorIgual): 5 + 3 × 2 -> 11 --precedencia, numeros
+-- (linea que no es un caso de tipo "eval")
+-- (linea que no es un caso de tipo "eval")
+-- (linea que no es un caso de tipo "eval")
+-- (linea que no es un caso de tipo "eval")
+-- (linea que no es un caso de tipo "eval")

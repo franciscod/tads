@@ -3,6 +3,8 @@ import fs from "fs";
 export const EVALS_TXT = fs.readFileSync("tests/casos_eval.txt", "utf-8");
 export const INVALIDS_TXT = fs.readFileSync("tests/casos_noparse.txt", "utf-8");
 export const VALIDS_TXT = fs.readFileSync("tests/casos_parse.txt", "utf-8");
+export const IGOBS_TXT = fs.readFileSync("tests/casos_igobs.txt", "utf-8");
+export const NOIGOBS_TXT = fs.readFileSync("tests/casos_noigobs.txt", "utf-8");
 
 export const BOOL_TAD = fs.readFileSync("tads/bool.tad", "utf-8");
 export const NAT_TAD = fs.readFileSync("tads/nat.tad", "utf-8");
@@ -12,20 +14,24 @@ export const CONJ_TAD = fs.readFileSync("tads/conj.tad", "utf-8");
 
 export const TADS = [BOOL_TAD, NAT_TAD, INT_TAD, PAR_TAD, CONJ_TAD];
 
-export const EVALS: { left: string; right: string; line: number }[] = EVALS_TXT.replace(/\r\n/g, "\n")
-    .split("\n")
-    .map((l, i) => {
-        l = l.split("--")[0];
-        if (!l) return { left: "", right: "", line: -1 };
+function parsePares(input: string, sep: string) : { left: string; right: string; line: number }[]  {
+    return input.replace(/\r\n/g, "\n")
+        .split("\n")
+        .map((l, i) => {
+            l = l.split("--")[0];
+            if (!l) return null;
 
-        const s = l.split(" = ");
-        return {
-            left: s[0],
-            right: s[1],
-            line: i,
-        };
-    })
-    .filter(e => e.line > 0);
+            const s = l.split(sep);
+            return {
+                left: s[0],
+                right: s[1],
+                line: i,
+            };
+        })
+        .filter(e => e !== null);
+}
+
+export const EVALS   = parsePares(EVALS_TXT + IGOBS_TXT + NOIGOBS_TXT,  " -> ");
 
 // los statements son todas expresiones validas
 // sacadas de ambos lados de los evals
