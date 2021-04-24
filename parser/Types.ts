@@ -57,6 +57,12 @@ export type TAD = {
 
 export type Eval = { expr: string };
 
+export type AST = {
+    type: "fijo" | "variable";
+    nombre: string; // de la operación o la variable
+    operandos?: { [key: number]: AST }
+};
+
 export type Operandos = {
     [key: number]: Expr;
 };

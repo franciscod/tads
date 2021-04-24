@@ -1,5 +1,5 @@
 import { Report } from "./Reporting";
-import { Axioma, Expr, Grammar, Operacion, Operandos, Parametros, TAD, VariablesLibres } from "./Types";
+import { AST, Axioma, Expr, Grammar, Operacion, Operandos, TAD, VariablesLibres } from "./Types";
 
 type CustomBackendData = {
     tads: TAD[];
@@ -11,13 +11,23 @@ function genAxiomas(data: CustomBackendData): Axioma[] {
 
     for (const tad of data.tads) {
         for (const rawAxioma of tad.rawAxiomas) {
-            const exprL = stringToExpr(rawAxioma.left, tad.variablesLibres, data);
-            const exprR = stringToExpr(rawAxioma.right, tad.variablesLibres, data);
+            const astL = stringToAST(rawAxioma.left, tad.variablesLibres,  data);
+            const astR = stringToAST(rawAxioma.right, tad.variablesLibres,  data);
 
-            if (exprL === null) console.log("Axioma L falló al parsearse", rawAxioma.left /*, tad.variablesLibres*/);
-            if (exprR === null) console.log("Axioma R falló al parsearse", rawAxioma.right /*, tad.variablesLibres*/);
+            // if (astL === null) console.log("Axioma L falló al parsearse", rawAxioma.left /*, tad.variablesLibres*/);
+            // if (astR === null) console.log("Axioma R falló al parsearse", rawAxioma.right /*, tad.variablesLibres*/);
 
-            if (exprL && exprR) axiomas.push([exprL, exprR]);
+            if(astL && astR) {
+                const exprL = astToExpr(astL, tad.variablesLibres, data);
+                const exprR = astToExpr(astR, tad.variablesLibres, data);
+
+                // if (exprL === null) console.log("Axioma L falló al tiparse", rawAxioma.left /*, tad.variablesLibres*/);
+                // if (exprR === null) console.log("Axioma R falló al tiparse", rawAxioma.right /*, tad.variablesLibres*/);
+
+                if (exprL && exprR)
+                    axiomas.push([exprL, exprR]);
+            }
+
         }
     }
 
@@ -50,124 +60,60 @@ export function genGrammar(tads: TAD[]): Grammar {
     };
 }
 
-
-function stringToExpr(input: string, vars: VariablesLibres, data: CustomBackendData, report?: Report): Expr | null {
-    input = input.trimEnd();
-
-    let stack: (string | Expr)[] = [];
+// transforma un string en un AST sin tipado
+export function stringToAST(input: string, vars: VariablesLibres, data: CustomBackendData, report?: Report): AST | null {
+    let stack: (string | AST)[] = [];
     let index = 0;
-    whileIdx: while (index < input.length || stack.length > 1 || (stack.length === 1 && typeof stack[0] === "string")) {
+    whileIdx: while(index < input.length || stack.length > 1 || (stack.length === 1 && typeof stack[0] === "string")) {
         // me fijo si matchea alguna operación la cola del stack
         for (const tad of data.tads) {
             forOp: for (const op of tad.operaciones) {
                 if (stack.length < op.tokens.length) continue;
-
-                // armo los operandos por si termina siendo exitoso
-                const operandos: Operandos = {};
-                // track para los templates (α, β etc)
-                const parametros: Parametros = {};
+                
+                const ast: AST = { type: "fijo", nombre: op.nombre };
 
                 for (let i = 0; i < op.tokens.length; i++) {
                     const token = op.tokens[i];
-                    const stack_elem = stack[stack.length - op.tokens.length + i];
+                    const stackElem = stack[stack.length - op.tokens.length + i];
 
                     if (token.type === "literal") {
                         // tiene que matchear exacto el chirimbolo
-                        if (stack_elem !== token.symbol) {
+                        if (stackElem !== token.symbol) {
                             continue forOp;
                         }
-                        // chirimobolo ok :)
                     } else {
-                        // token.type === 'slot'
-                        // tiene que ser un Expr
-                        if (typeof stack_elem === "string") {
+                        // el token es un slot
+                        // stackElem tiene que ser un AST
+                        if (typeof stackElem === "string") {
                             continue forOp;
                         }
 
-                        // ver si el parametro es un parámetro
-                        // TODO: creo que lo de token.genero.base === 'α' habría que hacerlo por separado...
-                        if (tad.parametros.includes(token.genero.base) || token.genero.base === "α") {
-                            // ahora veo que no haya conflictos
-                            // con otro uso de este parametro antes
-                            if (token.genero.base in parametros) {
-                                // si estaba antes, tiene que matchear el genero exactamente
-                                if (
-                                    JSON.stringify(parametros[token.genero.base]) !== JSON.stringify(stack_elem.genero)
-                                ) {
-                                    continue forOp;
-                                }
-                                // matchea exacto, seguimos bien
-                            } else {
-                                // el parametro no se había visto antes, todo ok
-                                parametros[token.genero.base] = stack_elem.genero;
-                            }
-                        } else {
-                            // el género de stack_elem tiene que estar contenido en el de token.genero
-
-                            // si la base no coincide ya perdí de una
-                            if (token.genero.base !== stack_elem.genero.base) {
-                                continue forOp;
-                            }
-
-                            // me fijo que todos los parámetros en stack_elem coincidan con los de token.genero
-                            // si uno no estaba, lo agrego a parametros
-                            for (const paramName in stack_elem.genero.parametros) {
-                                if (paramName in parametros) {
-                                    // si estaba antes, tiene que matchear el genero exactamente
-                                    if (
-                                        JSON.stringify(parametros[paramName]) !==
-                                        JSON.stringify(stack_elem.genero.parametros[paramName])
-                                    ) {
-                                        continue forOp;
-                                    }
-                                    // matchea exacto, seguimos bien
-                                } else {
-                                    // el parametro no se había visto antes, todo ok
-                                    parametros[paramName] = stack_elem.genero.parametros[paramName];
-                                }
-                            }
-
-                            // todos los parametros matchea, todo ok
-                        }
-
-                        // ta ok
-                        operandos[i] = stack_elem;
+                        // aceptamos cualquier AST, los tipos no nos importan en el AST
+                        if(!ast.operandos)
+                            ast.operandos = { };
+                        ast.operandos[i] = stackElem as AST;
                     }
                 }
 
-                const expr: Expr = {
-                    type: "fijo",
-                    nombre: op.nombre,
-                    genero:
-                        op.retorno.base in parametros
-                            ? parametros[op.retorno.base]
-                            : {
-                                  base: op.retorno.base,
-                                  // TODO: verificar que op.retorno.parametros coinciden!!!!
-                                  parametros,
-                              },
-                    operandos,
-                };
-
                 stack = stack.slice(0, -op.tokens.length);
-                stack.push(expr);
+                stack.push(ast);
                 continue whileIdx;
             }
         }
-
+        
         // consumo parentesis (ya sé que no matcheo ninguna op)
-        // si en el stack hay "(", Expr, ")"
+        // si en el stack hay "(", AST, ")"
         // entonces borro los literales de los paréntesis
         if (
             stack.length >= 3 &&
             stack[stack.length - 1] === ")" &&
             stack[stack.length - 3] === "(" &&
-            typeof stack[stack.length - 2] !== "string" // EXPR
+            typeof stack[stack.length - 2] !== "string" // AST
         ) {
             stack.pop();
-            const expr = stack.pop();
+            const ast = stack.pop();
             stack.pop();
-            stack.push(expr!);
+            stack.push(ast!);
             continue whileIdx;
         }
 
@@ -178,9 +124,7 @@ function stringToExpr(input: string, vars: VariablesLibres, data: CustomBackendD
                     stack.pop();
                     stack.push({
                         type: "variable",
-                        nombre: varName,
-                        genero: vars[varName],
-                        operandos: {},
+                        nombre: varName
                     });
                     continue whileIdx;
                 }
@@ -188,12 +132,15 @@ function stringToExpr(input: string, vars: VariablesLibres, data: CustomBackendD
         }
 
         // consumir whitespace
-        while (index < input.length && (input[index] === " " || input[index] === "\t")) index++;
+        while (index < input.length && (input[index] === " " || input[index] === "\t" || input[index] === "\n"))
+            index++;
+        // parar si el resto es whitespace
+        if (index >= input.length)
+            break;
 
         // consumo el proximo token
         for (const token of data.tokens) {
             if (input.startsWith(token, index)) {
-                // console.log("Matchea token", token);
                 stack.push(token);
                 index += token.length;
                 continue whileIdx;
@@ -210,20 +157,91 @@ function stringToExpr(input: string, vars: VariablesLibres, data: CustomBackendD
         }
 
         // si llego acá no pude consumir ningún token
-        // TODO: mejorar el error reporting
-        //       tendríamos que ver todos los offsets
-        //       con el stack y ver cuál/es son los más
-        //       cercanos y detallar qué falló
-        // ej.   "suc" "(" ")", decir "Falta un nat" y subrayar sólo el ")"
-        report?.addMark('error', "No se pudo parsear", 0, input.length);
+        report?.addMark('error', `No se esperaba el caracter ${input[index]}`, index, 1);
         return null;
     }
+    
+    if(stack.length === 1 && typeof stack[0] !== "string") {
+        return stack[0];
+    } else {
+        if(report) {
+            // generamos un mensaje de error util
+            let buffer = "";
+            for(const stackElem of stack) {
+                if(typeof stackElem === 'string') {
+                    buffer += `${stackElem}`;
+                } else {
+                    buffer += `•`;
+                }
+            }
 
-    return stack.length === 1 && typeof stack[0] !== "string" ? stack[0] : null;
+            report.addMark('error', `La expresión '${buffer}' no coincide con ningúna operación`, 0, input.length);
+        }
+        return null;
+    }
+}
+
+// transforma un AST sin tipos a una Expr tipada
+// la idea es que el tipado de Expr sea correcto
+function astToExpr(input: AST, vars: VariablesLibres, data: CustomBackendData, report?: Report): Expr | null {
+    if(input.type === 'variable') {
+        // no se necesita hacer nada más
+        return {
+            type: 'variable',
+            nombre: input.nombre,
+            genero: vars[input.nombre],
+            operandos: { }
+        }
+    }
+
+    // primero genero todos los Expr
+    // de los operandos
+    const operandos: Operandos = { };
+    if(input.operandos) {
+        for(const idx in input.operandos) {
+            const subExpr = astToExpr(input.operandos[idx], vars, data, report);
+            if(!subExpr) return null;
+            operandos[idx] = subExpr;
+        }
+    }
+
+    // ahora intento matchear el nombre de la operación
+    // y los géneros de los operandos con una op. concreta
+    // que calce
+    for (const tad of data.tads) {
+        for (const op of tad.operaciones) {
+            if(op.nombre === input.nombre) {
+                for (let i = 0; i < op.tokens.length; i++) {
+                    const token = op.tokens[i];
+                    if(token.type === 'slot') {
+                        // TODO: comparar genero
+                        if(JSON.stringify(token.genero) !== JSON.stringify(operandos[i].genero)) {
+                            return null;
+                        }
+                    }
+                }
+                const expr: Expr = {
+                    type: 'fijo',
+                    nombre: input.nombre,
+                    genero: op.retorno,
+                    operandos: operandos
+                }
+                return expr;
+            }
+        }
+    }
+
+    // NO MATCHEA NINGUNA
+    return null;
 }
 
 export function toExpr(input: string, grammar: Grammar, vars?: VariablesLibres, report?: Report): Expr | null {
-    return stringToExpr(input, vars || { }, grammar.backendGrammar as CustomBackendData, report);
+    vars = vars || { };
+    const data = grammar.backendGrammar as CustomBackendData;
+    const ast = stringToAST(input, vars, data, report);
+    if(!ast) return null;
+    const expr = astToExpr(ast, vars, data, report);
+    return expr;
 }
 
 function recFromExpr(expr: Expr, data: CustomBackendData): string {
