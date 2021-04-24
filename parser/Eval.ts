@@ -1,4 +1,13 @@
-import { Expr, Grammar } from "../parser/Types";
+import { Expr, Grammar, GeneroParametrizado } from "../parser/Types";
+
+function log(x: any) {
+    return console.log(JSON.stringify(x, null, 4));
+}
+
+function debuglog(x: any) {
+    return null;
+    // return log(x);
+}
 
 export function evalGrammar(expr: Expr, grammar: Grammar): Expr {
     let run = true;
@@ -26,26 +35,30 @@ export function evalStep(expr: Expr, grammar: Grammar): [boolean, Expr] {
 
         // si expr no entra en la izq del axioma, skip
         if (!tienenLaMismaFormaSalvoVariables(left, expr)) {
-            // console.log("tienen otra forma")
+            debuglog("tienen otra forma")
+            debuglog(left);
+            debuglog(expr);
             continue forAxiomaEnRaiz;
         }
 
         // si en el axioma no hay variables, no entra
         if (!contieneVariables(left)) {
-            // console.log("son distintos y no hay variables");
+            debuglog("son distintos y no hay variables");
             continue forAxiomaEnRaiz;
         }
 
         // bindeamos las variables de left a los valores que tienen en expr
         const bindings: Map<string, Expr> = conseguirBindings(left, expr, new Map());
 
-        // console.log("MAMA ENCONTRE MAS BINDINGS AHORA", bindings)
+            debuglog("MAMA ENCONTRE MAS BINDINGS AHORA")
+            debuglog(bindings)
 
         // reemplazamos en right con los bindings
 
         const [okReemplazo, ret] = reemplazar(right, bindings);
 
-        // console.log("LUEGO DE BINDEAR ", JSON.stringify(ret, null, 4));
+        debuglog("LUEGO DE BINDEAR ")
+            debuglog(ret);
 
         if (!contieneVariables(ret)) return [true, ret];
         if (okReemplazo) return [true, ret];
@@ -99,9 +112,16 @@ function reemplazar(expr: Expr, bindings: Map<string, Expr>): [boolean, Expr] {
     return [hizoAlgo, ret];
 }
 
+function esVariableDeGenero(g: GeneroParametrizado) {
+    // TODO: detectarlas correctamente. esto se va a romper para diccionario(clave, significado)
+    return g.base.startsWith("α");
+}
+
 function tienenLaMismaFormaSalvoVariables(template: Expr, expr: Expr): boolean {
     if (template.type === "variable") {
-        // TODO: el genero de la expresion puede depender de alpha
+        if (esVariableDeGenero(template.genero)) {
+            return true;
+        }
         return JSON.stringify(template.genero) === JSON.stringify(expr.genero) || template.genero.base === "α";
     }
 

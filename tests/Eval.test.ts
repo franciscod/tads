@@ -14,6 +14,8 @@ for (const _eval of EVALS) {
 
         expect(exprL).not.toBeNull();
         expect(exprR).not.toBeNull();
+
+        // console.log(exprL);
         expect(evalGrammar(exprL!, grammar)).toStrictEqual(exprR!);
     });
 }
