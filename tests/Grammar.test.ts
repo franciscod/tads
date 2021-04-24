@@ -35,7 +35,12 @@ for (const stmt of STATEMENTS) {
 const operaciones = tads.reduce((p: Operacion[], c) => p.concat(c.operaciones), []);
 // estos son casos en que ohm retorna el arbol incorrecto
 // y el custom el correcto
-const excepciones_ohm = ["¬false ∨ ¬false", "+suc(0) + +suc(0)"];
+const excepciones_ohm = [
+    "¬false ∨ ¬false",
+    "+suc(0) + +suc(0)",
+    "π1(π1(⟨⟨0,0⟩,⟨0,0⟩⟩)) + 0",
+    "π1(π2(⟨ ⟨ true, 0 ⟩, ⟨ +0, ⟨ suc(0), ∅ ⟩ ⟩ ⟩)) + +0"
+];
 
 for (const stmt of STATEMENTS) {
     if (excepciones_ohm.includes(stmt)) continue;
