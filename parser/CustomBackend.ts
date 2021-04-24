@@ -1,3 +1,4 @@
+import { Report } from "./Reporting";
 import { Axioma, Expr, Grammar, Operacion, Operandos, Parametros, TAD, VariablesLibres } from "./Types";
 
 type CustomBackendData = {
@@ -10,8 +11,8 @@ function genAxiomas(data: CustomBackendData): Axioma[] {
 
     for (const tad of data.tads) {
         for (const rawAxioma of tad.rawAxiomas) {
-            const exprL = process(rawAxioma.left, data, tad.variablesLibres);
-            const exprR = process(rawAxioma.right, data, tad.variablesLibres);
+            const exprL = stringToExpr(rawAxioma.left, tad.variablesLibres, data);
+            const exprR = stringToExpr(rawAxioma.right, tad.variablesLibres, data);
 
             if (exprL === null) console.log("Axioma L falló al parsearse", rawAxioma.left /*, tad.variablesLibres*/);
             if (exprR === null) console.log("Axioma R falló al parsearse", rawAxioma.right /*, tad.variablesLibres*/);
@@ -49,15 +50,8 @@ export function genGrammar(tads: TAD[]): Grammar {
     };
 }
 
-/*function aplicarParametros(genero: Genero, parametros: Parametros) {
-    for(let templateName in parametros) {
-        genero = genero.split(templateName).join(parametros[templateName]);
-    }
-    return genero;
-}*/
 
-function process(input: string, data: CustomBackendData, vars: VariablesLibres = {}): Expr | null {
-    // console.log("===============================", input, "===============================");
+function stringToExpr(input: string, vars: VariablesLibres, data: CustomBackendData, report?: Report): Expr | null {
     input = input.trimEnd();
 
     let stack: (string | Expr)[] = [];
@@ -216,15 +210,20 @@ function process(input: string, data: CustomBackendData, vars: VariablesLibres =
         }
 
         // si llego acá no pude consumir ningún token
-        // console.log("SE ESPERABA TOKEN!");
+        // TODO: mejorar el error reporting
+        //       tendríamos que ver todos los offsets
+        //       con el stack y ver cuál/es son los más
+        //       cercanos y detallar qué falló
+        // ej.   "suc" "(" ")", decir "Falta un nat" y subrayar sólo el ")"
+        report?.addMark('error', "No se pudo parsear", 0, input.length);
         return null;
     }
 
     return stack.length === 1 && typeof stack[0] !== "string" ? stack[0] : null;
 }
 
-export function toExpr(input: string, grammar: Grammar, vars?: VariablesLibres): Expr | null {
-    return process(input, grammar.backendGrammar as CustomBackendData, vars);
+export function toExpr(input: string, grammar: Grammar, vars?: VariablesLibres, report?: Report): Expr | null {
+    return stringToExpr(input, vars || { }, grammar.backendGrammar as CustomBackendData, report);
 }
 
 function recFromExpr(expr: Expr, data: CustomBackendData): string {

@@ -1,25 +1,5 @@
-import { RawAxioma, Eval, ExpresionLogica, Operacion, Range, Slot, TAD, Token, VariablesLibres } from "./Types";
-
-type MarkerSeverity = "error" | "warning" | "info" | "hint";
-
-export type Marker = {
-    severity: MarkerSeverity;
-    message: string;
-    range: Range;
-};
-
-export class EditorHints {
-    markers: Marker[] = [];
-
-    addMark(severity: MarkerSeverity, message: string, range: Range) {
-        this.markers.push({ severity, message, range });
-    }
-}
-
-export type ParseContext = {
-    range: Range;
-    hints?: EditorHints;
-};
+import { Report } from "./Reporting";
+import { RawAxioma, Eval, ExpresionLogica, Operacion, Slot, TAD, Token, VariablesLibres } from "./Types";
 
 type Section =
     | "none"
@@ -43,12 +23,12 @@ function checkSectionHeader(line: string): Section {
     return "none";
 }
 
-export function parseExpresionLogica(input: string, context?: ParseContext): ExpresionLogica | null {
+export function parseExpresionLogica(input: string, report?: Report): ExpresionLogica | null {
     // TODO: =)
     return null;
 }
 
-export function parseVarLibres(input: string, context?: ParseContext): VariablesLibres {
+export function parseVarLibres(input: string, report?: Report): VariablesLibres {
     //context?.hints?.addMark('info', 'variables libres', context.range);
     const result: VariablesLibres = {};
 
@@ -69,7 +49,7 @@ export function parseVarLibres(input: string, context?: ParseContext): Variables
     return result;
 }
 
-export function parseAxioma(left: string, right: string, context?: ParseContext): RawAxioma {
+export function parseAxioma(left: string, right: string, report?: Report): RawAxioma {
     const axioma: RawAxioma = { left, right };
     return axioma;
 }
@@ -78,7 +58,7 @@ export function parseOperacion(
     left: string,
     right: string,
     section: Section,
-    context?: ParseContext
+    report?: Report
 ): Operacion | null {
     // left:   • ∨L •
     // right   bool × bool  → bool {restriccion}
@@ -158,7 +138,7 @@ export function parseOperacion(
     return op;
 }
 
-export function parseTad(source: string, context?: ParseContext): TAD | null {
+export function parseTad(source: string, report?: Report): TAD | null {
     const lines = source
         .replace(/\r\n/g, "\n")
         .split("\n")
@@ -169,23 +149,14 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
         generos: [],
         operaciones: [],
         variablesLibres: {},
-        rawAxiomas: [],
-        range: context?.range,
+        rawAxiomas: []
     };
 
-    function offsetRange(range: Range) {
-        return {
-            startLine: (context?.range.startLine || 1) + range.startLine,
-            endLine: (context?.range.startLine || 1) + range.endLine,
-            columnStart: range.columnStart,
-            columnEnd: range.columnEnd,
-        };
-    }
-
     let closedProperly = false;
-
-    for (let i = 0; i < lines.length; i++) {
-        let line = lines[i];
+    let line;
+    let pos = 0;
+    for (let i = 0; i < lines.length; i++, pos += line.length + 1) {
+        line = lines[i];
 
         if (line.trim().length === 0) continue; // skip empty lines
 
@@ -193,30 +164,12 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
             if (line.toUpperCase().startsWith("TAD")) {
                 tad.nombre = line.slice("TAD".length).trim();
                 if (tad.nombre.length === 0) {
-                    i--;
-                    context?.hints?.addMark(
-                        "error",
-                        "Nombre del TAD incompleto",
-                        offsetRange({
-                            startLine: 1 + i,
-                            endLine: 1 + i,
-                            columnStart: 4,
-                            columnEnd: 5,
-                        })
-                    );
+                    i--; pos -= line.length + 1;
+                    report?.addMark("error","Nombre del TAD incompleto", pos, 3);
                     return null;
                 }
             } else {
-                context?.hints?.addMark(
-                    "error",
-                    "Se esperaba la definición de un TAD",
-                    offsetRange({
-                        startLine: 1 + i,
-                        endLine: 1 + i,
-                        columnStart: 1,
-                        columnEnd: 1 + line.length,
-                    })
-                );
+                report?.addMark("error", "Se esperaba la definición de un TAD", pos, 5);
                 return null;
             }
             continue;
@@ -224,16 +177,7 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
 
         if (line.toUpperCase().startsWith("FIN TAD")) {
             if (closedProperly) {
-                context?.hints?.addMark(
-                    "error",
-                    "El TAD ya estaba cerrado",
-                    offsetRange({
-                        startLine: 1 + i,
-                        endLine: 1 + i,
-                        columnStart: 1,
-                        columnEnd: 1 + line.length,
-                    })
-                );
+                report?.addMark("error", "El TAD ya estaba cerrado", pos, line.length);
             }
             closedProperly = true;
             continue;
@@ -245,7 +189,7 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
         const section: Section = checkSectionHeader(line);
 
         if (section === "none") {
-            context?.hints?.addMark(
+            /*context?.hints?.addMark(
                 "error",
                 "Se esperaba el inicio de una sección.",
                 offsetRange({
@@ -254,7 +198,7 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
                     columnStart: 1,
                     columnEnd: 1 + line.length,
                 })
-            );
+            );*/
         } else if (section === "generos") {
             /*const generos = line
                 .slice("generos".length)
@@ -268,7 +212,7 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
                     // no es elegante pero funciona ¯\_(ツ)_/¯
                     const startWarning = line!.split(generos[j])[0].length;
 
-                    context?.hints?.addMark(
+                    /*context?.hints?.addMark(
                         "warning",
                         `Especificar más de un género tendrá ningún efecto (no implementado).\nLos géneros ya especificados para este TAD son: ${tad.generos.join(
                             ", "
@@ -279,7 +223,7 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
                             columnStart: 1 + startWarning,
                             columnEnd: 1 + startWarning + generos[j].length,
                         })
-                    );
+                    );*/
                 }
                 tad.generos.push(generos[j]);
             }
@@ -304,30 +248,32 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
                 // variables libres de los axiomas
                 const varLibres = line.slice("axiomas".length);
                 if (varLibres.trim().length > 0) {
-                    tad.variablesLibres = parseVarLibres(varLibres, {
-                        hints: context?.hints,
-                        range: offsetRange({
-                            startLine: i,
-                            endLine: i,
-                            columnStart: 1 + "axiomas".length + 1,
-                            columnEnd: 1 + line.length,
-                        }),
-                    });
+                    tad.variablesLibres = parseVarLibres(varLibres, report);
                 }
             } else {
                 splitter = /:/;
             }
 
-            i++;
+            i++; pos += line.length + 1;
+                        
+            const axStep =(left: string, rightBuffer: string) => {
+                if (left.length > 0) {
+                    if (section === "axiomas") tad.rawAxiomas.push(parseAxioma(left, rightBuffer));
+                    else {
+                        const op: Operacion | null = parseOperacion(left, rightBuffer, section);
+                        if (op) tad.operaciones.push(op);
+                    }
+                }
+            };
 
             let startLine = i;
             let left = "";
             let rightBuffer = "";
-            for (; i < lines.length; ) {
+            for (; i < lines.length; i++, pos += line.length + 1) {
                 line = lines[i];
 
                 if (line.toLowerCase().startsWith("eval")) {
-                    context?.hints?.addMark(
+                    /*context?.hints?.addMark(
                         "error",
                         "Los evals no pueden estar adentro de los TADs",
                         offsetRange({
@@ -336,76 +282,66 @@ export function parseTad(source: string, context?: ParseContext): TAD | null {
                             columnStart: 1,
                             columnEnd: 1 + line.length,
                         })
-                    );
-                    i++;
+                    );*/
                     continue;
                 }
 
                 if (checkSectionHeader(line) !== "none" || line.toUpperCase().startsWith("FIN TAD")) {
-                    i--;
+                    i--; pos -= line.length + 1;
                     break;
                 }
 
                 const split = line.split(splitter);
                 if (split.length === 2) {
                     // anterior
-                    lombiStep(offsetRange, i, left, context, startLine, line, tad, rightBuffer, section);
+                    axStep(left, rightBuffer);
                     startLine = i;
                     left = split[0];
                     rightBuffer = split[1];
                 } else {
                     rightBuffer += line;
                 }
-
-                i++;
             }
-            lombiStep(offsetRange, i, left, context, startLine, line, tad, rightBuffer, section);
+            axStep(left, rightBuffer);
         }
     }
 
     if (!closedProperly) {
-        context?.hints?.addMark(
-            "error",
-            `Se esperaba "FIN TAD" para ${tad.nombre}`,
-            offsetRange({
-                startLine: lines.length,
-                endLine: lines.length,
-                columnStart: 1,
-                columnEnd: 100,
-            })
-        );
+        report?.addMark("error", `Se esperaba "FIN TAD" para ${tad.nombre}`, pos, 1);
     }
 
     return tad;
 }
 
-export function parseSource(source: string, hints?: EditorHints): [TAD[], Eval[]] {
+export function parseSource(source: string, report?: Report): [TAD[], Eval[]] {
+    source = source.replace(/\r\n/g, "\n");
+
     const tads: TAD[] = [];
     const evals: Eval[] = [];
-    const lines = source.replace(/\r\n/g, "\n").split("\n");
+    const lines = source.split("\n");
 
-    for (let i = 0; i < lines.length; i++) {
-        let line = lines[i];
+    let pos = 0;
+    let line;
+    for (let i = 0; i < lines.length; i++, pos += line.length + 1) {
+        line = lines[i];
+
         if (line.trim().length === 0) continue; // skip empty lines
 
         // empieza TAD
         if (line.toLowerCase().startsWith("eval")) {
             // ok
             evals.push({
-                expr: line.slice("eval".length),
-                range: {
-                    startLine: 1 + i,
-                    endLine: 1 + i,
-                    columnStart: 1,
-                    columnEnd: 1 + line.length,
-                },
+                expr: line.slice("eval".length)
             });
         } else if (line.toUpperCase().startsWith("TAD")) {
             const startLine = i;
 
+            console.log(pos);
+            
+            report?.push(pos);
             // copiamos todo el TAD hasta FIN TAD
             let buffer = line + "\n";
-            i++;
+            i++; pos += line.length;
             while (i < lines.length) {
                 line = lines[i];
 
@@ -417,59 +353,17 @@ export function parseSource(source: string, hints?: EditorHints): [TAD[], Eval[]
                     if (line.toUpperCase().startsWith("FIN TAD")) break; // fin del tad
                 }
 
-                i++;
+                i++; pos += line.length;
             }
 
-            const tad: TAD | null = parseTad(buffer, {
-                hints,
-                range: {
-                    startLine: 1 + startLine,
-                    endLine: 1 + i,
-                    columnStart: 1,
-                    columnEnd: 1 + line.length,
-                },
-            });
+            const tad: TAD | null = parseTad(buffer, report);
+            report?.pop();
 
             if (tad != null) tads.push(tad);
         } else {
-            hints?.addMark("error", "Se esperaba la definición de un TAD", {
-                startLine: 1 + i,
-                endLine: 1 + i,
-                columnStart: 1,
-                columnEnd: 1 + line.length,
-            });
+            report?.addMark("error", "Se esperaba la definición de un TAD", pos, line.length);
         }
     }
 
     return [tads, evals];
-}
-
-// TODO: name this, put reasonable type annotations instead of any
-function lombiStep(
-    offsetRange: any,
-    i: any,
-    left: any,
-    context: any,
-    startLine: any,
-    line: any,
-    tad: any,
-    rightBuffer: any,
-    section: any
-) {
-    if (left.length > 0) {
-        const ctx: ParseContext = {
-            hints: context?.hints,
-            range: offsetRange({
-                startLine: 1 + startLine - 1,
-                endLine: 1 + i - 1,
-                columnStart: 1,
-                columnEnd: 1 + line.length,
-            }),
-        };
-        if (section === "axiomas") tad.rawAxiomas.push(parseAxioma(left, rightBuffer, ctx));
-        else {
-            const op: Operacion | null = parseOperacion(left, rightBuffer, section, ctx);
-            if (op) tad.operaciones.push(op);
-        }
-    }
 }

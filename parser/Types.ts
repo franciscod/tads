@@ -1,13 +1,3 @@
-export type Range = {
-    startLine: number;
-    endLine: number;
-    columnStart: number;
-    columnEnd: number;
-};
-
-export type SourceReference = {
-    range?: Range;
-};
 
 export type ExpresionLogica = any; // TODO
 export type VariablesLibres = { [nombreVar: string]: GeneroParametrizado };
@@ -39,8 +29,8 @@ export type Slot = {
 export type Token = Literal | Slot;
 
 export type RawAxioma = {
-    left: string & SourceReference;
-    right: string & SourceReference;
+    left: string;
+    right: string;
 };
 
 export type Operacion = {
@@ -49,7 +39,7 @@ export type Operacion = {
     tokens: Token[]; // como lo parseo a un nodo
     retorno: GeneroParametrizado;
     restriccion?: ExpresionLogica;
-} & SourceReference;
+};
 
 // TODO: falta exporta, usa
 //       para esto podemos mostrar warnings cuando se
@@ -63,9 +53,9 @@ export type TAD = {
     operaciones: Operacion[];
     rawAxiomas: RawAxioma[];
     variablesLibres: VariablesLibres;
-} & SourceReference;
+};
 
-export type Eval = { expr: string } & SourceReference;
+export type Eval = { expr: string };
 
 export type Operandos = {
     [key: number]: Expr;

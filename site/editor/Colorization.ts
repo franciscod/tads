@@ -1,7 +1,5 @@
 import * as monaco from "monaco-editor";
 
-monaco.languages.register({ id: "tad" });
-
 monaco.languages.setMonarchTokensProvider("tad", {
     ignoreCase: true,
     tokenizer: {

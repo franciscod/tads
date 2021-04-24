@@ -1,16 +1,21 @@
-import "./Colorization";
-import "./Suggestions";
-
 import * as monaco from "monaco-editor";
 
+monaco.languages.register({ id: "tad" });
+
+import "./Colorization";
+import "./Suggestions";
+import "./Hover";
+
 import { basicos, demo } from "../../tads";
-import { Marker, EditorHints, parseSource } from "../../parser/Parser";
+import { parseSource } from "../../parser/Parser";
 import { Eval, Expr, Grammar, TAD } from "../../parser/Types";
 import { evalGrammar } from "../../parser/Eval";
 import { fromExpr, genGrammar, toExpr } from "../../parser/CustomBackend";
 import generateDebugView from "../views/DebugView";
 import { openModal } from "../views/Modal";
 import generateEvalDebug from "../views/EvalDebugView";
+import { Report } from "../../parser/Reporting";
+import { Marker } from "../../parser/Reporting";
 
 interface ITextModelData {
     tab?: Tab;
@@ -111,12 +116,14 @@ class Tab {
     }
 
     validate() {
-        const hints = new EditorHints();
-        [this.tads, this.evals] = parseSource(
-            this.model.getValue() + "\n\n\n" + (this._options.usarBasicos ? basicos.join("\n") : ""),
-            hints
-        );
+        let input = this.model.getValue() + "\n\n\n" + (this._options.usarBasicos ? basicos.join("\n") : "");
+        input = input.replace(/\r\n/g, "\n");
 
+        const report = new Report();
+        report.setSource(input);
+        [this.tads, this.evals] = parseSource(input, report);
+        console.log(report);
+        
         const grammar = genGrammar(this.tads);
 
         const toMonacoSeverity = (marker: Marker): monaco.MarkerSeverity => {
@@ -136,7 +143,7 @@ class Tab {
         monaco.editor.setModelMarkers(
             this.model,
             "tad",
-            hints.markers
+            report.markers
                 .filter(m => m.range.startLine <= numLines)
                 .map(m => ({
                     severity: toMonacoSeverity(m),
@@ -172,6 +179,7 @@ class Tab {
                 */
             }
 
+            /*
             if (!tad.range) continue;
 
             const tadRange = {
@@ -189,9 +197,11 @@ class Tab {
                     arguments: [tad],
                 },
             });
+            */
         }
 
         for (const _eval of this.evals) {
+            /*
             if (!_eval.range) continue;
 
             const evalRange = {
@@ -235,6 +245,7 @@ class Tab {
                     className: ok ? "ok-line" : "error-line",
                 },
             });
+            */
         }
 
         this.decorations = this.model.deltaDecorations(this.decorations, deltaDecorations);
