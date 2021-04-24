@@ -43,3 +43,15 @@ estaría bueno hacer bien el tema de los colores (Colorization.ts)
 hacer que el evals.txt se genere con padding (como estaba al principio)
 
 quizas hacer un flamegraph para visualizar mejor el arbol de la expresion
+
+
+vs-services stuff:
+    mensajes basicos:
+        Se esperaba la definición de un TAD
+        Nombre de TAD incompleto
+        Se esperaba un FIN TAD
+    
+    autocomplete:
+        tokens (facil)
+    
+    

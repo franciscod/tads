@@ -336,8 +336,6 @@ export function parseSource(source: string, report?: Report): [TAD[], Eval[]] {
         } else if (line.toUpperCase().startsWith("TAD")) {
             const startLine = i;
 
-            console.log(pos);
-            
             report?.push(pos);
             // copiamos todo el TAD hasta FIN TAD
             let buffer = line + "\n";

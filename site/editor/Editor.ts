@@ -122,7 +122,6 @@ class Tab {
         const report = new Report();
         report.setSource(input);
         [this.tads, this.evals] = parseSource(input, report);
-        console.log(report);
         
         const grammar = genGrammar(this.tads);
 
@@ -210,6 +209,7 @@ class Tab {
                 endLineNumber: _eval.range.endLine,
                 endColumn: _eval.range.columnEnd,
             };
+            */
 
             let ok = false;
             const expr = toExpr(_eval.expr, grammar);
@@ -217,6 +217,9 @@ class Tab {
                 const evaluado = evalGrammar(expr, grammar);
                 ok = true;
 
+                // console.log(expr, evaluado);
+                
+                /*
                 this.lenses.push(
                     {
                         range: evalRange,
@@ -236,8 +239,10 @@ class Tab {
                         },
                     }
                 );
+                */
             }
 
+            /*
             deltaDecorations.push({
                 range: evalRange,
                 options: {
