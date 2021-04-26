@@ -54,12 +54,7 @@ export function parseAxioma(left: string, right: string, report?: Report): RawAx
     return axioma;
 }
 
-export function parseOperacion(
-    left: string,
-    right: string,
-    section: Section,
-    report?: Report
-): Operacion | null {
+export function parseOperacion(left: string, right: string, section: Section, report?: Report): Operacion | null {
     // left:   • ∨L •
     // right   bool × bool  → bool {restriccion}
 
@@ -149,7 +144,7 @@ export function parseTad(source: string, report?: Report): TAD | null {
         generos: [],
         operaciones: [],
         variablesLibres: {},
-        rawAxiomas: []
+        rawAxiomas: [],
     };
 
     let closedProperly = false;
@@ -164,8 +159,9 @@ export function parseTad(source: string, report?: Report): TAD | null {
             if (line.toUpperCase().startsWith("TAD")) {
                 tad.nombre = line.slice("TAD".length).trim();
                 if (tad.nombre.length === 0) {
-                    i--; pos -= line.length + 1;
-                    report?.addMark("error","Nombre del TAD incompleto", pos, 3);
+                    i--;
+                    pos -= line.length + 1;
+                    report?.addMark("error", "Nombre del TAD incompleto", pos, 3);
                     return null;
                 }
             } else {
@@ -254,9 +250,10 @@ export function parseTad(source: string, report?: Report): TAD | null {
                 splitter = /:/;
             }
 
-            i++; pos += line.length + 1;
-                        
-            const axStep =(left: string, rightBuffer: string) => {
+            i++;
+            pos += line.length + 1;
+
+            const axStep = (left: string, rightBuffer: string) => {
                 if (left.length > 0) {
                     if (section === "axiomas") tad.rawAxiomas.push(parseAxioma(left, rightBuffer));
                     else {
@@ -287,7 +284,8 @@ export function parseTad(source: string, report?: Report): TAD | null {
                 }
 
                 if (checkSectionHeader(line) !== "none" || line.toUpperCase().startsWith("FIN TAD")) {
-                    i--; pos -= line.length + 1;
+                    i--;
+                    pos -= line.length + 1;
                     break;
                 }
 
@@ -331,7 +329,7 @@ export function parseSource(source: string, report?: Report): [TAD[], Eval[]] {
         if (line.toLowerCase().startsWith("eval")) {
             // ok
             evals.push({
-                expr: line.slice("eval".length)
+                expr: line.slice("eval".length),
             });
         } else if (line.toUpperCase().startsWith("TAD")) {
             const startLine = i;
@@ -339,7 +337,8 @@ export function parseSource(source: string, report?: Report): [TAD[], Eval[]] {
             report?.push(pos);
             // copiamos todo el TAD hasta FIN TAD
             let buffer = line + "\n";
-            i++; pos += line.length;
+            i++;
+            pos += line.length;
             while (i < lines.length) {
                 line = lines[i];
 
@@ -351,7 +350,8 @@ export function parseSource(source: string, report?: Report): [TAD[], Eval[]] {
                     if (line.toUpperCase().startsWith("FIN TAD")) break; // fin del tad
                 }
 
-                i++; pos += line.length;
+                i++;
+                pos += line.length;
             }
 
             const tad: TAD | null = parseTad(buffer, report);

@@ -20,8 +20,7 @@ export function evalGrammar(expr: Expr, grammar: Grammar): Expr {
 }
 
 export function evalStep(expr: Expr, grammar: Grammar): [boolean, Expr] {
-
-    if (expr.nombre ===  "•=•") {
+    if (expr.nombre === "•=•") {
         // IGUALDAD OBSERVACIONAL
 
         // TODO: mejorar, usando la def de igobs del tad
@@ -29,14 +28,14 @@ export function evalStep(expr: Expr, grammar: Grammar): [boolean, Expr] {
         // en ningun lado dice que dos cosas con la misma syntax son igobs,
         // pero si no vale estamos fritos
 
-        const igobs = JSON.stringify(expr.operandos[0]) === JSON.stringify(expr.operandos[2])
+        const igobs = JSON.stringify(expr.operandos[0]) === JSON.stringify(expr.operandos[2]);
 
         const ret: Expr = {
             type: "fijo",
             nombre: "" + igobs,
-            genero: {base: "bool", parametros: {}},
+            genero: { base: "bool", parametros: {} },
             operandos: {},
-        }
+        };
 
         return [true, ret];
     }
@@ -56,7 +55,7 @@ export function evalStep(expr: Expr, grammar: Grammar): [boolean, Expr] {
 
         // si expr no entra en la izq del axioma, skip
         if (!tienenLaMismaFormaSalvoVariables(left, expr)) {
-            debuglog("tienen otra forma")
+            debuglog("tienen otra forma");
             debuglog(left);
             debuglog(expr);
             continue forAxiomaEnRaiz;
@@ -71,15 +70,15 @@ export function evalStep(expr: Expr, grammar: Grammar): [boolean, Expr] {
         // bindeamos las variables de left a los valores que tienen en expr
         const bindings: Map<string, Expr> = conseguirBindings(left, expr, new Map());
 
-            debuglog("MAMA ENCONTRE MAS BINDINGS AHORA")
-            debuglog(bindings)
+        debuglog("MAMA ENCONTRE MAS BINDINGS AHORA");
+        debuglog(bindings);
 
         // reemplazamos en right con los bindings
 
         const [okReemplazo, ret] = reemplazar(right, bindings);
 
-        debuglog("LUEGO DE BINDEAR ")
-            debuglog(ret);
+        debuglog("LUEGO DE BINDEAR ");
+        debuglog(ret);
 
         if (!contieneVariables(ret)) return [true, ret];
         if (okReemplazo) return [true, ret];

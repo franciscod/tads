@@ -1,5 +1,17 @@
 import { Report } from "./Reporting";
-import { AST, Axioma, Expr, Genero, GeneroParametrizado, Grammar, Operacion, Operandos, Parametros, TAD, VariablesLibres } from "./Types";
+import {
+    AST,
+    Axioma,
+    Expr,
+    Genero,
+    GeneroParametrizado,
+    Grammar,
+    Operacion,
+    Operandos,
+    Parametros,
+    TAD,
+    VariablesLibres,
+} from "./Types";
 
 type CustomBackendData = {
     tads: TAD[];
@@ -12,23 +24,21 @@ function genAxiomas(data: CustomBackendData): Axioma[] {
 
     for (const tad of data.tads) {
         for (const rawAxioma of tad.rawAxiomas) {
-            const astL = stringToAST(rawAxioma.left, tad.variablesLibres,  data);
-            const astR = stringToAST(rawAxioma.right, tad.variablesLibres,  data);
+            const astL = stringToAST(rawAxioma.left, tad.variablesLibres, data);
+            const astR = stringToAST(rawAxioma.right, tad.variablesLibres, data);
 
             // if (astL === null) console.log("Axioma L falló al parsearse", rawAxioma.left /*, tad.variablesLibres*/);
             // if (astR === null) console.log("Axioma R falló al parsearse", rawAxioma.right /*, tad.variablesLibres*/);
 
-            if(astL && astR) {
+            if (astL && astR) {
                 const exprL = astToExpr(astL, tad.variablesLibres, data);
                 const exprR = astToExpr(astR, tad.variablesLibres, data);
 
                 // if (exprL === null) console.log("Axioma L falló al tiparse", rawAxioma.left /*, tad.variablesLibres*/);
                 // if (exprR === null) console.log("Axioma R falló al tiparse", rawAxioma.right /*, tad.variablesLibres*/);
 
-                if (exprL && exprR)
-                    axiomas.push([exprL, exprR]);
+                if (exprL && exprR) axiomas.push([exprL, exprR]);
             }
-
         }
     }
 
@@ -55,25 +65,30 @@ export function genGrammar(tads: TAD[]): Grammar {
     const data: CustomBackendData = {
         tads,
         tokens,
-        generosValidos
+        generosValidos,
     };
 
     return {
-        axiomas: [],// genAxiomas(data),
+        axiomas: [], // genAxiomas(data),
         backendGrammar: data,
     };
 }
 
 // transforma un string en un AST sin tipado
-export function stringToAST(input: string, vars: VariablesLibres, data: CustomBackendData, report?: Report): AST | null {
+export function stringToAST(
+    input: string,
+    vars: VariablesLibres,
+    data: CustomBackendData,
+    report?: Report
+): AST | null {
     let stack: (string | AST)[] = [];
     let index = 0;
-    whileIdx: while(index < input.length || stack.length > 1 || (stack.length === 1 && typeof stack[0] === "string")) {
+    whileIdx: while (index < input.length || stack.length > 1 || (stack.length === 1 && typeof stack[0] === "string")) {
         // me fijo si matchea alguna operación la cola del stack
         for (const tad of data.tads) {
             forOp: for (const op of tad.operaciones) {
                 if (stack.length < op.tokens.length) continue;
-                
+
                 const ast: AST = { type: "fijo", nombre: op.nombre };
 
                 for (let i = 0; i < op.tokens.length; i++) {
@@ -93,8 +108,7 @@ export function stringToAST(input: string, vars: VariablesLibres, data: CustomBa
                         }
 
                         // aceptamos cualquier AST, los tipos no nos importan en el AST
-                        if(!ast.operandos)
-                            ast.operandos = { };
+                        if (!ast.operandos) ast.operandos = {};
                         ast.operandos[i] = stackElem as AST;
                     }
                 }
@@ -104,7 +118,7 @@ export function stringToAST(input: string, vars: VariablesLibres, data: CustomBa
                 continue whileIdx;
             }
         }
-        
+
         // consumo parentesis (ya sé que no matcheo ninguna op)
         // si en el stack hay "(", AST, ")"
         // entonces borro los literales de los paréntesis
@@ -128,7 +142,7 @@ export function stringToAST(input: string, vars: VariablesLibres, data: CustomBa
                     stack.pop();
                     stack.push({
                         type: "variable",
-                        nombre: varName
+                        nombre: varName,
                     });
                     continue whileIdx;
                 }
@@ -139,8 +153,7 @@ export function stringToAST(input: string, vars: VariablesLibres, data: CustomBa
         while (index < input.length && (input[index] === " " || input[index] === "\t" || input[index] === "\n"))
             index++;
         // parar si el resto es whitespace
-        if (index >= input.length)
-            break;
+        if (index >= input.length) break;
 
         // consumo el proximo token
         for (const token of data.tokens) {
@@ -161,25 +174,25 @@ export function stringToAST(input: string, vars: VariablesLibres, data: CustomBa
         }
 
         // si llego acá no pude consumir ningún token
-        report?.addMark('error', `No se esperaba el caracter ${input[index]}`, index, 1);
+        report?.addMark("error", `No se esperaba el caracter ${input[index]}`, index, 1);
         return null;
     }
-    
-    if(stack.length === 1 && typeof stack[0] !== "string") {
+
+    if (stack.length === 1 && typeof stack[0] !== "string") {
         return stack[0];
     } else {
-        if(report) {
+        if (report) {
             // generamos un mensaje de error util
             let buffer = "";
-            for(const stackElem of stack) {
-                if(typeof stackElem === 'string') {
+            for (const stackElem of stack) {
+                if (typeof stackElem === "string") {
                     buffer += `${stackElem}`;
                 } else {
                     buffer += `•`;
                 }
             }
 
-            report.addMark('error', `La expresión '${buffer}' no coincide con ningúna operación`, 0, input.length);
+            report.addMark("error", `La expresión '${buffer}' no coincide con ningúna operación`, 0, input.length);
         }
         return null;
     }
@@ -207,25 +220,24 @@ export function stringToAST(input: string, vars: VariablesLibres, data: CustomBa
 //     }
 // }
 function generoCompleto(genero: Genero, data: CustomBackendData): GeneroParametrizado {
-    let parametros: Parametros = { };
-    if(genero === 'par(α1,α2)') {
+    let parametros: Parametros = {};
+    if (genero === "par(α1,α2)") {
         parametros = {
-            'α1': generoCompleto('α1', data),
-            'α2': generoCompleto('α2', data)
-        }
+            α1: generoCompleto("α1", data),
+            α2: generoCompleto("α2", data),
+        };
     }
-    if(genero === 'conj(α)') {
+    if (genero === "conj(α)") {
         parametros = {
-            'α': generoCompleto('α', data),
-        }
+            α: generoCompleto("α", data),
+        };
     }
-    
+
     return {
         base: genero,
-        parametros
-    }
+        parametros,
+    };
 }
-
 
 // devuelve true si se puede calzar bien
 // parametros se va modificando para reflejar los bindings de parametros
@@ -235,17 +247,17 @@ function calzarGeneros(template: GeneroParametrizado, target: GeneroParametrizad
 
     // caso especial: esto ocurre cuando al genero no le importa el tipo yet
     //                por ejemplo, a ∅ no le importa el alpha
-    if(target.base in parametros) {
+    if (target.base in parametros) {
         // TODO: ver si nos estamos comiendo algo acá que no vi?
         return true;
     }
 
     // vemos si el genero no es concreto
-    if(template.base in parametros) {
+    if (template.base in parametros) {
         // vemos si es la primera vez que lo vemos
         // (es decir, el parametro tiene de género a sí mismo)
         // ej: { base: 'conj(α)', parametros: { 'α': { base: 'α' } } }
-        if(parametros[template.base].base === template.base) {
+        if (parametros[template.base].base === template.base) {
             // este parámetro pasa a tener un tipo concreto
             parametros[template.base] = target;
             return true;
@@ -257,15 +269,13 @@ function calzarGeneros(template: GeneroParametrizado, target: GeneroParametrizad
 
     // sabemos que es un tipo concreto
     // vemos si coincide en ambos lados
-    if(template.base !== target.base)
-        return false;
-    
+    if (template.base !== target.base) return false;
+
     // como son el mismo tipo concreto
     // sabemos que tienen los mismos parámetros
     // recursivamente calzamos los géneros
-    for(const paramName in template.parametros) {
-        if(!calzarGeneros(template.parametros[paramName], target.parametros[paramName], parametros))
-            return false;
+    for (const paramName in template.parametros) {
+        if (!calzarGeneros(template.parametros[paramName], target.parametros[paramName], parametros)) return false;
     }
 
     return true;
@@ -273,16 +283,15 @@ function calzarGeneros(template: GeneroParametrizado, target: GeneroParametrizad
 
 function bindearParametros(genero: GeneroParametrizado, parametros: Parametros): GeneroParametrizado {
     // si el genero es un parámetro, retornamos el parámetro
-    if(genero.base in parametros)
-        return parametros[genero.base];
-    
-    let ret: GeneroParametrizado = {
+    if (genero.base in parametros) return parametros[genero.base];
+
+    const ret: GeneroParametrizado = {
         base: genero.base,
-        parametros: { }
+        parametros: {},
     };
 
     // bindeamos los parametros recursivamente
-    for(const paramName in genero.parametros) {
+    for (const paramName in genero.parametros) {
         ret.parametros[paramName] = bindearParametros(genero.parametros[paramName], parametros);
     }
 
@@ -292,23 +301,23 @@ function bindearParametros(genero: GeneroParametrizado, parametros: Parametros):
 // transforma un AST sin tipos a una Expr tipada
 // la idea es que el tipado de Expr sea correcto
 function astToExpr(input: AST, vars: VariablesLibres, data: CustomBackendData, report?: Report): Expr | null {
-    if(input.type === 'variable') {
+    if (input.type === "variable") {
         // no se necesita hacer nada más
         return {
-            type: 'variable',
+            type: "variable",
             nombre: input.nombre,
             genero: generoCompleto(vars[input.nombre].base, data),
-            operandos: { }
-        }
+            operandos: {},
+        };
     }
 
     // primero genero todos los Expr
     // de los operandos
-    const operandos: Operandos = { };
-    if(input.operandos) {
-        for(const idx in input.operandos) {
+    const operandos: Operandos = {};
+    if (input.operandos) {
+        for (const idx in input.operandos) {
             const subExpr = astToExpr(input.operandos[idx], vars, data, report);
-            if(!subExpr) return null;
+            if (!subExpr) return null;
             operandos[idx] = subExpr;
         }
     }
@@ -318,15 +327,15 @@ function astToExpr(input: AST, vars: VariablesLibres, data: CustomBackendData, r
     // que calce
     for (const tad of data.tads) {
         forOp: for (const op of tad.operaciones) {
-            if(op.nombre === input.nombre) {
-                let parametros: Parametros = { };
-                for(const paramName of tad.parametros) {
+            if (op.nombre === input.nombre) {
+                const parametros: Parametros = {};
+                for (const paramName of tad.parametros) {
                     parametros[paramName] = generoCompleto(paramName, data);
                 }
 
                 for (let i = 0; i < op.tokens.length; i++) {
                     const token = op.tokens[i];
-                    if(token.type === 'slot') {
+                    if (token.type === "slot") {
                         const generoSlot = generoCompleto(token.genero.base, data);
                         const generoOperando = operandos[i].genero;
 
@@ -337,24 +346,24 @@ function astToExpr(input: AST, vars: VariablesLibres, data: CustomBackendData, r
                         //                                ↑   ↑
                         // • = •                : α × α → bool
                         //                        ↑   ↑
-                        if(!(generoSlot.base in parametros) && !data.generosValidos.includes(generoSlot.base)) {
+                        if (!(generoSlot.base in parametros) && !data.generosValidos.includes(generoSlot.base)) {
                             // ok, no es un género válido, asumimos que es un "bindeo local"
                             // agregamos a parámetros este param fantasma
                             parametros[generoSlot.base] = generoCompleto(generoSlot.base, data);
                             // seguimos como si nada
                         }
 
-                        if(!calzarGeneros(generoSlot, generoOperando, parametros)) {
+                        if (!calzarGeneros(generoSlot, generoOperando, parametros)) {
                             continue forOp;
                         }
                     }
                 }
 
                 const expr: Expr = {
-                    type: 'fijo',
+                    type: "fijo",
                     nombre: input.nombre,
                     genero: bindearParametros(generoCompleto(op.retorno.base, data), parametros),
-                    operandos: operandos
+                    operandos: operandos,
                 };
 
                 return expr;
@@ -367,10 +376,10 @@ function astToExpr(input: AST, vars: VariablesLibres, data: CustomBackendData, r
 }
 
 export function toExpr(input: string, grammar: Grammar, vars?: VariablesLibres, report?: Report): Expr | null {
-    vars = vars || { };
+    vars = vars || {};
     const data = grammar.backendGrammar as CustomBackendData;
     const ast = stringToAST(input, vars, data, report);
-    if(!ast) return null;
+    if (!ast) return null;
     const expr = astToExpr(ast, vars, data, report);
     return expr;
 }

@@ -122,7 +122,7 @@ class Tab {
         const report = new Report();
         report.setSource(input);
         [this.tads, this.evals] = parseSource(input, report);
-        
+
         const grammar = genGrammar(this.tads);
 
         const toMonacoSeverity = (marker: Marker): monaco.MarkerSeverity => {
@@ -218,7 +218,7 @@ class Tab {
                 ok = true;
 
                 // console.log(expr, evaluado);
-                
+
                 /*
                 this.lenses.push(
                     {

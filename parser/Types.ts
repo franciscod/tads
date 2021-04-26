@@ -1,4 +1,3 @@
-
 export type ExpresionLogica = any; // TODO
 export type VariablesLibres = { [nombreVar: string]: GeneroParametrizado };
 
@@ -60,7 +59,7 @@ export type Eval = { expr: string };
 export type AST = {
     type: "fijo" | "variable";
     nombre: string; // de la operación o la variable
-    operandos?: { [key: number]: AST }
+    operandos?: { [key: number]: AST };
 };
 
 export type Operandos = {

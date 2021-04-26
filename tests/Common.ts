@@ -14,8 +14,9 @@ export const CONJ_TAD = fs.readFileSync("tads/conj.tad", "utf-8");
 
 export const TADS = [BOOL_TAD, NAT_TAD, INT_TAD, PAR_TAD, CONJ_TAD];
 
-function parsePares(input: string, sep: string) : { left: string; right: string; line: number }[]  {
-    return input.replace(/\r\n/g, "\n")
+function parsePares(input: string, sep: string): { left: string; right: string; line: number }[] {
+    return input
+        .replace(/\r\n/g, "\n")
         .split("\n")
         .map((l, i) => {
             l = l.split("--")[0];
@@ -31,25 +32,21 @@ function parsePares(input: string, sep: string) : { left: string; right: string;
         .filter(e => e.line >= 0);
 }
 
-export const EVALS   = parsePares(EVALS_TXT + IGOBS_TXT + NOIGOBS_TXT,  " -> ");
+export const EVALS = parsePares(EVALS_TXT + IGOBS_TXT + NOIGOBS_TXT, " -> ");
 
 // los statements son todas expresiones validas
 // sacadas de ambos lados de los evals
 // sirven para checkear parsing y otras cosas
-const EVAL_STATEMENTS: string[] = Array.from(
-    new Set(EVALS.reduce((p: string[], c) => p.concat(c.left, c.right), []))
-);
+const EVAL_STATEMENTS: string[] = Array.from(new Set(EVALS.reduce((p: string[], c) => p.concat(c.left, c.right), [])));
 
 // estos son statements que deberían fallar al parsear
-export const INVALID_STATEMENTS: string[] = INVALIDS_TXT
-    .replace(/\r\n/g, "\n")
+export const INVALID_STATEMENTS: string[] = INVALIDS_TXT.replace(/\r\n/g, "\n")
     .split("\n")
     .map(l => l.split("--")[0])
     .filter(l => l.length > 0);
 
 // estos son statements que no deberían fallar al parsear
-export const VALID_STATEMENTS: string[] = VALIDS_TXT
-    .replace(/\r\n/g, "\n")
+export const VALID_STATEMENTS: string[] = VALIDS_TXT.replace(/\r\n/g, "\n")
     .split("\n")
     .map(l => l.split("--")[0])
     .filter(l => l.length > 0)
