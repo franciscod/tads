@@ -3,7 +3,7 @@ TAD Conjunto(α)
 géneros conj(α)
 
 parámetros formales
-  -- géneros α
+    géneros α
 
 exporta conj(α), generadores, observadores, ∅?, ∪, ∩, #, • - {•}, dameUno, sinUno, ⊆, • -
 
