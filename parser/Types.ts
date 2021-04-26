@@ -1,16 +1,7 @@
+import { Genero, GeneroParametrizado } from "./Genero";
+
 export type ExpresionLogica = any; // TODO
 export type VariablesLibres = { [nombreVar: string]: GeneroParametrizado };
-
-export type Genero = string; // o es una variable (alpha, beta, etc) o es un tad especifico
-
-export type Parametros = {
-    [paramName: string]: GeneroParametrizado;
-};
-
-export type GeneroParametrizado = {
-    base: Genero;
-    parametros: Parametros;
-};
 
 // tokens para sintaxis: corchetes, simbolos, etc
 export type Literal = {

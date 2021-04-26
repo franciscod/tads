@@ -1,17 +1,15 @@
-import { Report } from "./Reporting";
 import {
     AST,
     Axioma,
     Expr,
-    Genero,
-    GeneroParametrizado,
     Grammar,
     Operacion,
     Operandos,
-    Parametros,
     TAD,
     VariablesLibres,
 } from "./Types";
+import { bindearParametros, calzarGeneros, Parametros, parseGenero } from "./Genero";
+import { Report } from "./Reporting";
 
 type CustomBackendData = {
     tads: TAD[];
@@ -205,105 +203,6 @@ export function stringToAST(
     }
 }
 
-// TODO: esto debería hacerlo el parseTad o parseSource, o el genGrammar, no sé
-// esta función tiene que normalizar los generos
-// ej: par(α,conj(par(α, α))) →
-// {
-//     base: 'par(α1, α2)',
-//     parametros: {
-//         'α1': { base: 'α' },
-//         'α2': {
-//             base: 'conj(α)',
-//             parametros: {
-//                 'α': {
-//                     base: 'par(α1, α2)',
-//                     parametros: {
-//                         'α1': { base: 'α' },
-//                         'α2': { base: 'α' }
-//                     }
-//                 }
-//             }
-//         }
-//     }
-// }
-function generoCompleto(genero: Genero, data: CustomBackendData): GeneroParametrizado {
-    let parametros: Parametros = {};
-    if (genero === "par(α1,α2)") {
-        parametros = {
-            α1: generoCompleto("α1", data),
-            α2: generoCompleto("α2", data),
-        };
-    }
-    if (genero === "conj(α)") {
-        parametros = {
-            α: generoCompleto("α", data),
-        };
-    }
-
-    return {
-        base: genero,
-        parametros,
-    };
-}
-
-// devuelve true si se puede calzar bien
-// parametros se va modificando para reflejar los bindings de parametros
-function calzarGeneros(template: GeneroParametrizado, target: GeneroParametrizado, parametros: Parametros): boolean {
-    // DEF: que un genero tenga tipo concreto significa que
-    //      el genero base NO es un parámetro, por ej. nat, conj(α), par(α1, α2)
-
-    // caso especial: esto ocurre cuando al genero no le importa el tipo yet
-    //                por ejemplo, a ∅ no le importa el alpha
-    if (target.base in parametros) {
-        // TODO: ver si nos estamos comiendo algo acá que no vi?
-        return true;
-    }
-
-    // vemos si el genero no es concreto
-    if (template.base in parametros) {
-        // vemos si es la primera vez que lo vemos
-        // (es decir, el parametro tiene de género a sí mismo)
-        // ej: { base: 'conj(α)', parametros: { 'α': { base: 'α' } } }
-        if (parametros[template.base].base === template.base) {
-            // este parámetro pasa a tener un tipo concreto
-            parametros[template.base] = target;
-            return true;
-        } else {
-            // ya estaba, así que tiene que calzar
-            return calzarGeneros(parametros[template.base], target, parametros);
-        }
-    }
-
-    // sabemos que es un tipo concreto
-    // vemos si coincide en ambos lados
-    if (template.base !== target.base) return false;
-
-    // como son el mismo tipo concreto
-    // sabemos que tienen los mismos parámetros
-    // recursivamente calzamos los géneros
-    for (const paramName in template.parametros) {
-        if (!calzarGeneros(template.parametros[paramName], target.parametros[paramName], parametros)) return false;
-    }
-
-    return true;
-}
-
-function bindearParametros(genero: GeneroParametrizado, parametros: Parametros): GeneroParametrizado {
-    // si el genero es un parámetro, retornamos el parámetro
-    if (genero.base in parametros) return parametros[genero.base];
-
-    const ret: GeneroParametrizado = {
-        base: genero.base,
-        parametros: {},
-    };
-
-    // bindeamos los parametros recursivamente
-    for (const paramName in genero.parametros) {
-        ret.parametros[paramName] = bindearParametros(genero.parametros[paramName], parametros);
-    }
-
-    return ret;
-}
 
 // transforma un AST sin tipos a una Expr tipada
 // la idea es que el tipado de Expr sea correcto
@@ -313,7 +212,7 @@ function astToExpr(input: AST, vars: VariablesLibres, data: CustomBackendData, r
         return {
             type: "variable",
             nombre: input.nombre,
-            genero: generoCompleto(vars[input.nombre].base, data),
+            genero: parseGenero(vars[input.nombre].base, data.tads)!,
             operandos: {},
         };
     }
@@ -337,13 +236,13 @@ function astToExpr(input: AST, vars: VariablesLibres, data: CustomBackendData, r
             if (op.nombre === input.nombre) {
                 const parametros: Parametros = {};
                 for (const paramName of tad.parametros) {
-                    parametros[paramName] = generoCompleto(paramName, data);
+                    parametros[paramName] = parseGenero(paramName, data.tads)!;
                 }
 
                 for (let i = 0; i < op.tokens.length; i++) {
                     const token = op.tokens[i];
                     if (token.type === "slot") {
-                        const generoSlot = generoCompleto(token.genero.base, data);
+                        const generoSlot = parseGenero(token.genero.base, data.tads)!;
                         const generoOperando = operandos[i].genero;
 
                         // si no es un parámetro y el género no existe
@@ -356,7 +255,7 @@ function astToExpr(input: AST, vars: VariablesLibres, data: CustomBackendData, r
                         if (!(generoSlot.base in parametros) && !data.generosValidos.includes(generoSlot.base)) {
                             // ok, no es un género válido, asumimos que es un "bindeo local"
                             // agregamos a parámetros este param fantasma
-                            parametros[generoSlot.base] = generoCompleto(generoSlot.base, data);
+                            parametros[generoSlot.base] = parseGenero(generoSlot.base, data.tads)!;
                             // seguimos como si nada
                         }
 
@@ -369,7 +268,7 @@ function astToExpr(input: AST, vars: VariablesLibres, data: CustomBackendData, r
                 const expr: Expr = {
                     type: "fijo",
                     nombre: input.nombre,
-                    genero: bindearParametros(generoCompleto(op.retorno.base, data), parametros),
+                    genero: bindearParametros(parseGenero(op.retorno.base, data.tads)!, parametros),
                     operandos: operandos,
                 };
 
