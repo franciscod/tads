@@ -57,3 +57,9 @@ vs-services stuff:
         - 
 
     definitions: control + click para navegar
+
+
+mostar en algún lugar las cosas que asumimos:
+    - tema parentesis y precedencia
+    - los géneros de TADs con parámetros formales tienen que tener
+      los parámetros entre paréntesis si o si

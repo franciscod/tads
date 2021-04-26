@@ -42,22 +42,29 @@ export type GeneroParametrizado = {
  * }
  * ```
  */
-export function parseGenero(genero: Genero, tads: TAD[], report?: Report): GeneroParametrizado | null {
+export function parseGenero(rawGenero: string, tads: TAD[], report?: Report): GeneroParametrizado | null {
     let parametros: Parametros = {};
-    if (genero === "par(α1,α2)") {
+    if (rawGenero === "par(α1,α2)") {
         parametros = {
             α1: parseGenero("α1", tads)!,
             α2: parseGenero("α2", tads)!,
         };
     }
-    if (genero === "conj(α)") {
+    if (rawGenero === "conj(α)") {
         parametros = {
             α: parseGenero("α", tads)!,
         };
     }
 
+    for(const tad of tads) {
+        const genero = tad.generos[0];
+        const rgx = new RegExp(`${tad.parametros.join("|")}`);
+        const r = rawGenero.split(rgx);
+        console.log(rgx, rawGenero, r);
+    }
+
     return {
-        base: genero,
+        base: rawGenero,
         parametros,
     };
 }
