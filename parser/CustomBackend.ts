@@ -69,7 +69,7 @@ export function genGrammar(tads: TAD[]): Grammar {
     };
 
     return {
-        axiomas: [], // genAxiomas(data),
+        axiomas: genAxiomas(data),
         backendGrammar: data,
     };
 }
@@ -386,8 +386,6 @@ export function toExpr(input: string, grammar: Grammar, vars?: VariablesLibres, 
     vars = vars || {};
     const data = grammar.backendGrammar as CustomBackendData;
     const ast = stringToAST(input, vars, data, report);
-    console.log(ast);
-    
     if (!ast) return null;
     const expr = astToExpr(ast, vars, data, report);
     return expr;

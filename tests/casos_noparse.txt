@@ -199,3 +199,8 @@ Ag(0, ∅) ∪ Ag(true, ∅)
 -- (linea que no es un caso de tipo "noparse")
 -- (linea que no es un caso de tipo "noparse")
 -- (linea que no es un caso de tipo "noparse")
+-- (linea que no es un caso de tipo "noparse")
+-- deshabilitadoHasta(asd): true = false ∧ true --faltan parentesis
+-- deshabilitadoHasta(asd): true = false = true --faltan parentesis
+-- deshabilitadoHasta(asd): ¬ suc(suc(0)) < suc(0) --faltan parentesis
+-- deshabilitadoHasta(asd): false ∧ true ∧ true --faltan parentesis
