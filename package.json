@@ -5,8 +5,8 @@
     "dev": "webpack serve",
     "build": "cross-env MODE=production webpack",
     "build:profile": "cross-env MODE=production webpack --profile --json > stats.json",
-    "test": "jest test",
-    "test:watch": "jest test --watchAll",
+    "test": "jest",
+    "test:watch": "jest --watchAll",
     "format": "prettier --write site/ parser/ tests/",
     "lint": "eslint --ext .js,.ts --fix site/ parser/ tests/"
   },
