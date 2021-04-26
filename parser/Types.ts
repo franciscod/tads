@@ -60,6 +60,7 @@ export type AST = {
     type: "fijo" | "variable";
     nombre: string; // de la operación o la variable
     operandos?: { [key: number]: AST };
+    entreParens: boolean; // si la expresión se encuentra contenida entre paréntesis
 };
 
 export type Operandos = {

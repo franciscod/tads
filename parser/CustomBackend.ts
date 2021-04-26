@@ -75,6 +75,7 @@ export function genGrammar(tads: TAD[]): Grammar {
 }
 
 // transforma un string en un AST sin tipado
+// IMPORTANTE(TODO): genera un warning si la entrada es ambigua
 export function stringToAST(
     input: string,
     vars: VariablesLibres,
@@ -89,7 +90,7 @@ export function stringToAST(
             forOp: for (const op of tad.operaciones) {
                 if (stack.length < op.tokens.length) continue;
 
-                const ast: AST = { type: "fijo", nombre: op.nombre };
+                const ast: AST = { type: "fijo", nombre: op.nombre, entreParens: false };
 
                 for (let i = 0; i < op.tokens.length; i++) {
                     const token = op.tokens[i];
@@ -129,7 +130,8 @@ export function stringToAST(
             typeof stack[stack.length - 2] !== "string" // AST
         ) {
             stack.pop();
-            const ast = stack.pop();
+            const ast = stack.pop() as AST;
+            ast.entreParens = true;
             stack.pop();
             stack.push(ast!);
             continue whileIdx;
@@ -143,6 +145,7 @@ export function stringToAST(
                     stack.push({
                         type: "variable",
                         nombre: varName,
+                        entreParens: false
                     });
                     continue whileIdx;
                 }
@@ -179,6 +182,10 @@ export function stringToAST(
     }
 
     if (stack.length === 1 && typeof stack[0] !== "string") {
+        // TODO: tirar warning si hay ambiguedad
+        //       recorrer el AST y utilizar entreParens
+        //       para ver si fue desambiguado
+
         return stack[0];
     } else {
         if (report) {
@@ -379,6 +386,8 @@ export function toExpr(input: string, grammar: Grammar, vars?: VariablesLibres, 
     vars = vars || {};
     const data = grammar.backendGrammar as CustomBackendData;
     const ast = stringToAST(input, vars, data, report);
+    console.log(ast);
+    
     if (!ast) return null;
     const expr = astToExpr(ast, vars, data, report);
     return expr;
