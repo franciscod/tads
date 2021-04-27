@@ -1,4 +1,5 @@
-import { Expr, Grammar, GeneroParametrizado } from "../parser/Types";
+import { Expr, Grammar } from "../parser/Types";
+import { GeneroParametrizado } from "./Genero";
 
 function log(x: any) {
     return console.log(JSON.stringify(x, null, 4));

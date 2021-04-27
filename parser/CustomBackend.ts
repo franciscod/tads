@@ -1,13 +1,4 @@
-import {
-    AST,
-    Axioma,
-    Expr,
-    Grammar,
-    Operacion,
-    Operandos,
-    TAD,
-    VariablesLibres,
-} from "./Types";
+import { AST, Axioma, Expr, Grammar, Operacion, Operandos, TAD, VariablesLibres } from "./Types";
 import { bindearParametros, calzarGeneros, Parametros, parseGenero } from "./Genero";
 import { Report } from "./Reporting";
 
@@ -58,7 +49,7 @@ export function genGrammar(tads: TAD[]): Grammar {
     // TODO: orden por length es lo que queremos, o algo distinto?
     const tokens = Array.from(tokensSet).sort((a, b) => b.length - a.length);
 
-    const generosValidos = tads.reduce((p: string[], c) => p.concat(c.generos), []);
+    const generosValidos = tads.reduce((p: string[], c) => p.concat([c.genero]), []);
 
     const data: CustomBackendData = {
         tads,
@@ -143,7 +134,7 @@ export function stringToAST(
                     stack.push({
                         type: "variable",
                         nombre: varName,
-                        entreParens: false
+                        entreParens: false,
                     });
                     continue whileIdx;
                 }
@@ -202,7 +193,6 @@ export function stringToAST(
         return null;
     }
 }
-
 
 // transforma un AST sin tipos a una Expr tipada
 // la idea es que el tipado de Expr sea correcto

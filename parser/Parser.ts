@@ -1,3 +1,4 @@
+import { tokenizeGenero } from "./Genero";
 import { Report } from "./Reporting";
 import { RawAxioma, Eval, ExpresionLogica, Operacion, Slot, TAD, Token, VariablesLibres } from "./Types";
 
@@ -141,7 +142,8 @@ export function parseTad(source: string, report?: Report): TAD | null {
     const tad: TAD = {
         nombre: "",
         parametros: [],
-        generos: [],
+        genero: "",
+        generoTokenizado: [],
         operaciones: [],
         variablesLibres: {},
         rawAxiomas: [],
@@ -196,33 +198,10 @@ export function parseTad(source: string, report?: Report): TAD | null {
                 })
             );*/
         } else if (section === "generos") {
-            /*const generos = line
-                .slice("generos".length)
-                .split(",")
-                .map(g => g.trim())
-                .filter(g => g.length)*/
-            const generos = [line.slice("generos".length).trim()];
-
-            for (let j = 0; j < generos.length; j++) {
-                if (tad.generos.length > 0) {
-                    // no es elegante pero funciona ¯\_(ツ)_/¯
-                    const startWarning = line!.split(generos[j])[0].length;
-
-                    /*context?.hints?.addMark(
-                        "warning",
-                        `Especificar más de un género tendrá ningún efecto (no implementado).\nLos géneros ya especificados para este TAD son: ${tad.generos.join(
-                            ", "
-                        )}`,
-                        offsetRange({
-                            startLine: i,
-                            endLine: i,
-                            columnStart: 1 + startWarning,
-                            columnEnd: 1 + startWarning + generos[j].length,
-                        })
-                    );*/
-                }
-                tad.generos.push(generos[j]);
+            if (tad.genero.length > 0) {
+                // TODO: warning
             }
+            tad.genero = line.slice("generos".length).trim();
         } else if (section == "parametros") {
             const parametros = line
                 .trim()
@@ -307,6 +286,8 @@ export function parseTad(source: string, report?: Report): TAD | null {
     if (!closedProperly) {
         report?.addMark("error", `Se esperaba "FIN TAD" para ${tad.nombre}`, pos, 1);
     }
+
+    tad.generoTokenizado = tokenizeGenero(tad.genero, tad.parametros);
 
     return tad;
 }

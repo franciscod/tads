@@ -39,7 +39,8 @@ export type Operacion = {
 export type TAD = {
     nombre: string;
     parametros: string[];
-    generos: Genero[];
+    genero: Genero;
+    generoTokenizado: string[];
     operaciones: Operacion[];
     rawAxiomas: RawAxioma[];
     variablesLibres: VariablesLibres;

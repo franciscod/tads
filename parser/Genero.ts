@@ -18,8 +18,35 @@ export type GeneroParametrizado = {
 };
 
 /**
+ * Tokeniza el género de un TAD con sus parámetros
+ *
+ * nat → ["nat"]
+ * conj(α) → ["conj(", "α", ")"]
+ * par(α1, α2) → ["par(", "α1", ",", "α2", ")"]
+ */
+export function tokenizeGenero(genero: Genero, parametros: string[]): string[] {
+    const tokens: string[] = [];
+    let buffer = "";
+    for (let i = 0; i < genero.length; i++) {
+        if (genero[i] === " ") continue;
+        for (const paramName of parametros) {
+            if (genero.startsWith(paramName, i)) {
+                if (buffer.length) tokens.push(buffer);
+                tokens.push(paramName);
+                buffer = "";
+                i += paramName.length;
+            }
+        }
+        buffer += genero[i];
+    }
+    if (buffer.length) tokens.push(buffer);
+    return tokens;
+}
+
+/**
  * Esta función toma un género crudo y genera el árbol de géneros
- * Ejemplo:
+ * Nota: se asume que todos los géneros tiene el formato `nombre(paramA, paramB, ...)`
+ *
  * ```
  * par(α1,conj(par(bool, α))) →
  * {
@@ -43,37 +70,87 @@ export type GeneroParametrizado = {
  * ```
  */
 export function parseGenero(rawGenero: string, tads: TAD[], report?: Report): GeneroParametrizado | null {
-    let parametros: Parametros = {};
-    if (rawGenero === "par(α1,α2)") {
-        parametros = {
-            α1: parseGenero("α1", tads)!,
-            α2: parseGenero("α2", tads)!,
-        };
+    if (rawGenero.length === 0) {
+        report?.addMark("error", "Se esperaba un género", 0, 1);
+        return null;
     }
-    if (rawGenero === "conj(α)") {
-        parametros = {
-            α: parseGenero("α", tads)!,
+
+    const tad = tads.find(t => t.generoTokenizado.length > 0 && rawGenero.startsWith(t.generoTokenizado[0]));
+
+    if (!tad) {
+        // si no se encuentra un género pero el string tiene
+        // paréntesis entonces esperabamos un tipo
+        if (rawGenero.includes("(")) {
+            report?.addMark("error", `No se reconoce el género \`${rawGenero}\``, 0, rawGenero.length);
+            return null;
+        }
+
+        return {
+            base: rawGenero.trim(),
+            parametros: {},
         };
     }
 
-    for(const tad of tads) {
-        const genero = tad.generos[0];
-        const rgx = new RegExp(`${tad.parametros.join("|")}`);
-        const r = rawGenero.split(rgx);
-        console.log(rgx, rawGenero, r);
+    const parametros: Parametros = {};
+    let offset = 0;
+    for (let i = 0; i < tad.generoTokenizado.length; i++) {
+        const token = tad.generoTokenizado[i];
+        if (tad.parametros.includes(token)) {
+            // lo que está acá adentro es otro género,
+            // avanzamos hasta que se llegue al otro token
+            report?.push(offset);
+            let buffer = "";
+            let bracketBalance = 0;
+            while (
+                offset < rawGenero.length &&
+                (bracketBalance != 0 ||
+                    (bracketBalance == 0 && !rawGenero.startsWith(tad.generoTokenizado[i + 1], offset)))
+            ) {
+                if (rawGenero[offset] === "(") bracketBalance++;
+                else if (rawGenero[offset] === ")") {
+                    if (bracketBalance === 0) {
+                        report?.addMark("error", "No hay paréntesis abierto que matchee", offset, 1);
+                        return null;
+                    }
+                    bracketBalance--;
+                }
+                buffer += rawGenero[offset];
+                offset++;
+            }
+            const subGenero = parseGenero(buffer, tads, report);
+            if (subGenero === null) return null;
+            parametros[token] = subGenero;
+            report?.pop();
+        } else {
+            // tiene que coincidir el literal
+            if (!rawGenero.startsWith(token, offset)) {
+                report?.addMark("error", `Se esperaba \`${token}\``, offset, 1);
+                return null;
+            }
+            offset += token.length;
+        }
+    }
+
+    if (offset < rawGenero.length) {
+        report?.addMark("error", `No se esperaba \`${rawGenero.slice(offset)}\``, offset, rawGenero.length - offset);
+        return null;
     }
 
     return {
-        base: rawGenero,
+        base: tad.genero,
         parametros,
     };
 }
 
-/** 
- * Devuelve true si se puede calzar el target en el template  
+/**
+ * Devuelve true si se puede calzar el target en el template
  * `parametros` se va modificando para reflejar los bindings
  */
-export function calzarGeneros(template: GeneroParametrizado, target: GeneroParametrizado, parametros: Parametros): boolean {
+export function calzarGeneros(
+    template: GeneroParametrizado,
+    target: GeneroParametrizado,
+    parametros: Parametros
+): boolean {
     // DEF: que un genero tenga tipo concreto significa que
     //      el genero base NO es un parámetro, por ej. nat, conj(α), par(α1, α2)
 
