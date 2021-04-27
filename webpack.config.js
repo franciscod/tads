@@ -3,16 +3,18 @@ const git = require('git-rev-sync');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 
+const isProduction = process.env.MODE === 'production';
+console.log("isProduction", isProduction);
+
 const config = {
     entry: "./site/index.ts",
-    mode: process.env.MODE || 'development',
+    mode: isProduction ? 'production' : 'development',
     output: {
         path: path.resolve(__dirname, "build")
     },
     module: {
         rules: [
             { test: /\.ts?$/, loader: "ts-loader", exclude: [/node_modules/, /tests/] },
-            { test: /\.js?$/, loader: "babel-loader", exclude: [/node_modules/, /tests/] },
             { test: /\.(less|css)$/, use: [{ loader: "style-loader" }, { loader: "css-loader" }, { loader: "less-loader" }] },
             { test: /\.ttf$/, use: ['file-loader'] },
             { test: /\.tad$/, use: ['raw-loader'] }
@@ -38,7 +40,8 @@ const config = {
     ],
     devServer: {
         contentBase: path.resolve(__dirname, "public"),
-        compress: false
+        compress: false,
+        inline: !isProduction
     }
 };
 

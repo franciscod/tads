@@ -1,3 +1,6 @@
+/**
+ * Representa un rango de texto en un documento (o tab)
+ */
 export type SourceRange = {
     document: number;
 
@@ -15,6 +18,9 @@ export type Marker = {
     range: SourceRange;
 };
 
+/**
+ * Permite ir agregando Markers a un string usando un stack de offsets
+ */
 export class Report {
     private document = 0;
     private source = "";
@@ -24,7 +30,7 @@ export class Report {
 
     markers: Marker[] = [];
 
-    setSource(source: string, document = 0) {
+    setSource(source: string, document: number = 0) {
         this.source = source;
         this.lines = source.replace(/\r\n/g, "\n").split("\n");
         this.document = document;

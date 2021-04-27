@@ -166,7 +166,7 @@ export function stringToAST(
         }
 
         // si llego acá no pude consumir ningún token
-        report?.addMark("error", `No se esperaba el caracter ${input[index]}`, index, 1);
+        report?.addMark("error", `No se esperaba el caracter \`${input[index]}\``, index, 1);
         return null;
     }
 
@@ -249,7 +249,11 @@ function astToExpr(input: AST, vars: VariablesLibres, data: CustomBackendData, r
                             // seguimos como si nada
                         }
 
-                        if (!calzarGeneros(generoSlot, generoOperando, parametros)) {
+                        
+                        let r = calzarGeneros(generoSlot, generoOperando, parametros);
+                        //console.log(token.genero.base, generoOperando, JSON.stringify(parametros), r);
+
+                        if (!r) {
                             continue forOp;
                         }
                     }
