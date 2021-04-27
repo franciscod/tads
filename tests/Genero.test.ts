@@ -14,7 +14,16 @@ test.each(GENEROS_TOKENIZAR)("tokenize %s %s", (input, params, expected) =>
     expect(tokenizeGenero(input, params)).toStrictEqual(expected)
 );
 
-const GENEROS_INVALIDOS = ["conj(", "conj()", "conj(conj()", "conj(α))", "pepe()", "pepe(α)"];
+const GENEROS_INVALIDOS = [
+    "conj(",
+    "conj()",
+    "conj(conj()",
+    "conj(α))",
+    "pepe()",
+    "pepe(α)",
+    "par(α1,)",
+    "par(,α2)",
+];
 
 const GENEROS_VALIDOS = [
     "α",
@@ -24,14 +33,26 @@ const GENEROS_VALIDOS = [
     "conj(nat)",
     "conj(conj(α))",
     "conj(conj(bool))",
+    "par(conj(bool), conj(nat))",
     "par(α1, α2)",
     "par(α1, nat)",
+    "par(nat, α2)",
     "par(nat, nat)",
 ];
 
 const GENEROS_COMPARAR: [string, GeneroParametrizado][] = [
     ["nat", { base: "nat", parametros: {} }],
     ["conj(α)", { base: "conj(α)", parametros: { α: { base: "α", parametros: {} } } }],
+    [
+        "par(conj(bool), conj(nat))",
+        {
+            base: "par(α1,α2)",
+            parametros: {
+                α1: { base: "conj(α)", parametros: { α: { base: "bool", parametros: { }}} },
+                α2: { base: "conj(α)", parametros: { α: { base: "nat", parametros: { }}} },
+            }
+        }
+    ],
     [
         "par(α1,conj(par(bool, α)))",
         {

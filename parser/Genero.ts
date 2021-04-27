@@ -78,6 +78,8 @@ export function tokenizeGenero(genero: Genero, parametros: string[]): string[] {
  * ```
  */
 export function parseGenero(rawGenero: string, tads: TAD[], report?: Report): GeneroParametrizado | null {
+    rawGenero = rawGenero.trim();
+
     if (rawGenero.length === 0) {
         report?.addMark("error", "Se esperaba un género", 0, 1);
         return null;
@@ -106,7 +108,7 @@ export function parseGenero(rawGenero: string, tads: TAD[], report?: Report): Ge
         if (tad.parametros.includes(token)) {
             // lo que está acá adentro es otro género,
             // avanzamos hasta que se llegue al otro token
-            report?.push(offset);
+            const startOffset = offset;
             let buffer = "";
             let bracketBalance = 0;
             while (
@@ -125,10 +127,11 @@ export function parseGenero(rawGenero: string, tads: TAD[], report?: Report): Ge
                 buffer += rawGenero[offset];
                 offset++;
             }
+            report?.push(startOffset);
             const subGenero = parseGenero(buffer, tads, report);
+            report?.pop();
             if (subGenero === null) return null;
             parametros[token] = subGenero;
-            report?.pop();
         } else {
             // tiene que coincidir el literal
             if (!rawGenero.startsWith(token, offset)) {
