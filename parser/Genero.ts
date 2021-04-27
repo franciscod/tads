@@ -1,28 +1,36 @@
 import { Report } from "./Reporting";
 import { TAD } from "./Types";
 
-// mapean un parámetro (α, α1, α2, clave) a un género parametrizado
+/**
+ * O es un parámetro (`α`, `β`, etc) o un género base (sin parámetros reemplazados)
+ */
+export type Genero = string;
+
+/**
+ * Mapean un parámetro (`α`, `α1`, `α2`, `clave`, `significado`)
+ * a un género parametrizado
+ */
 export type Parametros = {
     [paramName: string]: GeneroParametrizado;
 };
 
-// o es una parametro (α, β, etc) o es un tad especifico
-export type Genero = string;
-
-// género parametrizado,
-// la base siempre es el género del TAD **sin reemplazar los parámetros en el nombre**
-// es decir, la base de conj(nat) es conj(α)
+/**
+ * El género parametrizado.
+ * La base siempre es el género del TAD **sin reemplazar los parámetros**, es decir
+ * la base de `conj(nat)` es `conj(α)`
+ */
 export type GeneroParametrizado = {
     base: Genero;
     parametros: Parametros;
 };
 
 /**
- * Tokeniza el género de un TAD con sus parámetros
+ * Tokeniza el género de un TAD con sus parámetros  
+ * No sirve para parsear géneros crudos (ie. `conj(nat)`)  
  *
- * nat → ["nat"]
- * conj(α) → ["conj(", "α", ")"]
- * par(α1, α2) → ["par(", "α1", ",", "α2", ")"]
+ * `nat` → ["nat"]  
+ * `conj(α)` → ["conj(", "α", ")"]  
+ * `par(α1, α2)` → ["par(", "α1", ",", "α2", ")"]
  */
 export function tokenizeGenero(genero: Genero, parametros: string[]): string[] {
     const tokens: string[] = [];
@@ -143,7 +151,7 @@ export function parseGenero(rawGenero: string, tads: TAD[], report?: Report): Ge
 }
 
 /**
- * Devuelve true si se puede calzar el target en el template
+ * Devuelve true si se puede calzar el target en el template.
  * `parametros` se va modificando para reflejar los bindings
  */
 export function calzarGeneros(
@@ -151,8 +159,8 @@ export function calzarGeneros(
     target: GeneroParametrizado,
     parametros: Parametros
 ): boolean {
-    // DEF: que un genero tenga tipo concreto significa que
-    //      el genero base NO es un parámetro, por ej. nat, conj(α), par(α1, α2)
+    // DEF: que un genero sea concreto significa que el genero base NO es un parámetro,
+    //      por ej. es nat, conj(α), par(α1, α2) y NO α, α1, clave
 
     // caso especial: esto ocurre cuando al genero no le importa el tipo yet
     //                por ejemplo, a ∅ no le importa el alpha
@@ -163,15 +171,16 @@ export function calzarGeneros(
 
     // vemos si el genero no es concreto
     if (template.base in parametros) {
-        // vemos si es la primera vez que lo vemos
-        // (es decir, el parametro tiene de género a sí mismo)
-        // ej: { base: 'conj(α)', parametros: { 'α': { base: 'α' } } }
+        // vemos si el slot está libre
+        // (es decir, el parametro del template tiene de género a sí mismo)
+        // ej: template = { base: 'conj(α)', parametros: { 'α': { base: 'α' } } }
+        //                                                  ↑            ↑
         if (parametros[template.base].base === template.base) {
             // este parámetro pasa a tener un tipo concreto
             parametros[template.base] = target;
             return true;
         } else {
-            // ya estaba, así que tiene que calzar
+            // ya estaba, así que tiene que calzar con el anterior
             return calzarGeneros(parametros[template.base], target, parametros);
         }
     }
@@ -187,11 +196,13 @@ export function calzarGeneros(
         if (!calzarGeneros(template.parametros[paramName], target.parametros[paramName], parametros)) return false;
     }
 
+    // calzó todo
     return true;
 }
 
 /**
- * Bindea
+ * Bindea parámetros en un género parametrizado
+ * (devuelve una copia, pero los parámetros reemplazados no son copiados)
  */
 export function bindearParametros(genero: GeneroParametrizado, parametros: Parametros): GeneroParametrizado {
     // si el genero es un parámetro, retornamos el parámetro
