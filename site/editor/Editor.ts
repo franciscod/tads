@@ -10,7 +10,7 @@ import { basicos, demo } from "../../tads";
 import { parseSource } from "../../parser/Parser";
 import { Eval, Expr, Grammar, TAD } from "../../parser/Types";
 import { evalGrammar } from "../../parser/Eval";
-import { fromExpr, genGrammar, toExpr } from "../../parser/CustomBackend";
+import { fromExpr, genGrammar, toExpr } from "../../parser/Grammar";
 import generateDebugView from "../views/DebugView";
 import { openModal } from "../views/Modal";
 import generateEvalDebug from "../views/EvalDebugView";

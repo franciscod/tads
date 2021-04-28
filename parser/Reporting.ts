@@ -19,7 +19,7 @@ export type Marker = {
 };
 
 /**
- * Permite ir agregando Markers a un string usando un stack de offsets
+ * Permite ir agregando Markers sobre un string usando un stack de offsets
  */
 export class Report {
     private document = 0;

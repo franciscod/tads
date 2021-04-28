@@ -1,5 +1,5 @@
 import { Operacion, TAD, Token } from "../../parser/Types";
-import { genGrammar } from "../../parser/CustomBackend";
+import { genGrammar } from "../../parser/Grammar";
 import { Genero } from "../../parser/Genero";
 
 const generateGeneroTag = (genero: Genero): string => {
