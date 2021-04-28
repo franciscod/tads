@@ -1,6 +1,6 @@
 import { evalGrammar } from "../parser/Eval";
 import { parseSource } from "../parser/Parser";
-import { genGrammar, toExpr } from "../parser/CustomBackend";
+import { genGrammar, toExpr } from "../parser/Grammar";
 
 import { TADS, EVALS } from "./Common";
 
