@@ -7,7 +7,7 @@ const isProduction = process.env.MODE === 'production';
 console.log("isProduction", isProduction);
 
 const config = {
-    entry: "./site/index.ts",
+    entry: "./app/index.ts",
     mode: isProduction ? 'production' : 'development',
     output: {
         path: path.resolve(__dirname, "build")
@@ -25,7 +25,7 @@ const config = {
     },
     plugins: [
         new HtmlWebpackPlugin({
-            template: path.resolve(__dirname, "site/index.html"),
+            template: path.resolve(__dirname, "app/index.html"),
             minify: { removeComments: false },
             templateParameters: {
                 "BUILD_HASH": git.short() + (git.isDirty() ? '-dirty' : ''),

@@ -15,7 +15,7 @@ export type Grammar = {
 };
 
 /**
- * Genera la gramática utilizado para parsear ASTs, Exprs y luego evaluarlos
+ * Genera la gramática utilizada para parsear ASTs, Exprs y luego evaluarlos
  */
 export function genGrammar(tads: TAD[], report?: Report): Grammar {
     const tokens = extractTokens(tads);
