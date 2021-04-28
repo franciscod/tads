@@ -7,7 +7,7 @@
     "build:profile": "cross-env MODE=production webpack --profile --json > stats.json",
     "test": "jest test",
     "test:watch": "jest test --watchAll",
-    "format": "prettier --write site/ parser/ tests/",
+    "format": "prettier --config config/prettierrc --ignore-path config/prettierignore --write site/ parser/ tests/",
     "lint": "eslint --ext .js,.ts --fix site/ parser/ tests/"
   },
   "devDependencies": {
