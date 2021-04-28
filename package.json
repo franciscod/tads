@@ -8,7 +8,7 @@
     "test": "jest --config config/jest.config.js --rootDir . test",
     "test:watch": "jest --config config/jest.config.js --root . test --watchAll",
     "format": "prettier --config config/prettierrc --ignore-path config/prettierignore --write site/ parser/ tests/",
-    "lint": "eslint --ext .js,.ts --fix site/ parser/ tests/"
+    "lint": "eslint --config config/eslintrc.js --ignore-path config/eslintignore --ext .js,.ts --fix site/ parser/ tests/"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.13.15",
