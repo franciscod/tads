@@ -21,7 +21,7 @@ const symbol_replacements = [
 ];
 
 monaco.languages.registerCompletionItemProvider("tad", {
-    provideCompletionItems: (model, position, token) => {
+    provideCompletionItems: (model, position, _token) => {
         const word = model.getWordUntilPosition(position);
         const range = {
             startLineNumber: position.lineNumber,

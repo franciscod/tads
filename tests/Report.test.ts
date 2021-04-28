@@ -56,7 +56,7 @@ describe("offsets correctos", () => {
             report.setSource(off.input);
             for (const offset of off.offsets) report.push(offset);
             report.addMark("hint", "Test", off.offset, off.length);
-            for (const offset of off.offsets) report.pop();
+            for (const _ of off.offsets) report.pop();
             expect(report.markers[0].range).toStrictEqual(off.expected);
         });
     }

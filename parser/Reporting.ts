@@ -30,19 +30,19 @@ export class Report {
 
     markers: Marker[] = [];
 
-    setSource(source: string, document = 0) {
+    setSource(source: string, document = 0): void {
         this.source = source;
         this.lines = source.replace(/\r\n/g, "\n").split("\n");
         this.document = document;
     }
 
-    push(offset: number) {
+    push(offset: number): void {
         if (this.currentOffset + offset > this.source.length) throw new Error("Offset out of bounds");
         this.currentOffset += offset;
         this.offsets.push(offset);
     }
 
-    pop() {
+    pop(): void {
         if (this.offsets.length === 0) throw new Error("No offset to pop");
         this.currentOffset -= this.offsets.pop()!;
     }
@@ -77,7 +77,7 @@ export class Report {
         };
     }
 
-    addMark(severity: MarkerSeverity, message: string, offset: number, length: number) {
+    addMark(severity: MarkerSeverity, message: string, offset: number, length: number): void {
         if (this.currentOffset + offset + length > this.source.length) throw new Error("Section out of bounds");
         this.markers.push({
             severity,
