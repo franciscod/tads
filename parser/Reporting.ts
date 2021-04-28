@@ -30,7 +30,7 @@ export class Report {
 
     markers: Marker[] = [];
 
-    setSource(source: string, document: number = 0) {
+    setSource(source: string, document = 0) {
         this.source = source;
         this.lines = source.replace(/\r\n/g, "\n").split("\n");
         this.document = document;

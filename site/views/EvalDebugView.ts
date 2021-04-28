@@ -1,6 +1,6 @@
-import { evalStep } from "../../parser/Eval";
-import { fromExpr } from "../../parser/Grammar";
-import { Expr, Grammar } from "../../parser/Types";
+import { evalStepGrammar } from "../../parser/Eval";
+import { Expr, exprToString } from "../../parser/Expr";
+import { Grammar } from "../../parser/Grammar";
 
 const generateEvalDebug = (expr: Expr, grammar: Grammar): string => {
     let steps = "";
@@ -9,10 +9,10 @@ const generateEvalDebug = (expr: Expr, grammar: Grammar): string => {
     for (let i = 0; i < 50 && run; i++) {
         steps += `
             <div class="debug-section">STEP #${i}</div>
-            <pre>${fromExpr(ret, grammar)}</pre>
+            <pre>${exprToString(ret, grammar)}</pre>
             <br>
         `;
-        [run, ret] = evalStep(ret, grammar);
+        [run, ret] = evalStepGrammar(ret, grammar);
     }
 
     return `

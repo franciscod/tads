@@ -25,11 +25,11 @@ export type GeneroParametrizado = {
 };
 
 /**
- * Tokeniza el género de un TAD con sus parámetros  
- * No sirve para parsear géneros crudos (ie. `conj(nat)`)  
+ * Tokeniza el género de un TAD con sus parámetros
+ * No sirve para parsear géneros crudos (ie. `conj(nat)`)
  *
- * `nat` → ["nat"]  
- * `conj(α)` → ["conj(", "α", ")"]  
+ * `nat` → ["nat"]
+ * `conj(α)` → ["conj(", "α", ")"]
  * `par(α1, α2)` → ["par(", "α1", ",", "α2", ")"]
  */
 export function tokenizeGenero(genero: Genero, parametros: string[]): string[] {

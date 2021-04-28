@@ -1,5 +1,6 @@
-import { Expr, Grammar } from "../parser/Types";
+import { Expr } from "./Expr";
 import { GeneroParametrizado } from "./Genero";
+import { Grammar } from "./Grammar";
 
 function log(x: any) {
     return console.log(JSON.stringify(x, null, 4));
@@ -14,13 +15,13 @@ export function evalGrammar(expr: Expr, grammar: Grammar): Expr {
     let run = true;
     let ret: Expr = expr;
     for (let i = 0; i < 400 && run; i++) {
-        [run, ret] = evalStep(ret, grammar);
+        [run, ret] = evalStepGrammar(ret, grammar);
     }
 
     return ret;
 }
 
-export function evalStep(expr: Expr, grammar: Grammar): [boolean, Expr] {
+export function evalStepGrammar(expr: Expr, grammar: Grammar): [boolean, Expr] {
     if (expr.nombre === "•=•") {
         // IGUALDAD OBSERVACIONAL
 
@@ -100,7 +101,7 @@ export function evalStep(expr: Expr, grammar: Grammar): [boolean, Expr] {
     }
 
     for (const child in expr.operandos) {
-        const [evaluoAlgo, sub] = evalStep(expr.operandos[child], grammar);
+        const [evaluoAlgo, sub] = evalStepGrammar(expr.operandos[child], grammar);
         if (evaluoAlgo) {
             ret.operandos[child] = sub;
             return [true, ret];

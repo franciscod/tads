@@ -1,5 +1,8 @@
 import * as monaco from "monaco-editor";
 
+import { register, render } from "timeago.js";
+import timeago_es from "timeago.js/lib/lang/es";
+
 monaco.languages.register({ id: "tad" });
 
 import "./Colorization";
@@ -8,9 +11,10 @@ import "./Hover";
 
 import { basicos, demo } from "../../tads";
 import { parseSource } from "../../parser/Parser";
-import { Eval, Expr, Grammar, TAD } from "../../parser/Types";
+import { Eval, TAD } from "../../parser/Types";
 import { evalGrammar } from "../../parser/Eval";
-import { fromExpr, genGrammar, toExpr } from "../../parser/Grammar";
+import { Expr, parseToExpr } from "../../parser/Expr";
+import { genGrammar, Grammar } from "../../parser/Grammar";
 import generateDebugView from "../views/DebugView";
 import { openModal } from "../views/Modal";
 import generateEvalDebug from "../views/EvalDebugView";
@@ -212,7 +216,7 @@ class Tab {
             */
 
             let ok = false;
-            const expr = toExpr(_eval.expr, grammar);
+            const expr = parseToExpr(_eval.expr, {}, grammar);
             if (expr) {
                 const evaluado = evalGrammar(expr, grammar);
                 ok = true;
@@ -301,9 +305,5 @@ if(viewState) editor.restoreViewState(viewState);
 */
 
 // Header con el tiempo del commit
-
-import { register, render } from "timeago.js";
-import timeago_es from "timeago.js/lib/lang/es";
-
 register("es", timeago_es);
 render(document.querySelectorAll(".moment"), "es");

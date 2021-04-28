@@ -47,28 +47,3 @@ export type TAD = {
 };
 
 export type Eval = { expr: string };
-
-export type AST = {
-    type: "fijo" | "variable";
-    nombre: string; // de la operación o la variable
-    operandos?: { [key: number]: AST };
-    entreParens: boolean; // si la expresión se encuentra contenida entre paréntesis
-};
-
-export type Operandos = {
-    [key: number]: Expr;
-};
-
-export type Expr = {
-    type: "fijo" | "variable";
-    nombre: string;
-    genero: GeneroParametrizado;
-    operandos: Operandos;
-};
-
-export type Axioma = [Expr, Expr];
-
-export type Grammar = {
-    axiomas: Axioma[];
-    backendGrammar: any;
-};

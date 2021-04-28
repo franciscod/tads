@@ -1,6 +1,14 @@
 import { TADS } from "./Common";
 import { parseSource } from "../parser/Parser";
-import { bindearParametros, calzarGeneros, Genero, GeneroParametrizado, Parametros, parseGenero, tokenizeGenero } from "../parser/Genero";
+import {
+    bindearParametros,
+    calzarGeneros,
+    Genero,
+    GeneroParametrizado,
+    Parametros,
+    parseGenero,
+    tokenizeGenero,
+} from "../parser/Genero";
 
 const [tads] = parseSource(TADS.join("\n"));
 
@@ -14,16 +22,7 @@ test.each(GENEROS_TOKENIZAR)("tokenize %s %s", (input, params, expected) =>
     expect(tokenizeGenero(input, params)).toStrictEqual(expected)
 );
 
-const GENEROS_INVALIDOS = [
-    "conj(",
-    "conj()",
-    "conj(conj()",
-    "conj(α))",
-    "pepe()",
-    "pepe(α)",
-    "par(α1,)",
-    "par(,α2)",
-];
+const GENEROS_INVALIDOS = ["conj(", "conj()", "conj(conj()", "conj(α))", "pepe()", "pepe(α)", "par(α1,)", "par(,α2)"];
 
 const GENEROS_VALIDOS = [
     "α",
@@ -48,10 +47,10 @@ const GENEROS_COMPARAR: [string, GeneroParametrizado][] = [
         {
             base: "par(α1,α2)",
             parametros: {
-                α1: { base: "conj(α)", parametros: { α: { base: "bool", parametros: { }}} },
-                α2: { base: "conj(α)", parametros: { α: { base: "nat", parametros: { }}} },
-            }
-        }
+                α1: { base: "conj(α)", parametros: { α: { base: "bool", parametros: {} } } },
+                α2: { base: "conj(α)", parametros: { α: { base: "nat", parametros: {} } } },
+            },
+        },
     ],
     [
         "par(α1,conj(par(bool, α)))",
@@ -81,27 +80,27 @@ test.each(GENEROS_INVALIDOS)("invalido %s", input => expect(parseGenero(input, t
 test.each(GENEROS_COMPARAR)("arbol %s", (input, expected) => expect(parseGenero(input, tads)).toStrictEqual(expected));
 
 const GENEROS_CALZAR: [Genero, Genero, { [key: string]: Genero }, boolean][] = [
-    ["bool", "bool", { }, true],
-    ["bool", "nat", { }, false],
-    ["α", "α", { }, true],
+    ["bool", "bool", {}, true],
+    ["bool", "nat", {}, false],
+    ["α", "α", {}, true],
     ["α", "α", { α: "α" }, true],
     ["α", "α", { α: "nat" }, true],
     ["α", "nat", { α: "nat" }, true],
     ["α", "bool", { α: "nat" }, false],
     ["α1", "α1", { α1: "α1", α2: "α2" }, true],
     ["par(α1,α2)", "par(α1,α2)", { α1: "α1", α2: "α2" }, true],
-    ["nat", "conj(α)", { }, false],
+    ["nat", "conj(α)", {}, false],
     ["conj(α)", "conj(α)", { α: "α" }, true],
     ["conj(α)", "conj(nat)", { α: "α" }, true],
     ["conj(α)", "conj(nat)", { α: "nat" }, true],
-    ["conj(α)", "conj(nat)", { α: "bool" }, false]
+    ["conj(α)", "conj(nat)", { α: "bool" }, false],
 ];
 
 test.each(GENEROS_CALZAR)("calzar %s con %s %s -> %b", (template, target, parametros, expected) => {
     const generoTemplate = parseGenero(template, tads);
     const generoTarget = parseGenero(target, tads);
-    const generoParams: Parametros = { };
-    for(const paramName in parametros) {
+    const generoParams: Parametros = {};
+    for (const paramName in parametros) {
         const subGen = parseGenero(parametros[paramName], tads);
         expect(subGen).not.toBeNull();
         generoParams[paramName] = subGen!;
@@ -113,20 +112,20 @@ test.each(GENEROS_CALZAR)("calzar %s con %s %s -> %b", (template, target, parame
 });
 
 const BINDEAR_PARAMETROS: [Genero, { [key: string]: Genero }, Genero][] = [
-    ["bool", { }, "bool"],
+    ["bool", {}, "bool"],
     ["α", { α: "bool" }, "bool"],
-    ["par(α1,conj(par(bool, α)))", { α: 'bool' }, "par(α1,conj(par(bool, bool)))"],
-    ["par(α1,conj(par(bool, α)))", { α1: 'nat' }, "par(nat,conj(par(bool, α)))"],
-    ["par(α1,conj(par(bool, α)))", { α: 'bool', α1: 'nat' }, "par(nat,conj(par(bool, bool)))"],
-    ["par(α,α)", { α: 'bool' }, "par(bool, bool)"],
+    ["par(α1,conj(par(bool, α)))", { α: "bool" }, "par(α1,conj(par(bool, bool)))"],
+    ["par(α1,conj(par(bool, α)))", { α1: "nat" }, "par(nat,conj(par(bool, α)))"],
+    ["par(α1,conj(par(bool, α)))", { α: "bool", α1: "nat" }, "par(nat,conj(par(bool, bool)))"],
+    ["par(α,α)", { α: "bool" }, "par(bool, bool)"],
     ["conj(α)", { α: "conj(α1)" }, "conj(conj(α1))"],
 ];
 
 test.each(BINDEAR_PARAMETROS)("bindear %s + %s -> %s", (template, parametros, expected) => {
     const generoTemplate = parseGenero(template, tads);
     const generoTarget = parseGenero(expected, tads);
-    const generoParams: Parametros = { };
-    for(const paramName in parametros) {
+    const generoParams: Parametros = {};
+    for (const paramName in parametros) {
         const subGen = parseGenero(parametros[paramName], tads);
         expect(subGen).not.toBeNull();
         generoParams[paramName] = subGen!;

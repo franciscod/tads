@@ -47,8 +47,8 @@ const generateDebugView = (tad: TAD): string => {
         <br>
         <br>
         <br>
-        <div class="debug-section">Grammar generado</div>
-        <pre>${grammar.backendGrammar.source}</pre>
+        <div class="debug-section">Grammar meta</div>
+        <pre>TODO: tokens, etc...</pre>
     `;
 
     return "report\n".repeat(500);
