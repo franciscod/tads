@@ -2,7 +2,7 @@ import { evalGrammar } from "../../parser/Eval";
 import { parseToExpr } from "../../parser/Expr";
 import { genGrammar, Grammar } from "../../parser/Grammar";
 import { parseSource } from "../../parser/Parser";
-import { Report } from "../../parser/Reporting";
+import { Marker, Report } from "../../parser/Reporting";
 import { Eval, TAD } from "../../parser/Types";
 
 if(typeof window !== 'undefined') {
@@ -27,7 +27,12 @@ export type ProgressMessage = {
     elapsed: number;
 }
 
-export type Message = StartMessage | ProgressMessage;
+export type ReportMessage = {
+    type: "report",
+    markers: Marker[]
+}
+
+export type Message = StartMessage | ProgressMessage | ReportMessage;
 
 function* fullLoop(start: StartMessage): Generator<Message | null> {
     const report = new Report();
@@ -81,6 +86,12 @@ function* fullLoop(start: StartMessage): Generator<Message | null> {
             elapsed: performance.now() - evalsStart
         };
     }
+
+    const reportMessage: ReportMessage = {
+        type: 'report',
+        markers: report.markers
+    };
+    self.postMessage(reportMessage, undefined!);
 }
 
 let workGenerator: Generator<Message | null> | null = null;

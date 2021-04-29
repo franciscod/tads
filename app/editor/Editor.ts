@@ -6,9 +6,8 @@ import "./Colorization";
 import "./Suggestions";
 import "./Hover";
 import { Tab, ITabOptions } from "./Tab";
-import { Report } from "../../parser/Reporting";
-import { parseSource } from "../../parser/Parser";
-import { Message, ProgressMessage, StartMessage } from "./Worker";
+import { Marker } from "../../parser/Reporting";
+import { Message, ProgressMessage, ReportMessage, StartMessage } from "./Worker";
 
 setTimeout(monaco.editor.remeasureFonts, 1000);
 
@@ -43,9 +42,26 @@ export class Editor {
         this.revalidate();
     }
 
+    revalidate() {
+        let startMessage: StartMessage = {
+            type: 'start',
+            inputs: []
+        };
+        for(const i in this.tabs) {
+            startMessage.inputs.push({
+                source: this.tabs[i].source,
+                document: parseInt(i)
+            });
+        }
+        
+        this.worker.postMessage(startMessage, undefined!);
+    }
+    
     onMessage(data: Message) {
         if(data.type === 'progress') {
             this.renderProgress(data);
+        } else if(data.type === 'report') {
+            this.updateReport(data);
         }
     }
 
@@ -70,19 +86,37 @@ export class Editor {
         }
     }
 
-    revalidate() {
-        let startMessage: StartMessage = {
-            type: 'start',
-            inputs: []
+    updateReport(report: ReportMessage) {
+        const toMonacoSeverity = (marker: Marker): monaco.MarkerSeverity => {
+            switch (marker.severity) {
+                case "error":
+                    return monaco.MarkerSeverity.Error;
+                case "warning":
+                    return monaco.MarkerSeverity.Warning;
+                case "hint":
+                    return monaco.MarkerSeverity.Hint;
+                case "info":
+                    return monaco.MarkerSeverity.Info;
+            }
         };
+
         for(const i in this.tabs) {
-            startMessage.inputs.push({
-                source: this.tabs[i].source,
-                document: parseInt(i)
-            });
+            monaco.editor.setModelMarkers(
+                this.tabs[i].model,
+                "tad",
+                report.markers
+                    .filter(m => (m.range.document as unknown as string) == i)
+                    .map(m => ({
+                    severity: toMonacoSeverity(m),
+                    startLineNumber: m.range.startLine,
+                    startColumn: m.range.columnStart,
+                    endLineNumber: m.range.endLine,
+                    endColumn: m.range.columnEnd,
+                    message: m.message,
+                }))
+            );
         }
-        
-        this.worker.postMessage(startMessage, undefined!);
+
     }
 }
 
@@ -128,43 +162,6 @@ const tabs: Tab[] = ;
     private evals: Eval[];
 
     validate() {
-        let input = this.model.getValue() + "\n\n\n" + (this._options.usarBasicos ? basicos.join("\n") : "");
-        input = input.replace(/\r\n/g, "\n");
-
-        const report = new Report();
-        report.setSource(input);
-        [this.tads, this.evals] = parseSource(input, report);
-
-        const grammar = genGrammar(this.tads);
-
-        const toMonacoSeverity = (marker: Marker): monaco.MarkerSeverity => {
-            switch (marker.severity) {
-                case "error":
-                    return monaco.MarkerSeverity.Error;
-                case "warning":
-                    return monaco.MarkerSeverity.Warning;
-                case "hint":
-                    return monaco.MarkerSeverity.Hint;
-                case "info":
-                    return monaco.MarkerSeverity.Info;
-            }
-        };
-
-        const numLines = this.model.getValue().replace(/\r\n/g, "\n").split("\n").length;
-        monaco.editor.setModelMarkers(
-            this.model,
-            "tad",
-            report.markers
-                .filter(m => m.range.startLine <= numLines)
-                .map(m => ({
-                    severity: toMonacoSeverity(m),
-                    startLineNumber: m.range.startLine,
-                    startColumn: m.range.columnStart,
-                    endLineNumber: m.range.endLine,
-                    endColumn: m.range.columnEnd,
-                    message: m.message,
-                }))
-        );
 
         const deltaDecorations: monaco.editor.IModelDeltaDecoration[] = [];
         this.lenses = [];

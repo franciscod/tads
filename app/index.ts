@@ -12,7 +12,7 @@ const _editor = new Editor(document.getElementById("editor")!, [{
     readOnly: true,
     saveInStorage: false
 }, {
-    title: "🧪 Ejercicio",
+    title: "🧪 Playground",
     content: demo,
     readOnly: false,
     saveInStorage: true
