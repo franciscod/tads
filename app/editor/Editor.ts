@@ -1,40 +1,96 @@
 import * as monaco from "monaco-editor";
 
-import { register, render } from "timeago.js";
-import timeago_es from "timeago.js/lib/lang/es";
-
 monaco.languages.register({ id: "tad" });
 
 import "./Colorization";
 import "./Suggestions";
 import "./Hover";
-
-import { basicos, demo } from "../../tads";
-import { parseSource } from "../../parser/Parser";
-import { Eval, TAD } from "../../parser/Types";
-import { evalGrammar } from "../../parser/Eval";
-import { Expr, parseToExpr } from "../../parser/Expr";
-import { genGrammar, Grammar } from "../../parser/Grammar";
-import generateDebugView from "../views/DebugView";
-import { openModal } from "../views/Modal";
-import generateEvalDebug from "../views/EvalDebugView";
+import { Tab, ITabOptions } from "./Tab";
 import { Report } from "../../parser/Reporting";
-import { Marker } from "../../parser/Reporting";
+import { parseSource } from "../../parser/Parser";
+import { Message, ProgressMessage, StartMessage } from "./Worker";
 
+setTimeout(monaco.editor.remeasureFonts, 1000);
+
+export class Editor {
+    public monacoEditor: monaco.editor.IStandaloneCodeEditor;
+    public activeTab: Tab | null = null;
+    private worker: Worker;
+    private tabs: Tab[] = [];
+
+    constructor(editorElement: HTMLElement, tabs: ITabOptions[]) {
+        this.worker = new Worker('/worker.js');
+        // this.worker.onerror = (ev) => alert(`No se pudo cargar el WebWorker:\n\n${ev.message}`);
+        this.worker.onmessage = (ev) => this.onMessage(ev.data as Message);
+        
+        this.monacoEditor = monaco.editor.create(editorElement, {
+            theme: "tad-dark",
+            automaticLayout: true,
+            fontFamily: "Fira Code",
+            fontLigatures: true,
+            fontSize: 20,
+            tabSize: 4,
+            glyphMargin: true,
+            model: null,
+        });
+        
+        this.tabs = tabs.map(opts => new Tab(this, opts));
+
+        // si ningún tab se abrió
+        if(this.monacoEditor.getModel() === null)
+            this.tabs[this.tabs.length - 1].open();
+        
+        this.revalidate();
+    }
+
+    onMessage(data: Message) {
+        if(data.type === 'progress') {
+            this.renderProgress(data);
+        }
+    }
+
+    renderProgress(progress: ProgressMessage) {
+        const elem = document.getElementById(`progress-${progress.step.toLowerCase()}`);
+        if(elem) {
+            elem.title = `${progress.current}/${progress.total}`;
+            elem.classList.remove("processing");
+            elem.classList.remove("success");
+            if(progress.current === 0) {
+                // en espera
+                elem.innerText = progress.step;
+            } else if(progress.current === progress.total) {
+                // finalizado
+                elem.innerText = `${progress.step} (${progress.elapsed.toFixed(2)}ms)`;
+                elem.classList.add("success");
+            } else {
+                // actualmente procesando
+                elem.classList.add("processing");
+                elem.innerText = `${progress.step} (${progress.current}/${progress.total})`;
+            }
+        }
+    }
+
+    revalidate() {
+        let startMessage: StartMessage = {
+            type: 'start',
+            inputs: []
+        };
+        for(const i in this.tabs) {
+            startMessage.inputs.push({
+                source: this.tabs[i].source,
+                document: parseInt(i)
+            });
+        }
+        
+        this.worker.postMessage(startMessage, undefined!);
+    }
+}
+
+/*
 interface ITextModelData {
     tab?: Tab;
 }
 
-const editor = monaco.editor.create(document.getElementById("editor")!, {
-    theme: "tad-dark",
-    automaticLayout: true,
-    fontFamily: "Fira Code",
-    fontLigatures: true,
-    fontSize: 20,
-    tabSize: 4,
-    glyphMargin: true,
-    model: null,
-});
 
 const debugCommandId = editor.addCommand(
     0,
@@ -61,63 +117,15 @@ monaco.languages.registerCodeLensProvider("tad", {
     resolveCodeLens: (_, codeLens) => codeLens,
 });
 
-let activeTab: Tab | null = null;
+const tabs: Tab[] = ;
 
-type TabOptions = {
-    title: string;
-    content: string;
-    readOnly: boolean;
-    usarBasicos: boolean;
-};
+*/
 
-class Tab {
-    private _options: TabOptions;
-    private model: monaco.editor.ITextModel & ITextModelData;
-    private viewState: monaco.editor.ICodeEditorViewState | null;
+    /*
     private decorations: string[];
     private lenses: monaco.languages.CodeLens[];
     private tads: TAD[];
     private evals: Eval[];
-
-    private tabElement: HTMLElement;
-
-    constructor(options: TabOptions) {
-        this._options = options;
-        this.model = monaco.editor.createModel(options.content, "tad");
-        this.model.onDidChangeContent(this.onValueChange.bind(this));
-        this.model.tab = this;
-        this.viewState = null;
-        this.decorations = [];
-        this.lenses = [];
-        this.tads = [];
-        this.evals = [];
-        this.validate();
-
-        this.tabElement = document.createElement("div");
-        this.tabElement.innerText = options.title;
-        this.tabElement.classList.add("tab");
-        this.tabElement.onclick = this.switchTo.bind(this);
-        document.querySelector(".tabs")?.append(this.tabElement);
-    }
-
-    switchTo() {
-        document.querySelectorAll(".tab").forEach(e => e.classList.remove("open"));
-        this.tabElement.classList.add("open");
-
-        if (activeTab) this.viewState = editor.saveViewState();
-        editor.setModel(this.model);
-        if (this.viewState) editor.restoreViewState(this.viewState);
-        editor.updateOptions({ readOnly: this._options.readOnly });
-        editor.focus();
-        localStorage.setItem("tab", this._options.title);
-
-        activeTab = this;
-    }
-
-    onValueChange() {
-        localStorage.setItem("store", this.model.getValue());
-        this.validate();
-    }
 
     validate() {
         let input = this.model.getValue() + "\n\n\n" + (this._options.usarBasicos ? basicos.join("\n") : "");
@@ -179,7 +187,7 @@ class Tab {
                         glyphMarginHoverMessage: { value: "El axioma no tipa." },
                     },
                 });
-                */
+                * /
             }
 
             /*
@@ -200,7 +208,7 @@ class Tab {
                     arguments: [tad],
                 },
             });
-            */
+            * /
         }
 
         for (const _eval of this.evals) {
@@ -213,7 +221,7 @@ class Tab {
                 endLineNumber: _eval.range.endLine,
                 endColumn: _eval.range.columnEnd,
             };
-            */
+            * /
 
             let ok = false;
             const expr = parseToExpr(_eval.expr, {}, grammar);
@@ -243,7 +251,7 @@ class Tab {
                         },
                     }
                 );
-                */
+                * /
             }
 
             /*
@@ -254,56 +262,11 @@ class Tab {
                     className: ok ? "ok-line" : "error-line",
                 },
             });
-            */
+            * /
         }
 
         this.decorations = this.model.deltaDecorations(this.decorations, deltaDecorations);
     }
 
-    public get activeTADs(): TAD[] {
-        return this.tads;
-    }
-
-    public get activeLenses() {
-        return this.lenses;
-    }
-
-    public get options() {
-        return this._options;
-    }
 }
-
-const tabs: Tab[] = [
-    new Tab({
-        title: "⚛️ TADs básicos 🔒",
-        content: basicos.join(`\n\n${("-".repeat(100) + "\n").repeat(5)}\n\n`),
-        readOnly: true,
-        usarBasicos: false,
-    }),
-    new Tab({
-        title: "🧪 Ejercicio",
-        content: localStorage.getItem("store") || demo,
-        readOnly: false,
-        usarBasicos: true,
-    }),
-];
-
-(tabs.find(t => t.options.title === localStorage.getItem("tab")) || tabs[1]).switchTo();
-
-setTimeout(monaco.editor.remeasureFonts, 1000);
-
-// TODO: no funciona :C
-/*
-function updateViewState() {
-    localStorage.setItem("view_state", JSON.stringify(editor.saveViewState()));
-}
-// no se cuales hookear
-editor.onDidScrollChange(updateViewState);
-editor.onDidLayoutChange(updateViewState);
-const viewState = localStorage.getItem("view_state") as monaco.editor.ICodeEditorViewState | null;
-if(viewState) editor.restoreViewState(viewState);
 */
-
-// Header con el tiempo del commit
-register("es", timeago_es);
-render(document.querySelectorAll(".moment"), "es");
