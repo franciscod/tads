@@ -94,18 +94,27 @@ function* fullLoop(start: StartMessage): Generator<Message | null> {
     self.postMessage(reportMessage, undefined!);
 }
 
+function processNext() {
+    const r = workGenerator?.next();
+    if(!r || r.done) {
+        clearInterval(workInterval);
+        workInterval = 0;
+    } else {
+        if(r.value)
+            self.postMessage(r.value, undefined!);
+    }
+}
+
 let workGenerator: Generator<Message | null> | null = null;
+let workInterval: number = 0;
 
 self.onmessage = (ev: MessageEvent<Message>) => {
     const msg = ev.data;
 
     if(msg.type === 'start') {
         workGenerator = fullLoop(msg);
+        if(workInterval === 0) {
+            workInterval = setInterval(processNext, 0) as unknown as number;
+        }
     }
 };
-
-setInterval(() => {
-    const r = workGenerator?.next();
-    if(r?.value)
-        self.postMessage(r.value, undefined!);
-}, 0);
