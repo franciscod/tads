@@ -1,9 +1,9 @@
 import { evalGrammar } from "../../parser/Eval";
 import { parseToExpr } from "../../parser/Expr";
 import { genGrammar, Grammar } from "../../parser/Grammar";
-import { parseSource } from "../../parser/Parser";
+import { parseTADs } from "../../parser/Parser";
 import { Marker, Report } from "../../parser/Reporting";
-import { Eval, TAD } from "../../parser/Types";
+import { RawEval, TAD } from "../../parser/Types";
 
 export default null as any;
 
@@ -40,12 +40,12 @@ function* fullLoop(start: StartMessage): Generator<Message | null> {
     self.postMessage({ type: "progress", step: "Eval", current: 0, total: 0, elapsed: 0 }, undefined!);
 
     let tads: TAD[] = [];
-    let evals: Eval[] = [];
+    let evals: RawEval[] = [];
 
     const parseStart = performance.now();
     for(let i = 0; i < start.inputs.length; i++) {
         report.setSource(start.inputs[i].source, start.inputs[i].document);
-        const [newTads, newEvals] = parseSource(start.inputs[i].source, report);
+        const [newTads, newEvals] = parseTADs(start.inputs[i].source, report);
         tads = tads.concat(newTads);
         evals = evals.concat(newEvals);
         yield {
@@ -72,7 +72,7 @@ function* fullLoop(start: StartMessage): Generator<Message | null> {
 
     const evalsStart = performance.now();
     for(let i = 0; i < evals.length; i++) {
-        const expr = parseToExpr(evals[i].expr, { }, grammar, report);
+        const expr = parseToExpr(evals[i].expr.source, { }, grammar, report);
         if(expr) {
             evalGrammar(expr, grammar);
         }
