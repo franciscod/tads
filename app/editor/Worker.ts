@@ -78,7 +78,12 @@ function* fullLoop(start: StartMessage): Generator<Message | null> {
 
     const evalsStart = performance.now();
     for(let i = 0; i < evals.length; i++) {
+        const eval_ = evals[i];
+        report.activeDocument = eval_.expr.document;
+        report.push(eval_.expr.offset);
         const expr = parseToExpr(evals[i].expr.source, { }, grammar, report);
+        report.pop();
+
         if(expr) {
             evalGrammar(expr, grammar);
         }

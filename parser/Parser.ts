@@ -228,7 +228,7 @@ export function parseTADs(source: string, report?: Report): [TAD[], RawEval[]] {
 
             evals.push({
                 expr: {
-                    source: source.substring(evalStartOffset, offset).trim(),
+                    source: source.substring(evalStartOffset, offset),
                     document: report?.activeDocument || 0,
                     offset: evalStartOffset
                 },
@@ -283,7 +283,10 @@ export function parseTADs(source: string, report?: Report): [TAD[], RawEval[]] {
                             // y no tenga al splitter
                             !lines[index].match(splitter) &&
                             // no sea el inicio de una sección
-                            checkSectionHeader(lines[index]) === "none"
+                            checkSectionHeader(lines[index]) === "none" &&
+                            // no sea el inicio/fin del tad
+                            !lines[index].trimLeft().toUpperCase().startsWith("TAD") &&
+                            !lines[index].trimLeft().toUpperCase().startsWith("FIN TAD")
                         ) {
                             // avanzamos a la línea siguiente
                             offset += lines[index].length + 1;
