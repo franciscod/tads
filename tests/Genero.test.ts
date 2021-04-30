@@ -1,5 +1,5 @@
 import { TADS } from "./Common";
-import { parseSource } from "../parser/Parser";
+import { parseTADs } from "../parser/Parser";
 import {
     bindearParametros,
     calzarGeneros,
@@ -10,7 +10,7 @@ import {
     tokenizeGenero,
 } from "../parser/Genero";
 
-const [tads] = parseSource(TADS.join("\n"));
+const [tads] = parseTADs(TADS.join("\n"));
 
 const GENEROS_TOKENIZAR: [string, string[], string[]][] = [
     ["nat", [], ["nat"]],

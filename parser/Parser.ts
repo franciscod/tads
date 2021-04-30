@@ -1,11 +1,12 @@
 import { tokenizeGenero } from "./Genero";
 import { Report } from "./Reporting";
-import { RawAxioma, Eval, ExpresionLogica, Operacion, Slot, TAD, Token, VariablesLibres } from "./Types";
+import { Operacion, RawEval, Slot, TAD, Token, VariablesLibres } from "./Types";
 
 type Section =
     | "none"
-    | "parametros"
     | "generos"
+    | "usa"
+    | "exporta"
     | "igualdad"
     | "observadores"
     | "generadores"
@@ -14,19 +15,15 @@ type Section =
 
 function checkSectionHeader(line: string): Section {
     line = line.trimRight();
-    if (line.match(/\s+g[ée]neros/i)) return "parametros";
-    if (line.match(/^g[ée]neros/i)) return "generos";
+    if (line.match(/g[ée]neros/i)) return "generos";
+    if (line.match(/^exporta/i)) return "exporta";
+    if (line.match(/^usa/i)) return "usa";
     if (line.match(/^ig(ualdad)? ?obs(ervacional)?$/i)) return "igualdad";
     if (line.match(/^obs(ervadores b[áa]sicos)?$/i)) return "observadores";
     if (line.match(/^gen(eradores)?$/i)) return "generadores";
     if (line.match(/^otras ?op(eraciones)?$/i)) return "otras operaciones";
     if (line.match(/^axiomas/i)) return "axiomas";
     return "none";
-}
-
-export function parseExpresionLogica(input: string, report?: Report): ExpresionLogica | null {
-    // TODO: =)
-    return null;
 }
 
 export function parseVarLibres(input: string, report?: Report): VariablesLibres {
@@ -48,11 +45,6 @@ export function parseVarLibres(input: string, report?: Report): VariablesLibres 
         });
 
     return result;
-}
-
-export function parseAxioma(left: string, right: string, report?: Report): RawAxioma {
-    const axioma: RawAxioma = { left, right };
-    return axioma;
 }
 
 export function parseOperacion(left: string, right: string, section: Section, report?: Report): Operacion | null {
@@ -134,213 +126,248 @@ export function parseOperacion(left: string, right: string, section: Section, re
     return op;
 }
 
-export function parseTad(source: string, report?: Report): TAD | null {
-    const lines = source
-        .replace(/\r\n/g, "\n")
-        .split("\n")
-        .map(l => l.split("--")[0].trimRight());
-    const tad: TAD = {
-        nombre: "",
-        parametros: [],
-        genero: "",
-        generoTokenizado: [],
-        operaciones: [],
-        variablesLibres: {},
-        rawAxiomas: [],
-    };
 
-    let closedProperly = false;
-    let line;
-    let pos = 0;
-    for (let i = 0; i < lines.length; i++, pos += line.length + 1) {
-        line = lines[i];
-
-        if (line.trim().length === 0) continue; // skip empty lines
-
-        if (tad.nombre === "") {
-            if (line.toUpperCase().startsWith("TAD")) {
-                tad.nombre = line.slice("TAD".length).trim();
-                if (tad.nombre.length === 0) {
-                    i--;
-                    pos -= line.length + 1;
-                    report?.addMark("error", "Nombre del TAD incompleto", pos, 3);
-                    return null;
-                }
-            } else {
-                report?.addMark("error", "Se esperaba la definición de un TAD", pos, 5);
-                return null;
-            }
-            continue;
-        }
-
-        if (line.toUpperCase().startsWith("FIN TAD")) {
-            if (closedProperly) {
-                report?.addMark("error", "El TAD ya estaba cerrado", pos, line.length);
-            }
-            closedProperly = true;
-            continue;
-        }
-
-        if (line.trim() === "parametros formales") continue; // no es elegante pero funciona saludos
-
-        // inicio de sección
-        const section: Section = checkSectionHeader(line);
-
-        if (section === "none") {
-            /*context?.hints?.addMark(
-                "error",
-                "Se esperaba el inicio de una sección.",
-                offsetRange({
-                    startLine: 1 + i,
-                    endLine: 1 + i,
-                    columnStart: 1,
-                    columnEnd: 1 + line.length,
-                })
-            );*/
-        } else if (section === "generos") {
-            if (tad.genero.length > 0) {
-                // TODO: warning
-            }
-            tad.genero = line.slice("generos".length).trim();
-        } else if (section == "parametros") {
-            const parametros = line
-                .trim()
-                .slice("generos".length)
-                .split(",")
-                .map(g => g.trim())
-                .filter(g => g.length);
-
-            tad.parametros = tad.parametros.concat(parametros);
-        } else if (section == "igualdad") {
-            // jaja saludos
-        } else {
-            // operaciones y axiomas
-
-            let splitter: RegExp;
-            if (section === "axiomas") {
-                splitter = /≡|={3}/;
-
-                // variables libres de los axiomas
-                const varLibres = line.slice("axiomas".length);
-                if (varLibres.trim().length > 0) {
-                    tad.variablesLibres = parseVarLibres(varLibres, report);
-                }
-            } else {
-                splitter = /:/;
-            }
-
-            i++;
-            pos += line.length + 1;
-
-            const axStep = (left: string, rightBuffer: string) => {
-                if (left.length > 0) {
-                    if (section === "axiomas") tad.rawAxiomas.push(parseAxioma(left, rightBuffer));
-                    else {
-                        const op: Operacion | null = parseOperacion(left, rightBuffer, section);
-                        if (op) tad.operaciones.push(op);
-                    }
-                }
-            };
-
-            let startLine = i;
-            let left = "";
-            let rightBuffer = "";
-            for (; i < lines.length; i++, pos += line.length + 1) {
-                line = lines[i];
-
-                if (line.toLowerCase().startsWith("eval")) {
-                    /*context?.hints?.addMark(
-                        "error",
-                        "Los evals no pueden estar adentro de los TADs",
-                        offsetRange({
-                            startLine: 1 + i - 1,
-                            endLine: 1 + i - 1,
-                            columnStart: 1,
-                            columnEnd: 1 + line.length,
-                        })
-                    );*/
-                    continue;
-                }
-
-                if (checkSectionHeader(line) !== "none" || line.toUpperCase().startsWith("FIN TAD")) {
-                    i--;
-                    pos -= line.length + 1;
-                    break;
-                }
-
-                const split = line.split(splitter);
-                if (split.length === 2) {
-                    // anterior
-                    axStep(left, rightBuffer);
-                    startLine = i;
-                    left = split[0];
-                    rightBuffer = split[1];
-                } else {
-                    rightBuffer += line;
-                }
-            }
-            axStep(left, rightBuffer);
-        }
-    }
-
-    if (!closedProperly) {
-        report?.addMark("error", `Se esperaba "FIN TAD" para ${tad.nombre}`, pos, 1);
-    }
-
-    tad.generoTokenizado = tokenizeGenero(tad.genero, tad.parametros);
-
-    return tad;
-}
-
-export function parseSource(source: string, report?: Report): [TAD[], Eval[]] {
-    source = source.replace(/\r\n/g, "\n");
-
-    const tads: TAD[] = [];
-    const evals: Eval[] = [];
+/**
+ * Parsea múltiples TADs en un mismo archivo fuente
+ */
+export function parseTADs(source: string, report?: Report): [TAD[], RawEval[]] {
+    // reemplazamos \r\n por \n Y
+    // reemplazamos los comments con espacios (slow?)
+    source = source.split(/\r?\n/g).map(l => {
+        let split = l.split("--");
+        return split[0] + " ".repeat(l.length - split[0].length);
+    }).join("\n");
+    
     const lines = source.split("\n");
 
-    let pos = 0;
-    let line;
-    for (let i = 0; i < lines.length; i++, pos += line.length + 1) {
-        line = lines[i];
+    const tads: TAD[] = [];
+    const evals: RawEval[] = [];
 
-        if (line.trim().length === 0) continue; // skip empty lines
+    let offset = 0, index = 0, enTad = false, lastSection: Section = "none";
+    while(index < lines.length) {
+        const line = lines[index];
+        const lineUpper = line.toUpperCase();
 
-        // empieza TAD
-        if (line.toLowerCase().startsWith("eval")) {
-            // ok
-            evals.push({
-                expr: line.slice("eval".length),
-            });
-        } else if (line.toUpperCase().startsWith("TAD")) {
-            const startLine = i;
+        if(line.trim().length === 0) {
+            // salteamos las líneas vacías
+            offset += line.length + 1;
+            index++;
+            continue;
+        }
 
-            report?.push(pos);
-            // copiamos todo el TAD hasta FIN TAD
-            let buffer = line + "\n";
-            i++;
-            pos += line.length;
-            while (i < lines.length) {
-                line = lines[i];
+        if(lineUpper.startsWith("TAD")) {
+            // empieza un nuevo TAD
 
-                if (line.toUpperCase().startsWith("TAD")) {
-                    i--;
-                    break;
-                } else {
-                    buffer += line + "\n";
-                    if (line.toUpperCase().startsWith("FIN TAD")) break; // fin del tad
-                }
-
-                i++;
-                pos += line.length;
+            if(enTad) {
+                // ya estaba en un TAD, asumo que se olvidaron un "FIN TAD"
+                report?.addMark("warning", `No se esperaba el inicio de un TAD. Te olvidaste de un "FIN TAD"?`, offset, line.length);
+                // igualmente abrimos el nuevo
             }
 
-            const tad: TAD | null = parseTad(buffer, report);
-            report?.pop();
+            const nombre = line.slice("TAD".length).trim();
+            if (nombre.length === 0) {
+                // el nombre está vacío, no abrimos un nuevo TAD
+                report?.addMark("error", `Se esperaba el nombre de un TAD`, offset + line.length, 1);
+            } else {
+                tads.push({
+                    nombre,
+                    parametros: [],
+                    genero: "",
+                    generoTokenizado: [],
+                    operaciones: [],
+                    rawAxiomas: [],
+                    variablesLibres: { }
+                });
+                enTad = true;
+                lastSection = "none";
+            }
+        } else if(lineUpper.startsWith("FIN TAD")) {
+            if(enTad) {
+                // cerramos el TAD
+                enTad = false;
+            } else {
+                // no había un TAD abierto
+                report?.addMark("warning", `No se esperaba el fin de un TAD.`, offset, line.length);
+            }
+        } else if(lineUpper.startsWith("EVAL ") || lineUpper.startsWith("ASSERT ")) {
+            const kind = lineUpper[0] === 'E' ? 'eval' : 'assert';
+            const evalStartOffset = offset + kind.length;
+            
+            // esta línea la uso para el eval, avanzo
+            offset += line.length + 1;
+            index++;
+            
+            // veo si puedo consumir más líneas
+            // los eval y assert se leen hasta la siguiente línea que NO empiece con whitespace (y no sea vacía)
+            while(
+                // tenga más líneas
+                index < lines.length &&
+                // no sea vacía
+                lines[index].length !== 0 &&
+                // y empiece con whitespace
+                (lines[index][0] === ' ' || lines[index][0] === '\t')
+            ) {
+                // avanzamos a la línea siguiente
+                offset += lines[index].length + 1;
+                index++;
+            }
 
-            if (tad != null) tads.push(tad);
+            evals.push({
+                expr: {
+                    source: source.substring(evalStartOffset, offset).trim(),
+                    offset: evalStartOffset
+                },
+                kind
+            });
+
+            // ya avancé las líneas, me salteo el avanzar
+            continue;
+        } else if(enTad) {
+            const paramRegex = /^par[áa]metros( formales)?/i;
+            const tad: TAD = tads[tads.length - 1];
+            const section: Section = checkSectionHeader(line);
+
+            if (line.match(paramRegex)) {
+                // esta línea sólo me importa si abajo tiene una de género, por ahora la skipeo
+                offset += line.length + 1;
+                index++;
+                lastSection = "none";
+                continue;
+            }
+
+            if (section === "none") {
+                if(lastSection === "none") {
+                    report?.addMark("error", "Se esperaba el inicio de una sección.", offset, line.length);
+                } else if(lastSection === "axiomas" || lastSection === "observadores" || lastSection === "generadores" || lastSection === "otras operaciones") {
+                    // leemos el siguiente axioma/operacion
+                    const splitter = /≡|={3}|:/;
+
+                    const split = line.split(splitter);
+                    if(split.length === 1) {
+                        // si no se pudo splitear, significa que la línea no era un axioma / op
+                        if(lastSection === "axiomas") {
+                            report?.addMark("error", "Se esperaba un axioma.", offset, line.length);
+                        } else {
+                            report?.addMark("error", "Se esperaba la definición de una operación.", offset, line.length);
+                        }
+                    } else {
+                        const leftOffset = offset;
+                        const rightOffset = offset + line.length - split[1].length;
+                        
+                        // esta línea la uso para el axioma/operación, avanzo
+                        offset += line.length + 1;
+                        index++;
+                        
+                        // veo si puedo consumir más líneas
+                        // los axiomas y ops se leen hasta la siguiente línea que contenga al splitter o el inicio de una nueva sección y no sea vacía
+                        while(
+                            // tenga más líneas
+                            index < lines.length &&
+                            // no sea vacía
+                            lines[index].length !== 0 &&
+                            // y no tenga al splitter
+                            !lines[index].match(splitter) &&
+                            // no sea el inicio de una sección
+                            checkSectionHeader(lines[index]) === "none"
+                        ) {
+                            // avanzamos a la línea siguiente
+                            offset += lines[index].length + 1;
+                            index++;
+                        }
+
+                        const leftPart = split[0];
+                        const rightPart = source.substring(rightOffset, offset);
+
+                        if (lastSection === "axiomas") {
+                            tad.rawAxiomas.push({
+                                left: {
+                                    source: leftPart,
+                                    offset: leftOffset
+                                },
+                                right: {
+                                    source: rightPart,
+                                    offset: rightOffset
+                                }
+                            });
+                        }
+                        else {
+                            // TODO: ver
+                            report?.push(leftOffset);
+                            const op: Operacion | null = parseOperacion(leftPart, rightPart, lastSection, report);
+                            report?.pop();
+                            if (op) tad.operaciones.push(op);
+                        }
+
+                        // ya avanzamos la línea
+                        continue;
+                    }
+                }
+            } else {
+                // nueva sección, reiniciamos
+                lastSection = "none";
+
+                if (section === "generos") {
+
+                    // si la línea anterior contenía "parametros formales" entonces se trata de parámetros y no del género del TAD
+                    if(lines[index - 1].match(paramRegex)) {
+                        // se trata de parámetros
+                        const parametros = line
+                            .trim()
+                            .slice("generos".length)
+                            .split(",")
+                            .map(g => g.trim())
+                            .filter(g => g.length);
+
+                        tad.parametros = tad.parametros.concat(parametros);
+                    } else {
+                        // se trata del género del TAD
+                        if (tad.genero.length > 0) {
+                            report?.addMark("warning", "Este TAD ya tenía géneros. Esta línea será ignorada.", offset, line.length);
+                        } else {
+                            tad.genero = line.slice("generos".length).trim();
+                        }
+                    }
+                } else if(section == "usa" || section == "exporta") {
+                    // TODO: usa & exporta
+                } else if (section == "igualdad") {
+                    // jaja saludos
+                    lastSection = "igualdad";
+                } else {
+                    // operaciones y axiomas
+                    
+                    // variables libres de los axiomas
+                    if (section === "axiomas") {
+                        const varLibres = line.slice("axiomas".length);
+                        if (varLibres.trim().length > 0) {
+                            report?.push(offset + "axiomas".length);
+                            tad.variablesLibres = parseVarLibres(varLibres, report);
+                            report?.pop();
+                        }
+                    }
+                    
+                    lastSection = section;
+                }
+            }
         } else {
-            report?.addMark("error", "Se esperaba la definición de un TAD", pos, line.length);
+            // estamos afuera de un TAD y no es la definición de un TAD ni un assert o eval, mostramos un error
+            report?.addMark("warning", `Se esperaba la definición de un TAD`, offset, line.length);
+        }
+
+        // avanzamos a la línea siguiente
+        offset += line.length + 1;
+        index++;
+    }
+
+    if(enTad) {
+        report?.addMark("warning", `Se esperaba "FIN TAD"`, offset - 1, 1);
+    }
+
+    for(const tad of tads) {
+        tad.generoTokenizado = tokenizeGenero(tad.genero, tad.parametros);
+
+        // check: ver si el TAD tiene un género
+        if(tad.genero.length === 0) {
+            // TODO: error
         }
     }
 

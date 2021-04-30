@@ -67,3 +67,6 @@ mostar en algún lugar las cosas que asumimos:
 hacer loader para la página
 
 assert keyword (eval pero que sea como un recuento de tests)
+
+grammar sanity checks
+    - que no haya dos tads con el mismo nombre

@@ -7,7 +7,7 @@ import "./Suggestions";
 import "./Hover";
 import { Tab, ITabOptions } from "./Tab";
 import { Marker } from "../../parser/Reporting";
-import { Message, ProgressMessage, ReportMessage, StartMessage } from "./Worker";
+import Worker, { Message, ProgressMessage, ReportMessage, StartMessage } from "./Worker";
 
 setTimeout(monaco.editor.remeasureFonts, 1000);
 
@@ -31,6 +31,7 @@ export class Editor {
             tabSize: 4,
             glyphMargin: true,
             model: null,
+            renderValidationDecorations: 'on'
         });
         
         this.tabs = tabs.map(opts => new Tab(this, opts));
@@ -99,7 +100,7 @@ export class Editor {
                     return monaco.MarkerSeverity.Info;
             }
         };
-
+        
         for(const i in this.tabs) {
             monaco.editor.setModelMarkers(
                 this.tabs[i].model,

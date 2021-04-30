@@ -1,11 +1,11 @@
-import { parseSource } from "../parser/Parser";
+import { parseTADs } from "../parser/Parser";
 import { genGrammar } from "../parser/Grammar";
 import { parseToExpr } from "../parser/Expr";
 import { evalGrammar } from "../parser/Eval";
 
 import { TADS, EVALS } from "./Common";
 
-const [tads] = parseSource(TADS.join("\n"));
+const [tads] = parseTADs(TADS.join("\n"));
 const grammar = genGrammar(tads);
 
 for (const _eval of EVALS) {

@@ -37,7 +37,7 @@ export class Report {
     }
 
     push(offset: number): void {
-        if (this.currentOffset + offset > this.source.length) throw new Error("Offset out of bounds");
+        if (this.currentOffset + offset > this.source.length + 1) throw new Error("Offset out of bounds");
         this.currentOffset += offset;
         this.offsets.push(offset);
     }
@@ -54,7 +54,7 @@ export class Report {
         const locate = (off: number): [number, number] => {
             let line = 0;
             let pos = 0;
-            while (off >= pos + this.lines[line].length + 1) {
+            while (line < this.lines.length && off >= pos + this.lines[line].length + 1) {
                 pos += this.lines[line].length + 1;
                 line++;
             }
@@ -78,7 +78,7 @@ export class Report {
     }
 
     addMark(severity: MarkerSeverity, message: string, offset: number, length: number): void {
-        if (this.currentOffset + offset + length > this.source.length) throw new Error("Section out of bounds");
+        if (this.currentOffset + offset + length > this.source.length + 1) throw new Error("Section out of bounds");
         this.markers.push({
             severity,
             message,

@@ -32,8 +32,12 @@ export function genGrammar(tads: TAD[], report?: Report): Grammar {
 
     for (const tad of tads) {
         for (const rawAxioma of tad.rawAxiomas) {
-            const exprL = parseToExpr(rawAxioma.left, tad.variablesLibres, grammar, report);
-            const exprR = parseToExpr(rawAxioma.right, tad.variablesLibres, grammar, report);
+            report?.push(rawAxioma.left.offset);
+            const exprL = parseToExpr(rawAxioma.left.source, tad.variablesLibres, grammar, report);
+            report?.pop();
+            report?.push(rawAxioma.right.offset);
+            const exprR = parseToExpr(rawAxioma.right.source, tad.variablesLibres, grammar, report);
+            report?.pop();
 
             if (exprL && exprR) grammar.axiomas.push([exprL, exprR]);
         }

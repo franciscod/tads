@@ -1,10 +1,10 @@
-import { parseSource } from "../parser/Parser";
+import { parseTADs } from "../parser/Parser";
 import { genGrammar } from "../parser/Grammar";
 
 import { INVALID_STATEMENTS, VALID_STATEMENTS, TADS } from "./Common";
 import { exprToString, parseToExpr } from "../parser/Expr";
 
-const [tads] = parseSource(TADS.join("\n"));
+const [tads] = parseTADs(TADS.join("\n"));
 
 const grammar = genGrammar(tads);
 const padSize = 60;

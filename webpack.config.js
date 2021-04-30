@@ -8,16 +8,16 @@ console.log("isProduction", isProduction);
 
 const config = {
     entry: {
-        app: "./app/index.ts",
-        worker: "./app/editor/Worker.ts"
+        app: "./app/index.ts"
     },
     mode: isProduction ? 'production' : 'development',
     output: {
-        filename: '[name].js',
+        filename: '[name].[contenthash].js',
         path: path.resolve(__dirname, "build")
     },
     module: {
         rules: [
+            { test: /Worker\.ts$/, use: { loader: 'worker-loader' } },
             { test: /\.ts?$/, loader: "ts-loader", exclude: [/node_modules/, /tests/] },
             { test: /\.(less|css)$/, use: [{ loader: "style-loader" }, { loader: "css-loader" }, { loader: "less-loader" }] },
             { test: /\.ttf$/, use: ['file-loader'] },

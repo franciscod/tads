@@ -1,6 +1,5 @@
 import { Genero, GeneroParametrizado } from "./Genero";
 
-export type ExpresionLogica = any; // TODO
 export type VariablesLibres = { [nombreVar: string]: GeneroParametrizado };
 
 // tokens para sintaxis: corchetes, simbolos, etc
@@ -18,9 +17,19 @@ export type Slot = {
 
 export type Token = Literal | Slot;
 
+export type RawExpression = {
+    source: string;
+    offset: number;
+}
+
 export type RawAxioma = {
-    left: string;
-    right: string;
+    left: RawExpression;
+    right: RawExpression;
+};
+
+export type RawEval = {
+    kind: "eval" | "assert";
+    expr: RawExpression;
 };
 
 export type Operacion = {
@@ -28,7 +37,7 @@ export type Operacion = {
     nombre: string;
     tokens: Token[]; // como lo parseo a un nodo
     retorno: GeneroParametrizado;
-    restriccion?: ExpresionLogica;
+    // restriccion?: ExpresionLogica;
 };
 
 // TODO: falta exporta, usa
@@ -45,5 +54,3 @@ export type TAD = {
     rawAxiomas: RawAxioma[];
     variablesLibres: VariablesLibres;
 };
-
-export type Eval = { expr: string };

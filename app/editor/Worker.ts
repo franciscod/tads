@@ -5,9 +5,7 @@ import { parseSource } from "../../parser/Parser";
 import { Marker, Report } from "../../parser/Reporting";
 import { Eval, TAD } from "../../parser/Types";
 
-if(typeof window !== 'undefined') {
-    throw new Error("This code should only run insde a WebWorker");
-}
+export default null as any;
 
 export type WorkStep = "Parse" | "Grammar" | "Eval";
 
@@ -108,13 +106,18 @@ function processNext() {
 let workGenerator: Generator<Message | null> | null = null;
 let workInterval: number = 0;
 
-self.onmessage = (ev: MessageEvent<Message>) => {
-    const msg = ev.data;
+if(typeof window === 'undefined' && typeof self !== 'undefined') {
+    console.log("Web Worker started");
+    
+    // This should only run inside the Web Worker
+    self.onmessage = (ev: MessageEvent<Message>) => {
+        const msg = ev.data;
 
-    if(msg.type === 'start') {
-        workGenerator = fullLoop(msg);
-        if(workInterval === 0) {
-            workInterval = setInterval(processNext, 0) as unknown as number;
+        if(msg.type === 'start') {
+            workGenerator = fullLoop(msg);
+            if(workInterval === 0) {
+                workInterval = setInterval(processNext, 0) as unknown as number;
+            }
         }
-    }
-};
+    };
+}
