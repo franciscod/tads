@@ -2,7 +2,7 @@ import { evalGrammar } from "../../parser/Eval";
 import { parseToExpr } from "../../parser/Expr";
 import { genGrammar, Grammar } from "../../parser/Grammar";
 import { parseTADs } from "../../parser/Parser";
-import { Marker, Report } from "../../parser/Reporting";
+import { Marker, Report, ReportDoc } from "../../parser/Reporting";
 import { RawEval, TAD } from "../../parser/Types";
 
 export default null as any;
@@ -33,7 +33,6 @@ export type ReportMessage = {
 export type Message = StartMessage | ProgressMessage | ReportMessage;
 
 function* fullLoop(start: StartMessage): Generator<Message | null> {
-    const report = new Report();
 
     self.postMessage({ type: "progress", step: "Parse", current: 0, total: 0, elapsed: 0 }, undefined!);
     self.postMessage({ type: "progress", step: "Grammar", current: 0, total: 0, elapsed: 0 }, undefined!);
@@ -43,8 +42,15 @@ function* fullLoop(start: StartMessage): Generator<Message | null> {
     let evals: RawEval[] = [];
 
     const parseStart = performance.now();
+    
+    const docs: ReportDoc[] = [];
     for(let i = 0; i < start.inputs.length; i++) {
-        report.setSource(start.inputs[i].source, start.inputs[i].document);
+        docs.push(new ReportDoc(start.inputs[i].document, start.inputs[i].source));
+    }
+    const report = new Report(docs);
+
+    for(let i = 0; i < start.inputs.length; i++) {
+        report.activeDocument = i;
         const [newTads, newEvals] = parseTADs(start.inputs[i].source, report);
         tads = tads.concat(newTads);
         evals = evals.concat(newEvals);

@@ -19,23 +19,17 @@ export type Marker = {
 };
 
 /**
- * Permite ir agregando Markers sobre un string usando un stack de offsets
+ * Representa un documento particular en el reporte
  */
-export class Report {
-    private document = 0;
-    private source = "";
+export class ReportDoc {
     private lines: string[] = [];
     private currentOffset = 0;
     private offsets: number[] = [];
 
-    markers: Marker[] = [];
-
-    setSource(source: string, document = 0): void {
-        this.source = source;
+    constructor(private document: number, private source: string) {
         this.lines = source.replace(/\r\n/g, "\n").split("\n");
-        this.document = document;
     }
-
+    
     push(offset: number): void {
         if (this.currentOffset + offset > this.source.length + 1) throw new Error("Offset out of bounds");
         this.currentOffset += offset;
@@ -48,6 +42,8 @@ export class Report {
     }
 
     getRange(offset: number, length: number): SourceRange {
+        if (this.currentOffset + offset + length > this.source.length + 1) throw new Error("Section out of bounds");
+
         const startOffset = this.currentOffset + offset;
         const endOffset = startOffset + length;
 
@@ -76,13 +72,32 @@ export class Report {
             columnEnd: columnEnd + 1,
         };
     }
+}
+
+/**
+ * Permite ir agregando Markers sobre documentos usando un stack de offsets
+ */
+export class Report {
+
+    activeDocument = 0;
+    markers: Marker[] = [];
+
+    constructor(public docs: ReportDoc[]) {
+    }
+
+    push(offset: number): void {
+        this.docs[this.activeDocument].push(offset);
+    }
+
+    pop(): void {
+        this.docs[this.activeDocument].pop();
+    }
 
     addMark(severity: MarkerSeverity, message: string, offset: number, length: number): void {
-        if (this.currentOffset + offset + length > this.source.length + 1) throw new Error("Section out of bounds");
         this.markers.push({
             severity,
             message,
-            range: this.getRange(offset, length),
+            range: this.docs[this.activeDocument].getRange(offset, length),
         });
     }
 }

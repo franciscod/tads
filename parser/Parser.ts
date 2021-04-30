@@ -215,6 +215,7 @@ export function parseTADs(source: string, report?: Report): [TAD[], RawEval[]] {
             evals.push({
                 expr: {
                     source: source.substring(evalStartOffset, offset).trim(),
+                    document: report?.activeDocument || 0,
                     offset: evalStartOffset
                 },
                 kind
@@ -282,10 +283,12 @@ export function parseTADs(source: string, report?: Report): [TAD[], RawEval[]] {
                             tad.rawAxiomas.push({
                                 left: {
                                     source: leftPart,
+                                    document: report?.activeDocument || 0,
                                     offset: leftOffset
                                 },
                                 right: {
                                     source: rightPart,
+                                    document: report?.activeDocument || 0,
                                     offset: rightOffset
                                 }
                             });

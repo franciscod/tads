@@ -1,4 +1,4 @@
-import { Report, SourceRange } from "../parser/Reporting";
+import { Report, ReportDoc, SourceRange } from "../parser/Reporting";
 
 describe("offsets correctos", () => {
     type OffsetTest = {
@@ -52,11 +52,10 @@ describe("offsets correctos", () => {
         } - ${off.expected.startLine} ${off.expected.endLine} ${off.expected.columnStart} ${
             off.expected.columnEnd
         }`, () => {
-            const report = new Report();
-            report.setSource(off.input);
-            for (const offset of off.offsets) report.push(offset);
+            const report = new Report([new ReportDoc(0, off.input)]);
+            for (const offset of off.offsets) report.docs[0].push(offset);
             report.addMark("hint", "Test", off.offset, off.length);
-            for (const _ of off.offsets) report.pop();
+            for (const _ of off.offsets) report.docs[0].pop();
             expect(report.markers[0].range).toStrictEqual(off.expected);
         });
     }

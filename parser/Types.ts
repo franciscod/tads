@@ -17,10 +17,14 @@ export type Slot = {
 
 export type Token = Literal | Slot;
 
-export type RawExpression = {
-    source: string;
+export type Location = {
+    document: number;
     offset: number;
 }
+
+export type RawExpression = Location & {
+    source: string;
+};
 
 export type RawAxioma = {
     left: RawExpression;
