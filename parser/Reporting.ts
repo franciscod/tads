@@ -1,4 +1,12 @@
 /**
+ * Representa una posicion absoluta en un documento (o tab)
+ */
+export type SourceLocation = {
+    document: number;
+    offset: number;
+}
+
+/**
  * Representa un rango de texto en un documento (o tab)
  */
 export type SourceRange = {
@@ -9,6 +17,12 @@ export type SourceRange = {
     columnStart: number;
     columnEnd: number;
 };
+
+export type Lens = {
+    title: string;
+    range: SourceRange;
+    meta: any;
+}
 
 export type MarkerSeverity = "error" | "warning" | "info" | "hint";
 
@@ -99,5 +113,9 @@ export class Report {
             message,
             range: this.docs[this.activeDocument].getRange(offset, length),
         });
+    }
+
+    getActiveDoc(): ReportDoc | undefined {
+        return this.docs[this.activeDocument];
     }
 }

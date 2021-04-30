@@ -36,12 +36,12 @@ monaco.languages.registerCompletionItemProvider("tad", {
                 insertText: to,
                 range,
             })),
-            {
+            /*{
                 label: "demotad",
                 kind: monaco.languages.CompletionItemKind.Keyword,
                 insertText: demo,
                 range,
-            },
+            },*/
             {
                 label: "ifthenelsefi",
                 kind: monaco.languages.CompletionItemKind.Snippet,

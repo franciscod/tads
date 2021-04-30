@@ -190,7 +190,8 @@ export function parseTADs(source: string, report?: Report): [TAD[], RawEval[]] {
                     generoTokenizado: [],
                     operaciones: [],
                     rawAxiomas: [],
-                    variablesLibres: { }
+                    variablesLibres: { },
+                    range: report?.getActiveDoc()?.getRange(offset, line.length)
                 });
                 enTad = true;
                 lastSection = "none";
@@ -229,8 +230,11 @@ export function parseTADs(source: string, report?: Report): [TAD[], RawEval[]] {
             evals.push({
                 expr: {
                     source: source.substring(evalStartOffset, offset),
-                    document: report?.activeDocument || 0,
-                    offset: evalStartOffset
+                    location: {
+                        document: report?.activeDocument || 0,
+                        offset: evalStartOffset
+                    },
+                    range: report?.getActiveDoc()?.getRange(evalStartOffset, offset - evalStartOffset)
                 },
                 kind
             });
@@ -297,13 +301,19 @@ export function parseTADs(source: string, report?: Report): [TAD[], RawEval[]] {
                             tad.rawAxiomas.push({
                                 left: {
                                     source: split[0],
-                                    document: report?.activeDocument || 0,
-                                    offset: leftOffset
+                                    location: {
+                                        document: report?.activeDocument || 0,
+                                        offset: leftOffset
+                                    },
+                                    range: report?.getActiveDoc()?.getRange(leftOffset, rightOffset - leftOffset),
                                 },
                                 right: {
                                     source: source.substring(rightOffset, offset),
-                                    document: report?.activeDocument || 0,
-                                    offset: rightOffset
+                                    location: {
+                                        document: report?.activeDocument || 0,
+                                        offset: rightOffset
+                                    },
+                                    range: report?.getActiveDoc()?.getRange(rightOffset, offset - rightOffset)
                                 }
                             });
                         }

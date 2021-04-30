@@ -1,4 +1,5 @@
 import { Genero, GeneroParametrizado } from "./Genero";
+import { SourceLocation, SourceRange } from "./Reporting";
 
 export type VariablesLibres = { [nombreVar: string]: GeneroParametrizado };
 
@@ -17,13 +18,10 @@ export type Slot = {
 
 export type Token = Literal | Slot;
 
-export type Location = {
-    document: number;
-    offset: number;
-}
-
-export type RawExpression = Location & {
+export type RawExpression = {
     source: string;
+    location: SourceLocation;
+    range?: SourceRange;
 };
 
 export type RawAxioma = {
@@ -57,4 +55,5 @@ export type TAD = {
     operaciones: Operacion[];
     rawAxiomas: RawAxioma[];
     variablesLibres: VariablesLibres;
+    range?: SourceRange;
 };

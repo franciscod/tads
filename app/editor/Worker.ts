@@ -2,7 +2,7 @@ import { evalGrammar } from "../../parser/Eval";
 import { parseToExpr } from "../../parser/Expr";
 import { genGrammar, Grammar } from "../../parser/Grammar";
 import { parseTADs } from "../../parser/Parser";
-import { Marker, Report, ReportDoc } from "../../parser/Reporting";
+import { Lens, Marker, Report, ReportDoc } from "../../parser/Reporting";
 import { RawEval, TAD } from "../../parser/Types";
 
 export default null as any;
@@ -25,12 +25,22 @@ export type ProgressMessage = {
     elapsed: number;
 }
 
-export type ReportMessage = {
-    type: "report",
+export type MarkersMessage = {
+    type: "markers",
     markers: Marker[]
 }
 
-export type Message = StartMessage | ProgressMessage | ReportMessage;
+export type LensesMessage = {
+    type: "lenses",
+    lenses: Lens[]
+}
+
+export type CommandMessage = {
+    type: "command",
+    data: any
+}
+
+export type Message = StartMessage | ProgressMessage | MarkersMessage | LensesMessage | CommandMessage;
 
 function* fullLoop(start: StartMessage): Generator<Message | null> {
 
@@ -62,7 +72,33 @@ function* fullLoop(start: StartMessage): Generator<Message | null> {
             elapsed: performance.now() - parseStart
         };
     }
-    
+
+    // generamos todos los code lens iniciales
+    let tadLenses: Lens[] = [];
+    for(const tad of tads) {
+        if(!tad.range) continue;
+
+        const lens: Lens = {
+            title: "🐞 Debug " + tad.nombre,
+            range: tad.range,
+            meta: { a: '123' }
+        }
+        tadLenses.push(lens);
+    }
+    let evalLenses: Lens[] = [];
+    for(let i = 0; i < evals.length; i++) {
+        const lens: Lens = {
+            title: "Evaluando...",
+            range: evals[i].expr.range!,
+            meta: { a: '123' }
+        }
+        evalLenses.push(lens);
+    }
+    yield {
+        type: "lenses",
+        lenses: tadLenses.concat(evalLenses)
+    };
+
     const grammarStart = performance.now();
     const grammar: Grammar = genGrammar(tads, report);
     // TODO: grammar generator
@@ -79,8 +115,8 @@ function* fullLoop(start: StartMessage): Generator<Message | null> {
     const evalsStart = performance.now();
     for(let i = 0; i < evals.length; i++) {
         const eval_ = evals[i];
-        report.activeDocument = eval_.expr.document;
-        report.push(eval_.expr.offset);
+        report.activeDocument = eval_.expr.location.document;
+        report.push(eval_.expr.location.offset);
         const expr = parseToExpr(evals[i].expr.source, { }, grammar, report);
         report.pop();
 
@@ -96,8 +132,8 @@ function* fullLoop(start: StartMessage): Generator<Message | null> {
         };
     }
 
-    const reportMessage: ReportMessage = {
-        type: 'report',
+    const reportMessage: MarkersMessage = {
+        type: 'markers',
         markers: report.markers
     };
     self.postMessage(reportMessage, undefined!);

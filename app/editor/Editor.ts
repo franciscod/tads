@@ -5,17 +5,16 @@ monaco.languages.register({ id: "tad" });
 import "./Colorization";
 import "./Suggestions";
 import "./Hover";
-import { Tab, ITabOptions } from "./Tab";
+import { Tab, ITabOptions, ITextModelData } from "./Tab";
 import { Marker } from "../../parser/Reporting";
-import Worker, { Message, ProgressMessage, ReportMessage, StartMessage } from "./Worker";
-
-setTimeout(monaco.editor.remeasureFonts, 1000);
+import Worker, { Message, ProgressMessage, StartMessage } from "./Worker";
 
 export class Editor {
     public monacoEditor: monaco.editor.IStandaloneCodeEditor;
     public activeTab: Tab | null = null;
     private worker: Worker;
     private tabs: Tab[] = [];
+    private anyCommandId: string;
 
     constructor(editorElement: HTMLElement, tabs: ITabOptions[]) {
         this.worker = new Worker('/worker.js');
@@ -33,6 +32,12 @@ export class Editor {
             model: null,
             renderValidationDecorations: 'on'
         });
+        this.anyCommandId = this.monacoEditor.addCommand(0, (_, data: any) => {
+            this.worker.postMessage({
+                type: "command",
+                data
+            }, undefined!);
+        }, "")!;
         
         this.tabs = tabs.map(opts => new Tab(this, opts));
 
@@ -61,8 +66,43 @@ export class Editor {
     onMessage(data: Message) {
         if(data.type === 'progress') {
             this.renderProgress(data);
-        } else if(data.type === 'report') {
-            this.updateReport(data);
+        } else if(data.type === 'lenses') {
+            for(const i in this.tabs) {
+                const tab = this.tabs[i];
+                tab.lenses = data.lenses.filter(l => l.range.document as unknown as string == i).map(l => ({
+                    range: {
+                        startLineNumber: l.range.startLine,
+                        startColumn: l.range.columnStart,
+                        endLineNumber: l.range.endLine,
+                        endColumn: l.range.columnEnd
+                    },
+                    command: {
+                        id: this.anyCommandId,
+                        title: l.title,
+                        arguments: [l.meta]
+                    }
+                }));
+            }
+            
+            this.monacoEditor.render();
+        } else if(data.type === 'markers') {
+            for(const i in this.tabs) {
+                const tab = this.tabs[i];
+                monaco.editor.setModelMarkers(
+                    tab.model,
+                    "tad",
+                    data.markers
+                        .filter(m => (m.range.document as unknown as string) == i)
+                        .map(m => ({
+                        severity: toMonacoSeverity(m),
+                        startLineNumber: m.range.startLine,
+                        startColumn: m.range.columnStart,
+                        endLineNumber: m.range.endLine,
+                        endColumn: m.range.columnEnd,
+                        message: m.message,
+                    }))
+                );
+            }
         }
     }
 
@@ -86,54 +126,36 @@ export class Editor {
             }
         }
     }
-
-    updateReport(report: ReportMessage) {
-        const toMonacoSeverity = (marker: Marker): monaco.MarkerSeverity => {
-            switch (marker.severity) {
-                case "error":
-                    return monaco.MarkerSeverity.Error;
-                case "warning":
-                    return monaco.MarkerSeverity.Warning;
-                case "hint":
-                    return monaco.MarkerSeverity.Hint;
-                case "info":
-                    return monaco.MarkerSeverity.Info;
-            }
-        };
-        
-        for(const i in this.tabs) {
-            monaco.editor.setModelMarkers(
-                this.tabs[i].model,
-                "tad",
-                report.markers
-                    .filter(m => (m.range.document as unknown as string) == i)
-                    .map(m => ({
-                    severity: toMonacoSeverity(m),
-                    startLineNumber: m.range.startLine,
-                    startColumn: m.range.columnStart,
-                    endLineNumber: m.range.endLine,
-                    endColumn: m.range.columnEnd,
-                    message: m.message,
-                }))
-            );
-        }
-
-    }
 }
+
+// si la fuente se carga después de iniciar el editor, se rompe
+// estamos un poco y le decimos a monaco que la recalcule (y con suerte ya está cargada)
+setTimeout(monaco.editor.remeasureFonts, 1000);
+
+monaco.languages.registerCodeLensProvider("tad", {
+    provideCodeLenses: (model: monaco.editor.ITextModel & ITextModelData) => ({
+        lenses: model.tab?.lenses || [],
+        dispose: () => {}
+    }),
+    resolveCodeLens: (_, codeLens) => codeLens
+});
+
+
+const toMonacoSeverity = (marker: Marker): monaco.MarkerSeverity => {
+    switch (marker.severity) {
+        case "error":
+            return monaco.MarkerSeverity.Error;
+        case "warning":
+            return monaco.MarkerSeverity.Warning;
+        case "hint":
+            return monaco.MarkerSeverity.Hint;
+        case "info":
+            return monaco.MarkerSeverity.Info;
+    }
+};
+
 
 /*
-interface ITextModelData {
-    tab?: Tab;
-}
-
-
-const debugCommandId = editor.addCommand(
-    0,
-    (_, tad: TAD) => {
-        openModal(generateDebugView(tad), 750);
-    },
-    ""
-);
 const evalCommandId = editor.addCommand(
     0,
     (_, expr: Expr, grammar: Grammar) => {
@@ -141,16 +163,6 @@ const evalCommandId = editor.addCommand(
     },
     ""
 );
-
-monaco.languages.registerCodeLensProvider("tad", {
-    provideCodeLenses: (model: monaco.editor.ITextModel & ITextModelData) => {
-        return {
-            lenses: model.tab?.activeLenses || [],
-            dispose: () => {},
-        };
-    },
-    resolveCodeLens: (_, codeLens) => codeLens,
-});
 
 const tabs: Tab[] = ;
 

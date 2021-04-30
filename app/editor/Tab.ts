@@ -9,16 +9,22 @@ export interface ITabOptions {
     saveInStorage: boolean;
 };
 
+export interface ITextModelData {
+    tab?: Tab;
+}
+
 export class Tab {
     public tabElement: HTMLElement;
-    public model: monaco.editor.ITextModel;
+    public model: monaco.editor.ITextModel & ITextModelData;
     public viewState: monaco.editor.ICodeEditorViewState | null;
     public source: string;
+    public lenses: monaco.languages.CodeLens[] = [];
 
     constructor(private editor: Editor, public readonly options: ITabOptions) {
         this.source = options.content;
         this.model = monaco.editor.createModel(this.source, "tad");
         this.model.onDidChangeContent(() => { this.save(); this.editor.revalidate(); });
+        this.model.tab = this;
         this.viewState = null;
 
         this.tabElement = document.createElement("div");

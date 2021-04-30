@@ -166,6 +166,7 @@ export function parseAST(input: string, vars: VariablesLibres, grammar: Grammar,
         }
 
         // si llego acá no se pudo matchear ninguna operación ni consumir tokens
+        // TODO: avanzar caracter por caracter hasta encontrar un token válido y subrayar todo lo que no se reconoció
         report?.addMark("error", `No se esperaba el caracter \`${input[index]}\``, index, 1);
         return null;
     }
