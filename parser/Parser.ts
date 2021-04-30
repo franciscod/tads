@@ -2,34 +2,18 @@ import { tokenizeGenero } from "./Genero";
 import { Report } from "./Reporting";
 import { Operacion, RawEval, Slot, TAD, Token, VariablesLibres } from "./Types";
 
-type Section =
-    | "none"
-    | "generos"
-    | "usa"
-    | "exporta"
-    | "igualdad"
-    | "observadores"
-    | "generadores"
-    | "otras operaciones"
-    | "axiomas";
-
-function checkSectionHeader(line: string): Section {
-    line = line.trimRight();
-    if (line.match(/g[ée]neros/i)) return "generos";
-    if (line.match(/^exporta/i)) return "exporta";
-    if (line.match(/^usa/i)) return "usa";
-    if (line.match(/^ig(ualdad)? ?obs(ervacional)?$/i)) return "igualdad";
-    if (line.match(/^obs(ervadores b[áa]sicos)?$/i)) return "observadores";
-    if (line.match(/^gen(eradores)?$/i)) return "generadores";
-    if (line.match(/^otras ?op(eraciones)?$/i)) return "otras operaciones";
-    if (line.match(/^axiomas/i)) return "axiomas";
-    return "none";
-}
-
+/**
+ * Parsea variables libres a la derecha de los axiomas
+ * 
+ * `∀ x, y: bool, ∀ a, b: α`
+ * `∀ n, m: nat, ∀ x, y: int`
+ * `∀ c, d: conj(α), ∀ a, b: α`
+ * `∀ a1: α1, ∀ a2: α2`
+ */
 export function parseVarLibres(input: string, report?: Report): VariablesLibres {
-    //context?.hints?.addMark('info', 'variables libres', context.range);
     const result: VariablesLibres = {};
 
+    // TODO: mejorar, parsear bien
     input
         .split("∀")
         .map(l => l.trim().split(":"))
@@ -47,12 +31,17 @@ export function parseVarLibres(input: string, report?: Report): VariablesLibres 
     return result;
 }
 
-export function parseOperacion(left: string, right: string, section: Section, report?: Report): Operacion | null {
-    // left:   • ∨L •
-    // right   bool × bool  → bool {restriccion}
+/**
+ * Parsea las definiciones de las operaciones
+ * 
+ * `if • then • else • fi : bool × α × α → α`
+ * `pred : nat n → nat {¬(n =0?)}`
+ * `∅ : → conj(α)`
+ */
+export function parseOperacion(input: string, section: Section, report?: Report): Operacion | null {
+    // TODO: mejorar, agregar reporting
 
-    //context?.hints?.addMark('info', `${section}: ${left.length} / ${right.length}`, context.range);
-    // TODO: =)
+    let [left, right] = input.split(":");
 
     left = left.trim();
     right = right.split("{")[0];
@@ -126,9 +115,34 @@ export function parseOperacion(left: string, right: string, section: Section, re
     return op;
 }
 
+type Section =
+    | "none"
+    | "generos"
+    | "usa"
+    | "exporta"
+    | "igualdad"
+    | "observadores"
+    | "generadores"
+    | "otras operaciones"
+    | "axiomas";
+
+function checkSectionHeader(line: string): Section {
+    line = line.trimRight();
+    if (line.match(/g[ée]neros/i)) return "generos";
+    if (line.match(/^exporta/i)) return "exporta";
+    if (line.match(/^usa/i)) return "usa";
+    if (line.match(/^ig(ualdad)? ?obs(ervacional)?$/i)) return "igualdad";
+    if (line.match(/^obs(ervadores b[áa]sicos)?$/i)) return "observadores";
+    if (line.match(/^gen(eradores)?$/i)) return "generadores";
+    if (line.match(/^otras ?op(eraciones)?$/i)) return "otras operaciones";
+    if (line.match(/^axiomas/i)) return "axiomas";
+    return "none";
+}
 
 /**
  * Parsea múltiples TADs en un mismo archivo fuente
+ * 
+ * Ver ejemplos en `tads/`
  */
 export function parseTADs(source: string, report?: Report): [TAD[], RawEval[]] {
     // reemplazamos \r\n por \n Y
@@ -276,28 +290,22 @@ export function parseTADs(source: string, report?: Report): [TAD[], RawEval[]] {
                             index++;
                         }
 
-                        const leftPart = split[0];
-                        const rightPart = source.substring(rightOffset, offset);
-
                         if (lastSection === "axiomas") {
                             tad.rawAxiomas.push({
                                 left: {
-                                    source: leftPart,
+                                    source: split[0],
                                     document: report?.activeDocument || 0,
                                     offset: leftOffset
                                 },
                                 right: {
-                                    source: rightPart,
+                                    source: source.substring(rightOffset, offset),
                                     document: report?.activeDocument || 0,
                                     offset: rightOffset
                                 }
                             });
                         }
                         else {
-                            // TODO: ver
-                            report?.push(leftOffset);
-                            const op: Operacion | null = parseOperacion(leftPart, rightPart, lastSection, report);
-                            report?.pop();
+                            const op: Operacion | null = parseOperacion(source.substring(leftOffset, offset), lastSection, report);
                             if (op) tad.operaciones.push(op);
                         }
 
