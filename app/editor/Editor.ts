@@ -84,7 +84,7 @@ export class Editor {
                 }));
             }
             
-            this.monacoEditor.render();
+            this.monacoEditor.render(true);
         } else if(data.type === 'markers') {
             for(const i in this.tabs) {
                 const tab = this.tabs[i];
@@ -102,6 +102,23 @@ export class Editor {
                         message: m.message,
                     }))
                 );
+            }
+        } else if(data.type === 'decorations') {
+            for(const i in this.tabs) {
+                const tab = this.tabs[i];
+
+                tab.model.deltaDecorations([], data.decorations.filter(l => l.range.document as unknown as string == i).map(l => ({
+                    range: {
+                        startLineNumber: l.range.startLine,
+                        startColumn: l.range.columnStart,
+                        endLineNumber: l.range.endLine,
+                        endColumn: l.range.columnEnd,
+                    },
+                    options: {
+                        isWholeLine: true,
+                        className: true ? "ok-line" : "error-line",
+                    },
+                })));
             }
         }
     }
@@ -154,129 +171,3 @@ const toMonacoSeverity = (marker: Marker): monaco.MarkerSeverity => {
     }
 };
 
-
-/*
-const evalCommandId = editor.addCommand(
-    0,
-    (_, expr: Expr, grammar: Grammar) => {
-        openModal(generateEvalDebug(expr, grammar), 750);
-    },
-    ""
-);
-
-const tabs: Tab[] = ;
-
-*/
-
-    /*
-    private decorations: string[];
-    private lenses: monaco.languages.CodeLens[];
-    private tads: TAD[];
-    private evals: Eval[];
-
-    validate() {
-
-        const deltaDecorations: monaco.editor.IModelDeltaDecoration[] = [];
-        this.lenses = [];
-
-        for (const tad of this.tads) {
-            for (const rawAxioma of tad.rawAxiomas) {
-                /*
-                if (!axioma.range || axioma.range.startLine > numLines) continue;
-
-                deltaDecorations.push({
-                    range: {
-                        startLineNumber: axioma.range.startLine,
-                        startColumn: 1,
-                        endLineNumber: axioma.range.startLine,
-                        endColumn: 1,
-                    },
-                    options: {
-                        minimap: { position: monaco.editor.MinimapPosition.Gutter, color: "rgba(255, 255, 0, 1.0)" },
-                        glyphMarginClassName: "glyph-margin-warning",
-                        glyphMarginHoverMessage: { value: "El axioma no tipa." },
-                    },
-                });
-                * /
-            }
-
-            /*
-            if (!tad.range) continue;
-
-            const tadRange = {
-                startLineNumber: tad.range.startLine,
-                startColumn: 1,
-                endLineNumber: tad.range.endLine,
-                endColumn: 1,
-            };
-            this.lenses.push({
-                range: tadRange,
-                id: "debug-" + tad.nombre,
-                command: {
-                    id: debugCommandId!,
-                    title: "🐞 Debug " + tad.nombre,
-                    arguments: [tad],
-                },
-            });
-            * /
-        }
-
-        for (const _eval of this.evals) {
-            /*
-            if (!_eval.range) continue;
-
-            const evalRange = {
-                startLineNumber: _eval.range.startLine,
-                startColumn: _eval.range.columnStart,
-                endLineNumber: _eval.range.endLine,
-                endColumn: _eval.range.columnEnd,
-            };
-            * /
-
-            let ok = false;
-            const expr = parseToExpr(_eval.expr, {}, grammar);
-            if (expr) {
-                const evaluado = evalGrammar(expr, grammar);
-                ok = true;
-
-                // console.log(expr, evaluado);
-
-                /*
-                this.lenses.push(
-                    {
-                        range: evalRange,
-                        id: "eval-" + evalRange.startLineNumber,
-                        command: {
-                            id: evalCommandId!,
-                            title: "👀 Ver eval",
-                            arguments: [expr, grammar],
-                        },
-                    },
-                    {
-                        range: evalRange,
-                        id: "eval-result-" + evalRange.startLineNumber,
-                        command: {
-                            id: "",
-                            title: fromExpr(evaluado, grammar),
-                        },
-                    }
-                );
-                * /
-            }
-
-            /*
-            deltaDecorations.push({
-                range: evalRange,
-                options: {
-                    isWholeLine: true,
-                    className: ok ? "ok-line" : "error-line",
-                },
-            });
-            * /
-        }
-
-        this.decorations = this.model.deltaDecorations(this.decorations, deltaDecorations);
-    }
-
-}
-*/

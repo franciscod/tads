@@ -18,12 +18,6 @@ export type SourceRange = {
     columnEnd: number;
 };
 
-export type Lens = {
-    title: string;
-    range: SourceRange;
-    meta: any;
-}
-
 export type MarkerSeverity = "error" | "warning" | "info" | "hint";
 
 export type Marker = {

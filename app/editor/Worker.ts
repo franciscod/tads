@@ -1,11 +1,22 @@
 import { evalGrammar } from "../../parser/Eval";
-import { parseToExpr } from "../../parser/Expr";
+import { exprToString, parseToExpr } from "../../parser/Expr";
 import { genGrammar, Grammar } from "../../parser/Grammar";
 import { parseTADs } from "../../parser/Parser";
-import { Lens, Marker, Report, ReportDoc } from "../../parser/Reporting";
+import { Marker, Report, ReportDoc, SourceRange } from "../../parser/Reporting";
 import { RawEval, TAD } from "../../parser/Types";
 
 export default null as any;
+
+export type Lens = {
+    title: string;
+    range: SourceRange;
+    meta: any;
+}
+
+export type Decoration = {
+    range: SourceRange;
+    options: any;
+}
 
 export type WorkStep = "Parse" | "Grammar" | "Eval";
 
@@ -35,12 +46,17 @@ export type LensesMessage = {
     lenses: Lens[]
 }
 
+export type DecorationsMessage = {
+    type: "decorations",
+    decorations: Decoration[]
+}
+
 export type CommandMessage = {
     type: "command",
     data: any
 }
 
-export type Message = StartMessage | ProgressMessage | MarkersMessage | LensesMessage | CommandMessage;
+export type Message = StartMessage | ProgressMessage | MarkersMessage | LensesMessage | DecorationsMessage | CommandMessage;
 
 function* fullLoop(start: StartMessage): Generator<Message | null> {
 
@@ -87,12 +103,12 @@ function* fullLoop(start: StartMessage): Generator<Message | null> {
     }
     let evalLenses: Lens[] = [];
     for(let i = 0; i < evals.length; i++) {
-        const lens: Lens = {
+        /*const lens: Lens = {
             title: "Evaluando...",
             range: evals[i].expr.range!,
             meta: { a: '123' }
         }
-        evalLenses.push(lens);
+        evalLenses.push(lens);*/
     }
     yield {
         type: "lenses",
@@ -112,6 +128,7 @@ function* fullLoop(start: StartMessage): Generator<Message | null> {
 
     // TODO: cuota de evals step
 
+    const evalDecors: Decoration[] = [];
     const evalsStart = performance.now();
     for(let i = 0; i < evals.length; i++) {
         const eval_ = evals[i];
@@ -121,7 +138,19 @@ function* fullLoop(start: StartMessage): Generator<Message | null> {
         report.pop();
 
         if(expr) {
-            evalGrammar(expr, grammar);
+            const finalExpr = evalGrammar(expr, grammar);
+            /*const lens: Lens = {
+                title: exprToString(finalExpr, grammar),
+                range: evals[i].expr.range!,
+                meta: { a: '123' }
+            }
+            evalLenses.push(lens);*/
+            evalDecors.push({
+                range: evals[i].expr.range!,
+                options: {
+
+                }
+            })
         }
         yield {
             type: "progress",
@@ -130,6 +159,11 @@ function* fullLoop(start: StartMessage): Generator<Message | null> {
             total: evals.length,
             elapsed: performance.now() - evalsStart
         };
+        /*evalLenses[i].title = "👀 Ver eval";
+        yield {
+            type: "lenses",
+            lenses: tadLenses.concat(evalLenses)
+        };*/
     }
 
     const reportMessage: MarkersMessage = {
@@ -137,6 +171,10 @@ function* fullLoop(start: StartMessage): Generator<Message | null> {
         markers: report.markers
     };
     self.postMessage(reportMessage, undefined!);
+    yield {
+        type: "decorations",
+        decorations: evalDecors
+    };
 }
 
 function processNext() {
