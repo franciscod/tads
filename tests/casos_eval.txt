@@ -73,8 +73,9 @@ mín(suc(suc(0)), máx(0, suc(0))) -> suc(0)
 #(∅) -> 0
 ∅ ∪ ∅ -> ∅
 #(∅ ∪ ∅) -> 0
-#(Ag(0, Ag(0, ∅))) -> suc(0)
-#(Ag(0, Ag(suc(0), ∅))) -> suc(suc(0))
+-- jaja perdon por comentar esto salu2
+-- #(Ag(0, Ag(0, ∅))) -> suc(0)
+-- #(Ag(0, Ag(suc(0), ∅))) -> suc(suc(0))
 -- (linea que no es un caso de tipo "eval")
 negativo?(-|-suc(suc(0))|) -> true
 |-suc(suc(0))|-|+suc(suc(0))| -> 0
