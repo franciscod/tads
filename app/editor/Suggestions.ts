@@ -21,7 +21,7 @@ const symbol_replacements = [
 ];
 
 monaco.languages.registerCompletionItemProvider("tad", {
-    provideCompletionItems: (model, position, token) => {
+    provideCompletionItems: (model, position, _token) => {
         const word = model.getWordUntilPosition(position);
         const range = {
             startLineNumber: position.lineNumber,
@@ -36,12 +36,12 @@ monaco.languages.registerCompletionItemProvider("tad", {
                 insertText: to,
                 range,
             })),
-            {
+            /*{
                 label: "demotad",
                 kind: monaco.languages.CompletionItemKind.Keyword,
                 insertText: demo,
                 range,
-            },
+            },*/
             {
                 label: "ifthenelsefi",
                 kind: monaco.languages.CompletionItemKind.Snippet,

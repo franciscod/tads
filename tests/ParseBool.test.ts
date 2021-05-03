@@ -1,4 +1,4 @@
-import { parseTad } from "../parser/Parser";
+import { parseTADs } from "../parser/Parser";
 import { Slot, TAD, Token } from "../parser/Types";
 
 import { BOOL_TAD } from "./Common";
@@ -13,10 +13,11 @@ function generosDeSlots(tokens: Token[]): string[] {
 }
 
 it("parsea bool", () => {
-    const tad: TAD = parseTad(BOOL_TAD)!;
+    const [tads] = parseTADs(BOOL_TAD)!;
+    const tad = tads[0];
 
     expect(tad.nombre).toStrictEqual("Bool");
-    expect(tad.generos).toStrictEqual(["bool"]);
+    expect(tad.genero).toStrictEqual("bool");
 
     const generadores = tad.operaciones.filter(op => op.type == "generador");
     const otrasOperaciones = tad.operaciones.filter(op => op.type == "otra");

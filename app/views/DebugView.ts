@@ -1,5 +1,6 @@
-import { Genero, Operacion, TAD, Token } from "../../parser/Types";
-import { genGrammar } from "../../parser/CustomBackend";
+import { Operacion, TAD, Token } from "../../parser/Types";
+import { genGrammar } from "../../parser/Grammar";
+import { Genero } from "../../parser/Genero";
 
 const generateGeneroTag = (genero: Genero): string => {
     return `<span class="keyword genero">${genero}</span>`;
@@ -39,15 +40,15 @@ const generateOperatorTable = (ops: Operacion[]): string => {
 const generateDebugView = (tad: TAD): string => {
     const grammar = genGrammar([tad]);
     return `
-        <div class="debug-title">${tad.nombre} (${tad.generos[0]})</div>
+        <div class="debug-title">${tad.nombre} (${tad.genero})</div>
         <br>
         <div class="debug-section">operaciones</div>
         ${generateOperatorTable(tad.operaciones)}
         <br>
         <br>
         <br>
-        <div class="debug-section">Grammar generado</div>
-        <pre>${grammar.backendGrammar.source}</pre>
+        <div class="debug-section">Grammar meta</div>
+        <pre>TODO: tokens, etc...</pre>
     `;
 
     return "report\n".repeat(500);

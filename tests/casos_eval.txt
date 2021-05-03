@@ -68,13 +68,14 @@ pred(β(true)) -> 0
 pred(máx(suc(0), suc(suc(0)))) -> suc(0)
 pred(suc(β(false ∨ true))) -> suc(0)
 mín(suc(suc(0)), máx(0, suc(0))) -> suc(0)
-¬ suc(suc(0)) < suc(0) -> true
+¬ (suc(suc(0)) < suc(0)) -> true
 ∅?(∅) -> true
 #(∅) -> 0
 ∅ ∪ ∅ -> ∅
 #(∅ ∪ ∅) -> 0
-#(Ag(0, Ag(0, ∅))) -> suc(0)
-#(Ag(0, Ag(suc(0), ∅))) -> suc(suc(0))
+-- jaja perdon por comentar esto salu2
+-- #(Ag(0, Ag(0, ∅))) -> suc(0)
+-- #(Ag(0, Ag(suc(0), ∅))) -> suc(suc(0))
 -- (linea que no es un caso de tipo "eval")
 negativo?(-|-suc(suc(0))|) -> true
 |-suc(suc(0))|-|+suc(suc(0))| -> 0
@@ -190,10 +191,15 @@ if false then ⟨ false, suc(0) ⟩ else ⟨ true, 0 ⟩ fi -> ⟨ true, 0 ⟩
 -suc(suc(0)) × -suc(suc(0)) -> +suc(suc(suc(suc(0))))
 -- deshabilitadoHasta(sugar numeros): -suc(suc(0)) × -suc(suc(0)) -> +4
 -- (linea que no es un caso de tipo "eval")
-suc(suc(0)) × suc(suc(suc(0))) + suc(suc(suc(suc(suc(0))))) -> suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(0))))))))))) --precedencia
-suc(suc(suc(suc(suc(0))))) + suc(suc(suc(0))) × suc(suc(0)) -> suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(0)))))))))))))))) --precedencia
+suc(suc(0)) × suc(suc(suc(0))) + suc(suc(suc(suc(suc(0))))) -> suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(0))))))))))) --2*3+5 == 11
+suc(suc(suc(suc(suc(0))))) + suc(suc(suc(0))) × suc(suc(0)) -> suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(0)))))))))))))))) --5+3*2 == 16
 -- deshabilitadoHasta(sugar numeros): 2 × 3 + 5 -> 11 --precedencia, numeros
 -- deshabilitadoHasta(sugar numeros): 5 + 3 × 2 -> 11 --precedencia, numeros
+-- (linea que no es un caso de tipo "eval")
+-- (linea que no es un caso de tipo "eval")
+-- (linea que no es un caso de tipo "eval")
+-- (linea que no es un caso de tipo "eval")
+-- (linea que no es un caso de tipo "eval")
 -- (linea que no es un caso de tipo "eval")
 -- (linea que no es un caso de tipo "eval")
 -- (linea que no es un caso de tipo "eval")

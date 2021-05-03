@@ -14,6 +14,8 @@ monaco.languages.setMonarchTokensProvider("tad", {
             [/(≡|:|→)/, "tad-separators"],
             [/(∀|∃)/, "tad-quantifiers"],
             [/(if|then|else|fi)/, "tad-if"],
+            [/^eval /, "tad-eval"],
+            [/^assert /, "tad-assert"],
         ],
     },
 });
@@ -30,5 +32,7 @@ monaco.editor.defineTheme("tad-dark", {
         { token: "tad-separators", foreground: "add4ff" },
         { token: "tad-quantifiers", foreground: "e5ff28" },
         { token: "tad-if", fontStyle: "bold" },
+        { token: "tad-eval", fontStyle: "bold", foreground: "30a9ff" },
+        { token: "tad-assert", fontStyle: "bold", foreground: "c8ff00" },
     ],
 });

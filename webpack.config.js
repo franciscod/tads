@@ -1,18 +1,25 @@
+const webpack = require('webpack');
 const path = require('path');
 const git = require('git-rev-sync');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 
+const isProduction = process.env.MODE === 'production';
+console.log("isProduction", isProduction);
+
 const config = {
-    entry: "./site/index.ts",
-    mode: process.env.MODE || 'development',
+    entry: {
+        app: "./app/index.ts"
+    },
+    mode: isProduction ? 'production' : 'development',
     output: {
+        filename: '[name].[contenthash].js',
         path: path.resolve(__dirname, "build")
     },
     module: {
         rules: [
+            { test: /Worker\.ts$/, use: { loader: 'worker-loader' } },
             { test: /\.ts?$/, loader: "ts-loader", exclude: [/node_modules/, /tests/] },
-            { test: /\.js?$/, loader: "babel-loader", exclude: [/node_modules/, /tests/] },
             { test: /\.(less|css)$/, use: [{ loader: "style-loader" }, { loader: "css-loader" }, { loader: "less-loader" }] },
             { test: /\.ttf$/, use: ['file-loader'] },
             { test: /\.tad$/, use: ['raw-loader'] }
@@ -22,8 +29,12 @@ const config = {
         extensions: [".ts", ".js"]
     },
     plugins: [
+        new webpack.DefinePlugin({
+            MODE: JSON.stringify(isProduction ? 'production' : 'development')
+        }),
         new HtmlWebpackPlugin({
-            template: path.resolve(__dirname, "site/index.html"),
+            template: path.resolve(__dirname, "app/index.html"),
+            chunks: ["app"],
             minify: { removeComments: false },
             templateParameters: {
                 "BUILD_HASH": git.short() + (git.isDirty() ? '-dirty' : ''),
@@ -38,7 +49,8 @@ const config = {
     ],
     devServer: {
         contentBase: path.resolve(__dirname, "public"),
-        compress: false
+        compress: false,
+        inline: !isProduction
     }
 };
 

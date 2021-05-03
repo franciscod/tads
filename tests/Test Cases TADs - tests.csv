@@ -68,7 +68,7 @@ mlomb,eval,pred(β(true)),0,,
 mlomb,eval,"pred(máx(suc(0), suc(suc(0))))",suc(0),,
 mlomb,eval,pred(suc(β(false ∨ true))),suc(0),,
 mlomb,eval,"mín(suc(suc(0)), máx(0, suc(0)))",suc(0),,
-mlomb,eval,¬ suc(suc(0)) < suc(0),true,,
+mlomb,eval,¬ (suc(suc(0)) < suc(0)),true,,
 mlomb,eval,∅?(∅),TRUE,,
 mlomb,eval,#(∅),0,,
 mlomb,eval,∅ ∪ ∅,∅,,
@@ -190,8 +190,8 @@ piru,eval,-suc(suc(0)) × -suc(0),+2,,sugar numeros
 piru,eval,-suc(suc(0)) × -suc(suc(0)),+suc(suc(suc(suc(0)))),,
 piru,eval,-suc(suc(0)) × -suc(suc(0)),+4,,sugar numeros
 ,,,,,
-fd,eval,suc(suc(0)) × suc(suc(suc(0))) + suc(suc(suc(suc(suc(0))))),suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(0))))))))))),precedencia,
-fd,eval,suc(suc(suc(suc(suc(0))))) + suc(suc(suc(0))) × suc(suc(0)),suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(0)))))))))))))))),precedencia,
+fd,eval,suc(suc(0)) × suc(suc(suc(0))) + suc(suc(suc(suc(suc(0))))),suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(0))))))))))),2*3+5 == 11,
+fd,eval,suc(suc(suc(suc(suc(0))))) + suc(suc(suc(0))) × suc(suc(0)),suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(suc(0)))))))))))))))),5+3*2 == 16,
 fd,eval,2 × 3 + 5,11,"precedencia, numeros",sugar numeros
 fd,eval,5 + 3 × 2,11,"precedencia, numeros",sugar numeros
 ,,,,,
@@ -199,3 +199,8 @@ fd,igobs,FALSE,FALSE,,
 fd,igobs,TRUE,TRUE,,
 fd,noigobs,FALSE,TRUE,,
 fd,noigobs,TRUE,FALSE,,
+,,,,,
+mlomb,noparse,true = false ∧ true,,faltan parentesis,asd
+mlomb,noparse,true = false = true,,faltan parentesis,asd
+mlomb,noparse,¬ suc(suc(0)) < suc(0),,faltan parentesis,asd
+mlomb,noparse,false ∧ true ∧ true,,faltan parentesis,asd

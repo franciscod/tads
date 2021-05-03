@@ -3,7 +3,7 @@ TAD Conjunto(α)
 géneros conj(α)
 
 parámetros formales
-  -- géneros α
+    géneros α
 
 exporta conj(α), generadores, observadores, ∅?, ∪, ∩, #, • - {•}, dameUno, sinUno, ⊆, • -
 
@@ -35,7 +35,7 @@ otras operaciones
 
 axiomas ∀ c, d: conj(α), ∀ a, b: α
     a ∈ ∅             ≡ false
-    -- a ∈ Ag(b, c)      ≡ (a = b) ∨ (a ∈ c)
+    a ∈ Ag(b, c)      ≡ (a = b) ∨ (a ∈ c)
     ∅?(∅)             ≡ true
     ∅?(Ag(b, c))      ≡ false
     vacio?(∅)         ≡ ∅?(∅)
@@ -51,7 +51,7 @@ axiomas ∀ c, d: conj(α), ∀ a, b: α
     Ag(a, c) ∩ d      ≡ if a ∈ d then Ag(a, c ∩ d) else c ∩ d fi
     -- dameUno(c) ∈ c    ≡ true
     sinUno(c)         ≡ c - {dameUno(c)}
-    -- c ⊆ d             ≡ c ∩ d = c
+    c ⊆ d             ≡ c ∩ d = c
     ∅ - c             ≡ ∅
     Ag(a, c) - d      ≡ if a ∈ d then c - d else Ag(a, c - d) fi
 
