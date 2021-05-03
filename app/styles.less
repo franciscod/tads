@@ -88,14 +88,20 @@ body {
 }
 
 .details {
-    display: flex;
     height: 90px;
     background-color: @back-2;
-    align-items: center;
     padding: 10px 15px;
-    user-select: none;
     box-shadow: black 0 6px 3px -6px inset;
     box-sizing: border-box;
+
+    code {
+        font-size: 18px;
+    }
+
+    .empty {
+        color: gray;
+        font-style: italic;
+    }
 }
 
 .status-bar {

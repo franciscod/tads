@@ -1,5 +1,5 @@
 import { evalGrammar } from "../../parser/Eval";
-import { parseToExpr } from "../../parser/Expr";
+import { exprToString, parseToExpr } from "../../parser/Expr";
 import { genGrammar, Grammar } from "../../parser/Grammar";
 import { parseTADs } from "../../parser/Parser";
 import { Marker, Report, ReportDoc } from "../../parser/Reporting";
@@ -57,6 +57,7 @@ export type GlyphDecoration =
 export type LineInfo = {
     lens: Lens[];
     glyphDecoration: GlyphDecoration;
+    details?: string;
 };
 
 /**
@@ -228,16 +229,21 @@ function* fullLoop(start: StartMessage): Generator {
                 if (eval_.kind === "assert") {
                     if (finalExpr.nombre === "true") {
                         lineInfo.glyphDecoration = "assert-success";
+                        lineInfo.details = `La expresión resuelve a <b>true</b> ✅`;
                     } else {
                         lineInfo.glyphDecoration = "assert-fail";
+                        lineInfo.details = "La expresión debería resolver a <b>true</b>, pero resuelve a:<br><code>" + exprToString(finalExpr, grammar) + `</code>`;
                     }
                 } else {
+                    lineInfo.details = `La expresión resuelve a:<br><code>` + exprToString(finalExpr, grammar) + `</code>`;
                     lineInfo.glyphDecoration = "eval-success";
                 }
             } else {
+                lineInfo.details = `La expresión resuelve a:<br><code>` + exprToString(finalExpr, grammar) + `</code>`;
                 lineInfo.glyphDecoration = "eval-fail";
             }
         } else {
+            lineInfo.details = `La expresión no parsea.`;
             lineInfo.glyphDecoration = "parse-fail";
         }
 

@@ -23,6 +23,7 @@ export class Tab {
     public lenses: monaco.languages.CodeLens[] = [];
     public linesInfo: { [line: number]: LineInfo } = {};
     public markers: Marker[] = [];
+    public lastPositionLine: number = -1;
     private oldDecorations: string[] = [];
 
     constructor(private editor: Editor, public readonly options: ITabOptions) {
@@ -73,6 +74,10 @@ export class Tab {
         this.editor.monacoEditor.updateOptions({ readOnly: this.options.readOnly });
 
         this.editor.activeTab = this;
+
+        const lastLine = this.lastPositionLine;
+        this.lastPositionLine = -1;
+        this.updateDetails(lastLine);
     }
 
     updateInfo(): void {
@@ -169,5 +174,12 @@ export class Tab {
                 message: m.message
             }))
         );
+    }
+    
+    updateDetails(line: number) {
+        this.lastPositionLine = line;
+        const lineInfo = this.linesInfo[line];
+        const html = lineInfo?.details || `<span class="empty">Mové el cursor a un eval/assert para más información</span>`;
+        document.querySelector(".details")!.innerHTML = html;
     }
 }

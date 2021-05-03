@@ -7,8 +7,7 @@ import "./Suggestions";
 import "./Hover";
 
 import { Tab, ITabOptions, ITextModelData } from "./Tab";
-import { Marker } from "../../parser/Reporting";
-import Worker, { LineInfo, Message, ProgressMessage, StartMessage } from "./Worker";
+import Worker, { Message, ProgressMessage, StartMessage } from "./Worker";
 
 export class Editor {
     public monacoEditor: monaco.editor.IStandaloneCodeEditor;
@@ -32,6 +31,12 @@ export class Editor {
             glyphMargin: true,
             model: null,
             renderValidationDecorations: "on"
+        });
+        this.monacoEditor.onDidChangeCursorPosition((ev) => {
+            // solo actualizar si la linea cambió efectivamente
+            if(this.activeTab && this.activeTab.lastPositionLine !== ev.position.lineNumber) {
+                this.activeTab.updateDetails(ev.position.lineNumber);
+            }
         });
         this.anyCommandId = this.monacoEditor.addCommand(
             0,
@@ -74,6 +79,7 @@ export class Editor {
         let updateInfo = false;
         let updateMarkers = false;
         let forceRender = false;
+        let updateDetails = false;
 
         // actualizamos los datos necesarios
         for (const msg of messages) {
@@ -90,8 +96,10 @@ export class Editor {
                 // forzamos un render si había o hay un lens
                 forceRender ||=
                     (msg.line in tab.linesInfo && tab.linesInfo[msg.line].lens.length > 0) || msg.info.lens.length > 0;
-                tab.linesInfo[msg.line] = msg.info;
+                // forzamos que se actualice el detalle
+                updateDetails ||= msg.line === tab.lastPositionLine;
                 updateInfo = true;
+                tab.linesInfo[msg.line] = msg.info;
             } else if (msg.type === "clear-markers") {
                 for (const tab of this.tabs) {
                     tab.markers = [];
@@ -110,6 +118,9 @@ export class Editor {
         for (const tab of this.tabs) {
             if (updateInfo) tab.updateInfo();
             if (updateMarkers) tab.updateMarkers();
+        }
+        if(updateDetails) {
+            this.activeTab!.updateDetails(this.activeTab!.lastPositionLine);
         }
         if (forceRender) {
             this.monacoEditor.render(false);
@@ -136,6 +147,7 @@ export class Editor {
             }
         }
     }
+    
 }
 
 // si la fuente se carga después de iniciar el editor, se rompe
