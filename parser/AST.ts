@@ -157,6 +157,7 @@ export function parseAST(input: string, vars: VariablesLibres, grammar: Grammar,
         }
 
         // si no pude consumir un token general, veo si puedo consumir una variable
+        // TODO: deberíamos consumir la variable con el nombre más largo (a vs a')
         for (const varName in vars) {
             if (input.startsWith(varName, index)) {
                 stack.push(varName);
@@ -166,8 +167,26 @@ export function parseAST(input: string, vars: VariablesLibres, grammar: Grammar,
         }
 
         // si llego acá no se pudo matchear ninguna operación ni consumir tokens
-        // TODO: avanzar caracter por caracter hasta encontrar un token válido y subrayar todo lo que no se reconoció
-        report?.addMark("error", `No se esperaba el caracter \`${input[index]}\``, index, 1);
+        // avanzamos caracter por caracter hasta encontrar un token válido (o whitespace) y subrayar todo lo que no se reconoció
+        if(report) {
+            const unknownStart = index;
+            index++;
+            unkWhile: while(index < input.length) {
+                // whitespace corta el token
+                if(input[index] === ' ' || input[index] === '\t' || input[index] === '\n')
+                    break;
+                    
+                for (const token of grammar.tokens) {
+                    if (input.startsWith(token, index)) {
+                        // se reconoció un token en esta posición, dejo de avanzar
+                        break unkWhile;
+                    }
+                }
+                index++;
+            }
+            
+            report.addMark("error", `No se reconoce \`${input.substring(unknownStart, index)}\``, unknownStart, index - unknownStart);
+        }
         return null;
     }
 
