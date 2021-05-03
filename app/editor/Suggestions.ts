@@ -17,7 +17,7 @@ const symbol_replacements = [
     ["equiv", "≡"],
     ["alfa", "α"],
     ["beta", "β"],
-    ["not", "¬"],
+    ["not", "¬"]
 ];
 
 monaco.languages.registerCompletionItemProvider("tad", {
@@ -27,14 +27,14 @@ monaco.languages.registerCompletionItemProvider("tad", {
             startLineNumber: position.lineNumber,
             endLineNumber: position.lineNumber,
             startColumn: word.startColumn,
-            endColumn: word.endColumn,
+            endColumn: word.endColumn
         };
         const suggestions: monaco.languages.CompletionItem[] = [
             ...symbol_replacements.map(([from, to]) => ({
                 label: from,
                 kind: monaco.languages.CompletionItemKind.Keyword,
                 insertText: to,
-                range,
+                range
             })),
             /*{
                 label: "demotad",
@@ -47,7 +47,7 @@ monaco.languages.registerCompletionItemProvider("tad", {
                 kind: monaco.languages.CompletionItemKind.Snippet,
                 insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
                 insertText: "if ${1} then ${2} else ${3} fi",
-                range,
+                range
             },
             {
                 label: "tad",
@@ -65,17 +65,17 @@ monaco.languages.registerCompletionItemProvider("tad", {
                     "",
                     "axiomas",
                     "",
-                    "FIN TAD",
+                    "FIN TAD"
                 ].join("\n"),
-                range,
-            },
+                range
+            }
         ];
         return { suggestions: suggestions };
-    },
+    }
 });
 
 monaco.languages.setLanguageConfiguration("tad", {
     comments: {
-        lineComment: "--",
-    },
+        lineComment: "--"
+    }
 });

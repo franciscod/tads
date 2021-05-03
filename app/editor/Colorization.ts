@@ -7,7 +7,7 @@ monaco.languages.setMonarchTokensProvider("tad", {
             [/^(TAD|FIN TAD)/, "tad-definicion"],
             [
                 /^(\s*)(?:g[ée]neros|usa|importa|exporta|par[aá]metros formales|igualdad observacional|igobs|ig obs|observadores b[áa]sicos|obs|generadores|gen|otras operaciones|otras op|otrasop|axiomas)/,
-                "tad-keyword",
+                "tad-keyword"
             ],
             [/--.*/, "tad-comment"],
             [/(•|×)/, "tad-dot"],
@@ -15,9 +15,9 @@ monaco.languages.setMonarchTokensProvider("tad", {
             [/(∀|∃)/, "tad-quantifiers"],
             [/(if|then|else|fi)/, "tad-if"],
             [/^eval /, "tad-eval"],
-            [/^assert /, "tad-assert"],
-        ],
-    },
+            [/^assert /, "tad-assert"]
+        ]
+    }
 });
 
 monaco.editor.defineTheme("tad-dark", {
@@ -33,6 +33,6 @@ monaco.editor.defineTheme("tad-dark", {
         { token: "tad-quantifiers", foreground: "e5ff28" },
         { token: "tad-if", fontStyle: "bold" },
         { token: "tad-eval", fontStyle: "bold", foreground: "30a9ff" },
-        { token: "tad-assert", fontStyle: "bold", foreground: "c8ff00" },
-    ],
+        { token: "tad-assert", fontStyle: "bold", foreground: "c8ff00" }
+    ]
 });

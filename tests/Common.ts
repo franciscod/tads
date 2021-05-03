@@ -26,7 +26,7 @@ function parsePares(input: string, sep: string): { left: string; right: string; 
             return {
                 left: s[0],
                 right: s[1],
-                line: i,
+                line: i
             };
         })
         .filter(e => e.line >= 0);

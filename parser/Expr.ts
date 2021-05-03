@@ -37,13 +37,12 @@ export function astToExpr(input: AST, vars: VariablesLibres, grammar: Grammar, r
     if (input.type === "variable") {
         // no se necesita hacer nada más
         const genero = parseGenero(vars[input.nombre].base, grammar.tads, report);
-        if(genero === null)
-            return null;
+        if (genero === null) return null;
         return {
             type: "variable",
             nombre: input.nombre,
             genero,
-            operandos: {},
+            operandos: {}
         };
     }
 
@@ -99,7 +98,7 @@ export function astToExpr(input: AST, vars: VariablesLibres, grammar: Grammar, r
                     type: "fijo",
                     nombre: input.nombre,
                     genero: bindearParametros(parseGenero(op.retorno.base, grammar.tads)!, parametros),
-                    operandos: operandos,
+                    operandos: operandos
                 };
 
                 return expr;

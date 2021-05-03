@@ -9,7 +9,7 @@ export interface ITabOptions {
     content: string;
     readOnly: boolean;
     saveInStorage: boolean;
-};
+}
 
 export interface ITextModelData {
     tab?: Tab;
@@ -21,14 +21,17 @@ export class Tab {
     public viewState: monaco.editor.ICodeEditorViewState | null;
     public source: string;
     public lenses: monaco.languages.CodeLens[] = [];
-    public linesInfo: { [line: number]: LineInfo } = { };
+    public linesInfo: { [line: number]: LineInfo } = {};
     public markers: Marker[] = [];
     private oldDecorations: string[] = [];
 
     constructor(private editor: Editor, public readonly options: ITabOptions) {
         this.source = options.content;
         this.model = monaco.editor.createModel(this.source, "tad");
-        this.model.onDidChangeContent(() => { this.save(); this.editor.revalidate(); });
+        this.model.onDidChangeContent(() => {
+            this.save();
+            this.editor.revalidate();
+        });
         this.model.tab = this;
         this.viewState = null;
 
@@ -39,74 +42,70 @@ export class Tab {
         document.querySelector(".tabs")?.append(this.tabElement);
 
         // ver local storage
-        if(options.saveInStorage) {
+        if (options.saveInStorage) {
             const content = localStorage.getItem("tab-content-" + options.title);
-            if(content !== null)
-                this.model.setValue(content);
+            if (content !== null) this.model.setValue(content);
         }
-        if(options.title === localStorage.getItem("tab-open")) {
+        if (options.title === localStorage.getItem("tab-open")) {
             this.open();
         }
     }
 
     save(): void {
         this.source = this.model.getValue().replace(/\r\n/g, "\n");
-        if(this.options.saveInStorage)
-            localStorage.setItem("tab-content-" + this.options.title, this.source);
+        if (this.options.saveInStorage) localStorage.setItem("tab-content-" + this.options.title, this.source);
         this.viewState = this.editor.monacoEditor.saveViewState();
         // TODO: deberíamos guardar el view state de cada tab en el local storage
         //       cuando lo intenté no se aplicaba el view state :/
     }
 
     open(): void {
-        if(this.editor.activeTab)
-            this.editor.activeTab.save();
-        
+        if (this.editor.activeTab) this.editor.activeTab.save();
+
         document.querySelectorAll(".tab").forEach(e => e.classList.remove("open"));
         this.tabElement.classList.add("open");
-        
+
         localStorage.setItem("tab-open", this.options.title);
 
         this.editor.monacoEditor.setModel(this.model);
         this.editor.monacoEditor.focus();
-        if (this.viewState)
-            this.editor.monacoEditor.restoreViewState(this.viewState);
+        if (this.viewState) this.editor.monacoEditor.restoreViewState(this.viewState);
         this.editor.monacoEditor.updateOptions({ readOnly: this.options.readOnly });
-        
+
         this.editor.activeTab = this;
     }
 
     updateInfo(): void {
         const decos: monaco.editor.IModelDeltaDecoration[] = [];
         this.lenses = [];
-        for(const line in this.linesInfo) {
+        for (const line in this.linesInfo) {
             const lineInfo = this.linesInfo[line];
 
             let className = "";
             let hoverMsg = "";
 
-            switch(lineInfo.glyphDecoration) {
-                case 'loading':
+            switch (lineInfo.glyphDecoration) {
+                case "loading":
                     className = "glyph-margin-loading";
                     hoverMsg = "Esperando a ser evaluado";
                     break;
-                case 'parse-fail':
+                case "parse-fail":
                     className = "glyph-margin-parse-fail";
                     hoverMsg = "La expresión no se pudo parsear";
                     break;
-                case 'eval-success':
+                case "eval-success":
                     className = "glyph-margin-eval-success";
                     hoverMsg = "La expresión evaluó correctamente";
                     break;
-                case 'eval-fail':
+                case "eval-fail":
                     className = "glyph-margin-eval-fail";
                     hoverMsg = "La expresión no se pudo evaluar";
                     break;
-                case 'assert-success':
+                case "assert-success":
                     className = "glyph-margin-assert-check";
                     hoverMsg = "La expresión evaluó a **true**";
                     break;
-                case 'assert-fail':
+                case "assert-fail":
                     className = "glyph-margin-assert-times";
                     hoverMsg = "Se esperaba que la expresión evaluara a **true**";
                     break;
@@ -125,11 +124,11 @@ export class Tab {
                     stickiness: 3,
                     isWholeLine: true,
                     glyphMarginClassName: className,
-                    glyphMarginHoverMessage: { value: hoverMsg },
-                },
+                    glyphMarginHoverMessage: { value: hoverMsg }
+                }
             });
-            
-            for(const lens of lineInfo.lens) {
+
+            for (const lens of lineInfo.lens) {
                 this.lenses.push({
                     range: lineRange,
                     command: {
@@ -140,7 +139,7 @@ export class Tab {
                 });
             }
         }
-        
+
         this.oldDecorations = this.model.deltaDecorations(this.oldDecorations, decos);
     }
 
@@ -157,17 +156,18 @@ export class Tab {
                     return monaco.MarkerSeverity.Info;
             }
         };
-        
-        monaco.editor.setModelMarkers(this.model, "tad", this.markers.map(m => ({
-            severity: toMonacoSeverity(m),
-            startLineNumber: m.range.startLine,
-            startColumn: m.range.columnStart,
-            endLineNumber: m.range.endLine,
-            endColumn: m.range.columnEnd,
-            message: m.message
-        })));
+
+        monaco.editor.setModelMarkers(
+            this.model,
+            "tad",
+            this.markers.map(m => ({
+                severity: toMonacoSeverity(m),
+                startLineNumber: m.range.startLine,
+                startColumn: m.range.columnStart,
+                endLineNumber: m.range.endLine,
+                endColumn: m.range.columnEnd,
+                message: m.message
+            }))
+        );
     }
 }
-
-
-

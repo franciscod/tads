@@ -73,7 +73,7 @@ export function parseAST(input: string, vars: VariablesLibres, grammar: Grammar,
             const ast: AST = {
                 type: "fijo",
                 nombre: op.nombre,
-                entreParens: false,
+                entreParens: false
             };
 
             // itero todos los tokens de la operación y me fijo si matchean
@@ -133,7 +133,7 @@ export function parseAST(input: string, vars: VariablesLibres, grammar: Grammar,
                     stack.push({
                         type: "variable",
                         nombre: varName,
-                        entreParens: false,
+                        entreParens: false
                     });
                     continue whileIdx;
                 }

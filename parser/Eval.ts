@@ -36,7 +36,7 @@ export function evalStepGrammar(expr: Expr, grammar: Grammar): [boolean, Expr] {
             type: "fijo",
             nombre: "" + igobs,
             genero: { base: "bool", parametros: {} },
-            operandos: {},
+            operandos: {}
         };
 
         return [true, ret];
@@ -93,7 +93,7 @@ export function evalStepGrammar(expr: Expr, grammar: Grammar): [boolean, Expr] {
         type: expr.type,
         nombre: expr.nombre,
         genero: expr.genero,
-        operandos: {},
+        operandos: {}
     };
 
     for (const child in expr.operandos) {
@@ -121,7 +121,7 @@ function reemplazar(expr: Expr, bindings: Map<string, Expr>): [boolean, Expr] {
         type: expr.type,
         nombre: expr.nombre,
         genero: expr.genero,
-        operandos: {},
+        operandos: {}
     };
     let hizoAlgo = false;
 

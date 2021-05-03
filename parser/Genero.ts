@@ -97,7 +97,7 @@ export function parseGenero(rawGenero: string, tads: TAD[], report?: Report): Ge
 
         return {
             base: rawGenero.trim(),
-            parametros: {},
+            parametros: {}
         };
     }
 
@@ -149,7 +149,7 @@ export function parseGenero(rawGenero: string, tads: TAD[], report?: Report): Ge
 
     return {
         base: tad.genero,
-        parametros,
+        parametros
     };
 }
 
@@ -213,7 +213,7 @@ export function bindearParametros(genero: GeneroParametrizado, parametros: Param
 
     const ret: GeneroParametrizado = {
         base: genero.base,
-        parametros: {},
+        parametros: {}
     };
 
     // bindeamos los parametros recursivamente

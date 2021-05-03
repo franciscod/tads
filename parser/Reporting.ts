@@ -4,7 +4,7 @@
 export type SourceLocation = {
     document: number;
     offset: number;
-}
+};
 
 /**
  * Representa un rango de texto en un documento (o tab)
@@ -37,7 +37,7 @@ export class ReportDoc {
     constructor(private document: number, private source: string) {
         this.lines = source.replace(/\r\n/g, "\n").split("\n");
     }
-    
+
     push(offset: number): void {
         if (this.currentOffset + offset > this.source.length + 1) throw new Error("Offset out of bounds");
         this.currentOffset += offset;
@@ -77,7 +77,7 @@ export class ReportDoc {
             startLine: startLine + 1,
             endLine: endLine + 1,
             columnStart: columnStart + 1,
-            columnEnd: columnEnd + 1,
+            columnEnd: columnEnd + 1
         };
     }
 }
@@ -86,12 +86,10 @@ export class ReportDoc {
  * Permite ir agregando Markers sobre documentos usando un stack de offsets
  */
 export class Report {
-
     activeDocument = 0;
     markers: Marker[] = [];
 
-    constructor(public docs: ReportDoc[]) {
-    }
+    constructor(public docs: ReportDoc[]) {}
 
     push(offset: number): void {
         this.docs[this.activeDocument].push(offset);
@@ -105,7 +103,7 @@ export class Report {
         this.markers.push({
             severity,
             message,
-            range: this.docs[this.activeDocument].getRange(offset, length),
+            range: this.docs[this.activeDocument].getRange(offset, length)
         });
     }
 

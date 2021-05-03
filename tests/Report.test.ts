@@ -14,36 +14,36 @@ describe("offsets correctos", () => {
             offsets: [],
             offset: 0,
             length: 4,
-            expected: { document: 0, startLine: 1, endLine: 1, columnStart: 1, columnEnd: 5 },
+            expected: { document: 0, startLine: 1, endLine: 1, columnStart: 1, columnEnd: 5 }
         },
         {
             input: "ab\ncd",
             offsets: [],
             offset: 3,
             length: 2,
-            expected: { document: 0, startLine: 2, endLine: 2, columnStart: 1, columnEnd: 3 },
+            expected: { document: 0, startLine: 2, endLine: 2, columnStart: 1, columnEnd: 3 }
         },
         {
             input: "ab\ncd",
             offsets: [],
             offset: 0,
             length: 5,
-            expected: { document: 0, startLine: 1, endLine: 2, columnStart: 1, columnEnd: 3 },
+            expected: { document: 0, startLine: 1, endLine: 2, columnStart: 1, columnEnd: 3 }
         },
         {
             input: "ab\ncd",
             offsets: [],
             offset: 1,
             length: 3,
-            expected: { document: 0, startLine: 1, endLine: 2, columnStart: 2, columnEnd: 2 },
+            expected: { document: 0, startLine: 1, endLine: 2, columnStart: 2, columnEnd: 2 }
         },
         {
             input: "abcd\nabcd",
             offsets: [2],
             offset: 1,
             length: 3,
-            expected: { document: 0, startLine: 1, endLine: 2, columnStart: 4, columnEnd: 2 },
-        },
+            expected: { document: 0, startLine: 1, endLine: 2, columnStart: 4, columnEnd: 2 }
+        }
     ];
 
     for (const off of OFFSETS_TESTS) {
