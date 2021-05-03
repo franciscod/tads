@@ -1,6 +1,8 @@
 import * as monaco from "monaco-editor";
+import { Marker } from "../../parser/Reporting";
 
 import { Editor } from "./Editor";
+import { LineInfo } from "./Worker";
 
 export interface ITabOptions {
     title: string;
@@ -19,6 +21,9 @@ export class Tab {
     public viewState: monaco.editor.ICodeEditorViewState | null;
     public source: string;
     public lenses: monaco.languages.CodeLens[] = [];
+    public linesInfo: { [line: number]: LineInfo } = { };
+    public markers: Marker[] = [];
+    private oldDecorations: string[] = [];
 
     constructor(private editor: Editor, public readonly options: ITabOptions) {
         this.source = options.content;
@@ -44,7 +49,7 @@ export class Tab {
         }
     }
 
-    save() {
+    save(): void {
         this.source = this.model.getValue().replace(/\r\n/g, "\n");
         if(this.options.saveInStorage)
             localStorage.setItem("tab-content-" + this.options.title, this.source);
@@ -53,7 +58,7 @@ export class Tab {
         //       cuando lo intenté no se aplicaba el view state :/
     }
 
-    open() {
+    open(): void {
         if(this.editor.activeTab)
             this.editor.activeTab.save();
         
@@ -69,6 +74,98 @@ export class Tab {
         this.editor.monacoEditor.updateOptions({ readOnly: this.options.readOnly });
         
         this.editor.activeTab = this;
+    }
+
+    updateInfo(): void {
+        const decos: monaco.editor.IModelDeltaDecoration[] = [];
+        this.lenses = [];
+        for(const line in this.linesInfo) {
+            const lineInfo = this.linesInfo[line];
+
+            let className = "";
+            let hoverMsg = "";
+
+            switch(lineInfo.glyphDecoration) {
+                case 'loading':
+                    className = "glyph-margin-loading";
+                    hoverMsg = "Esperando a ser evaluado";
+                    break;
+                case 'parse-fail':
+                    className = "glyph-margin-parse-fail";
+                    hoverMsg = "La expresión no se pudo parsear";
+                    break;
+                case 'eval-success':
+                    className = "glyph-margin-eval-success";
+                    hoverMsg = "La expresión evaluó correctamente";
+                    break;
+                case 'eval-fail':
+                    className = "glyph-margin-eval-fail";
+                    hoverMsg = "La expresión no se pudo evaluar";
+                    break;
+                case 'assert-success':
+                    className = "glyph-margin-assert-check";
+                    hoverMsg = "La expresión evaluó a **true**";
+                    break;
+                case 'assert-fail':
+                    className = "glyph-margin-assert-times";
+                    hoverMsg = "Se esperaba que la expresión evaluara a **true**";
+                    break;
+            }
+
+            const lineRange = {
+                startLineNumber: +line,
+                endLineNumber: +line,
+                startColumn: 1,
+                endColumn: 1
+            };
+
+            decos.push({
+                range: lineRange,
+                options: {
+                    stickiness: 3,
+                    isWholeLine: true,
+                    glyphMarginClassName: className,
+                    glyphMarginHoverMessage: { value: hoverMsg },
+                },
+            });
+            
+            for(const lens of lineInfo.lens) {
+                this.lenses.push({
+                    range: lineRange,
+                    command: {
+                        id: "TODO",
+                        title: lens.title,
+                        arguments: [lens.meta]
+                    }
+                });
+            }
+        }
+        
+        this.oldDecorations = this.model.deltaDecorations(this.oldDecorations, decos);
+    }
+
+    updateMarkers(): void {
+        const toMonacoSeverity = (marker: Marker): monaco.MarkerSeverity => {
+            switch (marker.severity) {
+                case "error":
+                    return monaco.MarkerSeverity.Error;
+                case "warning":
+                    return monaco.MarkerSeverity.Warning;
+                case "hint":
+                    return monaco.MarkerSeverity.Hint;
+                case "info":
+                    return monaco.MarkerSeverity.Info;
+            }
+        };
+        
+        monaco.editor.setModelMarkers(this.model, "tad", this.markers.map(m => ({
+            severity: toMonacoSeverity(m),
+            startLineNumber: m.range.startLine,
+            startColumn: m.range.columnStart,
+            endLineNumber: m.range.endLine,
+            endColumn: m.range.columnEnd,
+            message: m.message
+        })));
     }
 }
 

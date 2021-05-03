@@ -1,25 +1,20 @@
 import { evalGrammar } from "../../parser/Eval";
-import { exprToString, parseToExpr } from "../../parser/Expr";
+import { parseToExpr } from "../../parser/Expr";
 import { genGrammar, Grammar } from "../../parser/Grammar";
 import { parseTADs } from "../../parser/Parser";
-import { Marker, Report, ReportDoc, SourceRange } from "../../parser/Reporting";
+import { Marker, Report, ReportDoc } from "../../parser/Reporting";
 import { RawEval, TAD } from "../../parser/Types";
 
 export default null as any;
 
-export type Lens = {
-    title: string;
-    range: SourceRange;
-    meta: any;
+export type CommandMessage = {
+    type: "command",
+    data: any
 }
 
-export type Decoration = {
-    range: SourceRange;
-    options: any;
-}
-
-export type WorkStep = "Parse" | "Grammar" | "Eval";
-
+/**
+ * Se emite para iniciar el procesamiento nuevamente
+ */
 export type StartMessage = {
     type: "start";
     inputs: {
@@ -28,107 +23,168 @@ export type StartMessage = {
     }[]
 }
 
+/**
+ * Se emite cada vez que se progresa en algún step del procesamiento
+ */
 export type ProgressMessage = {
     type: "progress",
-    step: WorkStep,
+    step: "Parse" | "Grammar" | "Eval",
     current: number;
     total: number;
     elapsed: number;
 }
 
+export type Lens = {
+    title: string;
+    meta: any;
+}
+
+/**
+ * GlyphDecoration disponibles
+ */
+export type GlyphDecoration = 'none' | 'loading' | 'parse-fail' | 'eval-fail' | 'eval-success' | 'assert-fail' | 'assert-success';
+
+/**
+ * Representa la información presentada en una línea (decorations, lens)
+ */
+export type LineInfo = {
+    lens: Lens[],
+    glyphDecoration: GlyphDecoration;
+}
+
+/**
+ * Mensaje emitido cuando se debe eliminar la información de todas las líneas
+ */
+ export type LinesClearMessage = { type: "clear-lines" }
+
+/**
+ * Mensaje emitido cuando se debe cambiar la información presentada de una línea (decorations, lens)
+ */
+export type LineUpdateMessage = {
+    type: "line";
+    document: number;
+    line: number;
+    info: LineInfo;
+}
+
+/**
+ * Mensaje emitido cuando se deben eliminar todos los markers
+ */
+ export type MarkersClearMessage = { type: "clear-markers" }
+
+/**
+ * Mensaje emitido cuando hay nuevos markers para agregar
+ */
 export type MarkersMessage = {
     type: "markers",
     markers: Marker[]
 }
 
-export type LensesMessage = {
-    type: "lenses",
-    lenses: Lens[]
-}
+/**
+ * Mensaje emitido entre la UI y el WebWorker
+ */
+export type Message = StartMessage | ProgressMessage | MarkersClearMessage | MarkersMessage | LinesClearMessage | LineUpdateMessage | CommandMessage;
 
-export type DecorationsMessage = {
-    type: "decorations",
-    decorations: Decoration[]
-}
+const post = (messages: Message[]) => self.postMessage(messages, undefined!);
 
-export type CommandMessage = {
-    type: "command",
-    data: any
-}
-
-export type Message = StartMessage | ProgressMessage | MarkersMessage | LensesMessage | DecorationsMessage | CommandMessage;
-
-function* fullLoop(start: StartMessage): Generator<Message | null> {
-
-    self.postMessage({ type: "progress", step: "Parse", current: 0, total: 0, elapsed: 0 }, undefined!);
-    self.postMessage({ type: "progress", step: "Grammar", current: 0, total: 0, elapsed: 0 }, undefined!);
-    self.postMessage({ type: "progress", step: "Eval", current: 0, total: 0, elapsed: 0 }, undefined!);
+/**
+ * Esta función se ejecuta cada vez que cambia el contenido en editor
+ */
+function* fullLoop(start: StartMessage): Generator {
+    // reiniciamos los progress
+    post([
+        { type: "progress", step: "Parse", current: 0, total: 0, elapsed: 0 },
+        { type: "progress", step: "Grammar", current: 0, total: 0, elapsed: 0 },
+        { type: "progress", step: "Eval", current: 0, total: 0, elapsed: 0 }
+    ]);
 
     let tads: TAD[] = [];
     let evals: RawEval[] = [];
 
+    // --------------- PARSING ---------------
     const parseStart = performance.now();
-    
-    const docs: ReportDoc[] = [];
-    for(let i = 0; i < start.inputs.length; i++) {
-        docs.push(new ReportDoc(start.inputs[i].document, start.inputs[i].source));
-    }
-    const report = new Report(docs);
+    const report = new Report(start.inputs.map(input => new ReportDoc(input.document, input.source)));
+    let c = 0;
+    for(const input of start.inputs) {
+        // parseamos cada input (documento/tab) y los agregamos a los tads y evals generales
+        report.activeDocument = input.document;
+        const [docTads, docEvals] = parseTADs(input.source, report);
+        tads = tads.concat(docTads);
+        evals = evals.concat(docEvals);
 
-    for(let i = 0; i < start.inputs.length; i++) {
-        report.activeDocument = i;
-        const [newTads, newEvals] = parseTADs(start.inputs[i].source, report);
-        tads = tads.concat(newTads);
-        evals = evals.concat(newEvals);
-        yield {
+        // notificamos que un doc ya fue parseado
+        post([{
             type: "progress",
             step: "Parse",
-            current: i + 1,
+            current: ++c,
             total: start.inputs.length,
             elapsed: performance.now() - parseStart
-        };
+        }]);
+        yield;
     }
+    // ---------------------------------------
 
-    // generamos todos los code lens iniciales
-    let tadLenses: Lens[] = [];
-    for(const tad of tads) {
-        if(!tad.range) continue;
+    // ya podemos generar algo de información para el editor
+    {
+        let msgs: Message[] = [{ type: 'clear-lines' }];
 
-        const lens: Lens = {
-            title: "🐞 Debug " + tad.nombre,
-            range: tad.range,
-            meta: { a: '123' }
+        // mostamos un lens en cada definición de TAD
+        for(const tad of tads) {
+            msgs.push({
+                type: "line",
+                document: tad.range!.document,
+                line: tad.range!.startLine,
+                info: {
+                    lens: [{
+                        title: "🐞 Debug " + tad.nombre,
+                        meta: { a: '123' }
+                    }],
+                    glyphDecoration: 'none'
+                }
+            });
         }
-        tadLenses.push(lens);
-    }
-    let evalLenses: Lens[] = [];
-    for(let i = 0; i < evals.length; i++) {
-        /*const lens: Lens = {
-            title: "Evaluando...",
-            range: evals[i].expr.range!,
-            meta: { a: '123' }
-        }
-        evalLenses.push(lens);*/
-    }
-    yield {
-        type: "lenses",
-        lenses: tadLenses.concat(evalLenses)
-    };
 
+        // marcamos todas las líneas con evals como 'loading'
+        for(const eval_ of evals) {
+            msgs.push({
+                type: "line",
+                document: eval_.expr.range!.document,
+                line: eval_.expr.range!.startLine,
+                info: { lens: [], glyphDecoration: 'loading' }
+            });
+        }
+        
+        // enviamos todo junto
+        post(msgs);
+    }
+
+    // --------------- GRAMMAR ---------------
     const grammarStart = performance.now();
     const grammar: Grammar = genGrammar(tads, report);
     // TODO: grammar generator
-    yield {
+    post([{
         type: "progress",
         step: "Grammar",
         current: 1,
         total: 1,
         elapsed: performance.now() - grammarStart
-    };
+    }]);
+    yield;
+    // ---------------------------------------
+    
+    // enviamos los markers hasta ahora (parse + grammar)
+    post([{
+        type: 'clear-markers' 
+    }, {
+        type: 'markers',
+        markers: report.markers
+    }]);
+    // limpiamos los markers para no volver a enviarlos
+    report.markers = [];
 
+    // --------------- EVAL ---------------
     // TODO: cuota de evals step
 
-    const evalDecors: Decoration[] = [];
     const evalsStart = performance.now();
     for(let i = 0; i < evals.length; i++) {
         const eval_ = evals[i];
@@ -137,44 +193,50 @@ function* fullLoop(start: StartMessage): Generator<Message | null> {
         const expr = parseToExpr(evals[i].expr.source, { }, grammar, report);
         report.pop();
 
+        let lineInfo: LineInfo = {
+            glyphDecoration: 'none',
+            lens: []
+        };
+
         if(expr) {
             const finalExpr = evalGrammar(expr, grammar);
-            /*const lens: Lens = {
-                title: exprToString(finalExpr, grammar),
-                range: evals[i].expr.range!,
-                meta: { a: '123' }
-            }
-            evalLenses.push(lens);*/
-            evalDecors.push({
-                range: evals[i].expr.range!,
-                options: {
-
+            
+            if(finalExpr) {
+                if(eval_.kind === 'assert') {
+                    if(finalExpr.nombre === "true") {
+                        lineInfo.glyphDecoration = 'assert-success';
+                    } else {
+                        lineInfo.glyphDecoration = 'assert-fail';
+                    }
+                } else {
+                    lineInfo.glyphDecoration = 'eval-success';
                 }
-            })
+            } else {
+                lineInfo.glyphDecoration = 'eval-fail';
+            }
+        } else {
+            lineInfo.glyphDecoration = 'parse-fail';
         }
-        yield {
+        
+        post([{
             type: "progress",
             step: "Eval",
             current: i + 1,
             total: evals.length,
             elapsed: performance.now() - evalsStart
-        };
-        /*evalLenses[i].title = "👀 Ver eval";
-        yield {
-            type: "lenses",
-            lenses: tadLenses.concat(evalLenses)
-        };*/
+        }, {
+            type: 'line',
+            document: eval_.expr.range!.document,
+            line: eval_.expr.range!.startLine,
+            info: lineInfo
+        }, {
+            type: 'markers',
+            markers: report.markers
+        }]);
+        report.markers = [];
+        yield;
     }
-
-    const reportMessage: MarkersMessage = {
-        type: 'markers',
-        markers: report.markers
-    };
-    self.postMessage(reportMessage, undefined!);
-    yield {
-        type: "decorations",
-        decorations: evalDecors
-    };
+    // ---------------------------------------
 }
 
 function processNext() {
@@ -182,13 +244,10 @@ function processNext() {
     if(!r || r.done) {
         clearInterval(workInterval);
         workInterval = 0;
-    } else {
-        if(r.value)
-            self.postMessage(r.value, undefined!);
     }
 }
 
-let workGenerator: Generator<Message | null> | null = null;
+let workGenerator: Generator | null = null;
 let workInterval: number = 0;
 
 if(typeof window === 'undefined' && typeof self !== 'undefined') {

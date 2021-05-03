@@ -1,3 +1,4 @@
+const webpack = require('webpack');
 const path = require('path');
 const git = require('git-rev-sync');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -28,6 +29,9 @@ const config = {
         extensions: [".ts", ".js"]
     },
     plugins: [
+        new webpack.DefinePlugin({
+            MODE: JSON.stringify(isProduction ? 'production' : 'development')
+        }),
         new HtmlWebpackPlugin({
             template: path.resolve(__dirname, "app/index.html"),
             chunks: ["app"],

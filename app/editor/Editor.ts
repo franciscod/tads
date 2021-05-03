@@ -5,9 +5,10 @@ monaco.languages.register({ id: "tad" });
 import "./Colorization";
 import "./Suggestions";
 import "./Hover";
+
 import { Tab, ITabOptions, ITextModelData } from "./Tab";
 import { Marker } from "../../parser/Reporting";
-import Worker, { Message, ProgressMessage, StartMessage } from "./Worker";
+import Worker, { LineInfo, Message, ProgressMessage, StartMessage } from "./Worker";
 
 export class Editor {
     public monacoEditor: monaco.editor.IStandaloneCodeEditor;
@@ -17,9 +18,9 @@ export class Editor {
     private anyCommandId: string;
 
     constructor(editorElement: HTMLElement, tabs: ITabOptions[]) {
-        this.worker = new Worker('/worker.js');
-        // this.worker.onerror = (ev) => alert(`No se pudo cargar el WebWorker:\n\n${ev.message}`);
-        this.worker.onmessage = (ev) => this.onMessage(ev.data as Message);
+        this.worker = new Worker();
+        this.worker.onerror = (ev) => alert(`No se pudo cargar el WebWorker:\n\n${ev.message}`);
+        this.worker.onmessage = (ev) => this.onMessages(ev.data as Message[]);
         
         this.monacoEditor = monaco.editor.create(editorElement, {
             theme: "tad-dark",
@@ -63,63 +64,48 @@ export class Editor {
         this.worker.postMessage(startMessage, undefined!);
     }
     
-    onMessage(data: Message) {
-        if(data.type === 'progress') {
-            this.renderProgress(data);
-        } else if(data.type === 'lenses') {
-            for(const i in this.tabs) {
-                const tab = this.tabs[i];
-                tab.lenses = data.lenses.filter(l => l.range.document as unknown as string == i).map(l => ({
-                    range: {
-                        startLineNumber: l.range.startLine,
-                        startColumn: l.range.columnStart,
-                        endLineNumber: l.range.endLine,
-                        endColumn: l.range.columnEnd
-                    },
-                    command: {
-                        id: this.anyCommandId,
-                        title: l.title,
-                        arguments: [l.meta]
-                    }
-                }));
-            }
-            
-            this.monacoEditor.render(true);
-        } else if(data.type === 'markers') {
-            for(const i in this.tabs) {
-                const tab = this.tabs[i];
-                monaco.editor.setModelMarkers(
-                    tab.model,
-                    "tad",
-                    data.markers
-                        .filter(m => (m.range.document as unknown as string) == i)
-                        .map(m => ({
-                        severity: toMonacoSeverity(m),
-                        startLineNumber: m.range.startLine,
-                        startColumn: m.range.columnStart,
-                        endLineNumber: m.range.endLine,
-                        endColumn: m.range.columnEnd,
-                        message: m.message,
-                    }))
-                );
-            }
-        } else if(data.type === 'decorations') {
-            for(const i in this.tabs) {
-                const tab = this.tabs[i];
+    onMessages(messages: Message[]) {
+        let updateInfo: boolean = false;
+        let updateMarkers: boolean = false;
+        let forceRender: boolean = false;
 
-                tab.model.deltaDecorations([], data.decorations.filter(l => l.range.document as unknown as string == i).map(l => ({
-                    range: {
-                        startLineNumber: l.range.startLine,
-                        startColumn: l.range.columnStart,
-                        endLineNumber: l.range.endLine,
-                        endColumn: l.range.columnEnd,
-                    },
-                    options: {
-                        isWholeLine: true,
-                        className: true ? "ok-line" : "error-line",
-                    },
-                })));
+        // actualizamos los datos necesarios
+        for(const msg of messages) {
+            if(msg.type === 'progress') {
+                this.renderProgress(msg);
+            } else if(msg.type === 'clear-lines') {
+                for(const tab of this.tabs) {
+                    tab.linesInfo = { };
+                }
+                updateInfo = true;
+                forceRender = true;
+            } else if(msg.type === 'line') {
+                const tab = this.tabs[msg.document];
+                // forzamos un render si había o hay un lens
+                forceRender ||= ((msg.line in tab.linesInfo) && tab.linesInfo[msg.line].lens.length > 0) || msg.info.lens.length > 0;
+                tab.linesInfo[msg.line] = msg.info;
+                updateInfo = true;
+            } else if(msg.type === 'clear-markers') {
+                for(const tab of this.tabs) {
+                    tab.markers = [];
+                }
+                updateMarkers = true;
+            } else if(msg.type === 'markers') {
+                for(const i in this.tabs) {
+                    const tab = this.tabs[i];
+                    tab.markers = tab.markers.concat(msg.markers.filter(m => m.range.document === +i));
+                }
+                updateMarkers = true;
             }
+        }
+
+        // notificamos a todos (luego de cambiar todos los datos, que es mas eficiente)
+        for(const tab of this.tabs) {
+            if(updateInfo) tab.updateInfo();
+            if(updateMarkers) tab.updateMarkers();
+        }
+        if(forceRender) {
+            this.monacoEditor.render(false);
         }
     }
 
@@ -145,6 +131,9 @@ export class Editor {
     }
 }
 
+
+
+
 // si la fuente se carga después de iniciar el editor, se rompe
 // estamos un poco y le decimos a monaco que la recalcule (y con suerte ya está cargada)
 setTimeout(monaco.editor.remeasureFonts, 1000);
@@ -156,18 +145,4 @@ monaco.languages.registerCodeLensProvider("tad", {
     }),
     resolveCodeLens: (_, codeLens) => codeLens
 });
-
-
-const toMonacoSeverity = (marker: Marker): monaco.MarkerSeverity => {
-    switch (marker.severity) {
-        case "error":
-            return monaco.MarkerSeverity.Error;
-        case "warning":
-            return monaco.MarkerSeverity.Warning;
-        case "hint":
-            return monaco.MarkerSeverity.Hint;
-        case "info":
-            return monaco.MarkerSeverity.Info;
-    }
-};
 
