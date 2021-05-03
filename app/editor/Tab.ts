@@ -102,6 +102,10 @@ export class Tab {
                     className = "glyph-margin-eval-success";
                     hoverMsg = "La expresión evaluó correctamente";
                     break;
+                case "eval-timeout":
+                    className = "glyph-margin-eval-timeout";
+                    hoverMsg = "La expresión necesita más pasos para ser evaluada";
+                    break;
                 case "eval-fail":
                     className = "glyph-margin-eval-fail";
                     hoverMsg = "La expresión no se pudo evaluar";

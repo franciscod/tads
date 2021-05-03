@@ -1,4 +1,4 @@
-import { evalGrammar } from "../../parser/Eval";
+import { evalGrammar, evalStepGrammar } from "../../parser/Eval";
 import { exprToString, parseToExpr } from "../../parser/Expr";
 import { genGrammar, Grammar } from "../../parser/Grammar";
 import { parseTADs } from "../../parser/Parser";
@@ -46,6 +46,7 @@ export type GlyphDecoration =
     | "none"
     | "loading"
     | "parse-fail"
+    | "eval-timeout"
     | "eval-fail"
     | "eval-success"
     | "assert-fail"
@@ -207,7 +208,10 @@ function* fullLoop(start: StartMessage): Generator {
     report.markers = [];
 
     // --------------- EVAL ---------------
-    // TODO: cuota de evals step
+    const MAX_STEPS_PER_EVAL = 500;
+    const MAX_STEPS_PER_CYCLE = 500;
+
+    let totalSteps = 0;
 
     const evalsStart = performance.now();
     for (let i = 0; i < evals.length; i++) {
@@ -223,23 +227,47 @@ function* fullLoop(start: StartMessage): Generator {
         };
 
         if (expr) {
-            const finalExpr = evalGrammar(expr, grammar);
-
-            if (finalExpr) {
-                if (eval_.kind === "assert") {
-                    if (finalExpr.nombre === "true") {
-                        lineInfo.glyphDecoration = "assert-success";
-                        lineInfo.details = `La expresión resuelve a <b>true</b> ✅`;
-                    } else {
-                        lineInfo.glyphDecoration = "assert-fail";
-                        lineInfo.details = "La expresión debería resolver a <b>true</b>, pero resuelve a:<br><code>" + exprToString(finalExpr, grammar) + `</code>`;
+            let shouldContinue = true;
+            let stepExpr = expr;
+            let steps = 0;
+            for (let i = 0; i < MAX_STEPS_PER_EVAL && shouldContinue; i++) {
+                // TODO: evalStepGrammar as generator
+                [shouldContinue, stepExpr] = evalStepGrammar(stepExpr, grammar);
+                if(shouldContinue) {
+                    steps++;
+                    totalSteps++;
+                    if(totalSteps > MAX_STEPS_PER_CYCLE) {
+                        totalSteps = 0;
+                        yield;
                     }
+                }
+            }
+            
+            const pasos = `${steps} paso${steps === 1 ? '' : 's'}`;
+
+            if (stepExpr) {
+                const lastExprAsString = exprToString(stepExpr, grammar);
+
+                if(shouldContinue) {
+                    // no terminó de computar
+                    lineInfo.glyphDecoration = "eval-timeout";
+                    lineInfo.details = `La expresión no llegó a resolverse en menos de ${MAX_STEPS_PER_EVAL} pasos. La última expresión fue:<br> <code>${lastExprAsString}</code>`;
                 } else {
-                    lineInfo.details = `La expresión resuelve a:<br><code>` + exprToString(finalExpr, grammar) + `</code>`;
-                    lineInfo.glyphDecoration = "eval-success";
+                    if (eval_.kind === "assert") {
+                        if (stepExpr.nombre === "true") {
+                            lineInfo.glyphDecoration = "assert-success";
+                            lineInfo.details = `La expresión resuelve a <b>true</b> en ${pasos} ✅`;
+                        } else {
+                            lineInfo.glyphDecoration = "assert-fail";
+                            lineInfo.details = `La expresión debería resolver a <code>true</code>, pero resuelve a (${pasos}):<br><code>${lastExprAsString}</code>`;
+                        }
+                    } else {
+                        lineInfo.details = `La expresión resuelve en ${pasos} a:<br><code>${lastExprAsString}</code>`;
+                        lineInfo.glyphDecoration = "eval-success";
+                    }
                 }
             } else {
-                lineInfo.details = `La expresión resuelve a:<br><code>` + exprToString(finalExpr, grammar) + `</code>`;
+                lineInfo.details = `La expresión no pudo resolverse en ${pasos}`;
                 lineInfo.glyphDecoration = "eval-fail";
             }
         } else {
@@ -267,7 +295,6 @@ function* fullLoop(start: StartMessage): Generator {
             }
         ]);
         report.markers = [];
-        yield;
     }
     // ---------------------------------------
 }

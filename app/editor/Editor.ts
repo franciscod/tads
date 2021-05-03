@@ -54,9 +54,10 @@ export class Editor {
 
         this.tabs = tabs.map(opts => new Tab(this, opts));
 
-        // si ningún tab se abrió
+        // abrimos el último tab si inició sin tabs abiertos
         if (this.monacoEditor.getModel() === null) this.tabs[this.tabs.length - 1].open();
 
+        // forzamos revalidación inicial
         this.revalidate();
     }
 
