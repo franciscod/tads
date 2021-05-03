@@ -132,18 +132,24 @@ function exprToStringRec(expr: Expr, grammar: Grammar): string {
     if (!opExpr) return "<ERROR>";
 
     let buffer = "";
+    let lastIsSlot = false;
     for (let i = 0; i < opExpr.tokens.length; i++) {
         const token = opExpr.tokens[i];
+
         if (token.type === "literal") {
             buffer += token.symbol;
+            lastIsSlot = false;
         } else {
             buffer += ` ${exprToStringRec(expr.operandos[i], grammar)} `;
+            lastIsSlot = true;
         }
     }
 
     // TODO: ver que onda los parentesis que desambiguan
     //       tratar de ponerlos solo cuando son necesarios
-    return `(${buffer})`;
+    //       lo de lastIsSlot es una heurística, no creo que funcione siempre
+    //       (pero por ahora los tests los pasa)
+    return lastIsSlot ? `(${buffer})` :  buffer;
 }
 
 /**
