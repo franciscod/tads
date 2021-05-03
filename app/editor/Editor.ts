@@ -95,10 +95,10 @@ export class Editor {
             } else if (msg.type === "line") {
                 const tab = this.tabs[msg.document];
                 // forzamos un render si había o hay un lens
-                forceRender ||=
+                forceRender = forceRender ||
                     (msg.line in tab.linesInfo && tab.linesInfo[msg.line].lens.length > 0) || msg.info.lens.length > 0;
                 // forzamos que se actualice el detalle
-                updateDetails ||= msg.line === tab.lastPositionLine;
+                updateDetails = updateDetails || msg.line === tab.lastPositionLine;
                 updateInfo = true;
                 tab.linesInfo[msg.line] = msg.info;
             } else if (msg.type === "clear-markers") {
