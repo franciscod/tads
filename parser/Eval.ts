@@ -1,5 +1,5 @@
 import { Expr } from "./Expr";
-import { GeneroParametrizado } from "./Genero";
+import { calzarGeneros, GeneroParametrizado, Parametros } from "./Genero";
 import { Grammar } from "./Grammar";
 
 function log(x: any) {
@@ -134,17 +134,16 @@ function reemplazar(expr: Expr, bindings: Map<string, Expr>): [boolean, Expr] {
     return [hizoAlgo, ret];
 }
 
-function esVariableDeGenero(g: GeneroParametrizado) {
-    // TODO: detectarlas correctamente. esto se va a romper para diccionario(clave, significado)
-    return g.base.startsWith("α");
-}
-
 function tienenLaMismaFormaSalvoVariables(template: Expr, expr: Expr): boolean {
     if (template.type === "variable") {
-        if (esVariableDeGenero(template.genero)) {
-            return true;
-        }
-        return JSON.stringify(template.genero) === JSON.stringify(expr.genero) || template.genero.base === "α";
+        // TODO: detectarlas correctamente. esto se va a romper para diccionario(clave, significado)
+        const variablesDeGenero: Parametros = {
+            α: {base: "α", parametros: {}},
+            α1: {base: "α1", parametros: {}},
+            α2: {base: "α2", parametros: {}},
+        };
+
+        return calzarGeneros(template.genero, expr.genero, variablesDeGenero);
     }
 
     // TODO: ver también el genero
