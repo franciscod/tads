@@ -1,4 +1,4 @@
-import { evalGrammar, evalStepGrammar } from "../../parser/Eval";
+import { evalStepGrammar } from "../../parser/Eval";
 import { exprToString, parseToExpr } from "../../parser/Expr";
 import { genGrammar, Grammar } from "../../parser/Grammar";
 import { parseTADs } from "../../parser/Parser";
@@ -90,15 +90,26 @@ export type MarkersMessage = {
 };
 
 /**
+ * Mensaje emitido para actualizar el conteo de asserts
+ */
+export type AssertsUpdateMessage = {
+    type: "asserts";
+    success: number;
+    fail: number;
+    total: number;
+}
+
+/**
  * Mensaje emitido entre la UI y el WebWorker
  */
 export type Message =
     | StartMessage
     | ProgressMessage
-    | MarkersClearMessage
-    | MarkersMessage
     | LinesClearMessage
     | LineUpdateMessage
+    | MarkersClearMessage
+    | MarkersMessage
+    | AssertsUpdateMessage
     | CommandMessage;
 
 const post = (messages: Message[]) => self.postMessage(messages, undefined!);
@@ -107,7 +118,7 @@ const post = (messages: Message[]) => self.postMessage(messages, undefined!);
  * Esta función se ejecuta cada vez que cambia el contenido en editor
  */
 function* fullLoop(start: StartMessage): Generator {
-    // reiniciamos los progress
+    // reiniciamos
     post([
         { type: "progress", step: "Parse", current: 0, total: 0, elapsed: 0 },
         { type: "progress", step: "Grammar", current: 0, total: 0, elapsed: 0 },
@@ -143,8 +154,12 @@ function* fullLoop(start: StartMessage): Generator {
     // ---------------------------------------
 
     // ya podemos generar algo de información para el editor
+    const totalAsserts = evals.filter(e => e.kind === 'assert').length;
     {
-        const msgs: Message[] = [{ type: "clear-lines" }];
+        const msgs: Message[] = [
+            { type: "clear-lines" },
+            { type: "asserts", success: 0, fail: 0, total: totalAsserts }
+        ];
 
         // mostamos un lens en cada definición de TAD
         for (const tad of tads) {
@@ -212,6 +227,7 @@ function* fullLoop(start: StartMessage): Generator {
     const MAX_STEPS_PER_CYCLE = 500;
 
     let totalSteps = 0;
+    let succeededEvals = 0, failedEvals = 0;
 
     const evalsStart = performance.now();
     for (let i = 0; i < evals.length; i++) {
@@ -257,9 +273,11 @@ function* fullLoop(start: StartMessage): Generator {
                         if (stepExpr.nombre === "true") {
                             lineInfo.glyphDecoration = "assert-success";
                             lineInfo.details = `La expresión resuelve a <b>true</b> en ${pasos} ✅`;
+                            succeededEvals++;
                         } else {
                             lineInfo.glyphDecoration = "assert-fail";
                             lineInfo.details = `La expresión debería resolver a <code>true</code>, pero resuelve a (${pasos}):<br><code>${lastExprAsString}</code>`;
+                            failedEvals++;
                         }
                     } else {
                         lineInfo.details = `La expresión resuelve en ${pasos} a:<br><code>${lastExprAsString}</code>`;
@@ -269,10 +287,14 @@ function* fullLoop(start: StartMessage): Generator {
             } else {
                 lineInfo.details = `La expresión no pudo resolverse en ${pasos}`;
                 lineInfo.glyphDecoration = "eval-fail";
+                if(eval_.kind === "assert")
+                    failedEvals++;
             }
         } else {
             lineInfo.details = `La expresión no parsea.`;
             lineInfo.glyphDecoration = "parse-fail";
+            if(eval_.kind === "assert")
+                failedEvals++;
         }
 
         post([
@@ -292,6 +314,12 @@ function* fullLoop(start: StartMessage): Generator {
             {
                 type: "markers",
                 markers: report.markers
+            },
+            {
+                type: "asserts",
+                success: succeededEvals,
+                fail: failedEvals,
+                total: totalAsserts
             }
         ]);
         report.markers = [];

@@ -93,6 +93,7 @@ body {
     padding: 10px 15px;
     box-shadow: black 0 6px 3px -6px inset;
     box-sizing: border-box;
+    overflow: hidden;
 
     code {
         font-size: 18px;
@@ -110,6 +111,7 @@ body {
     align-items: center;
     padding: 0 15px;
     user-select: none;
+    justify-content: flex-end;
 
     .progress {
         width: 170px;
@@ -117,12 +119,20 @@ body {
         margin-right: 15px;
         color: #f2ff86;
         transition: color 0.2s;
+        white-space: nowrap;
         &.processing {
             color: #72dfff;
         }
         &.success {
             color: #3eff55;
         }
+    }
+
+    .asserts {
+        font-weight: bold;
+        color: #c8ff00;
+        margin-left: auto;
+        white-space: nowrap;
     }
 }
 

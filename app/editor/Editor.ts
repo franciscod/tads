@@ -7,7 +7,7 @@ import "./Suggestions";
 import "./Hover";
 
 import { Tab, ITabOptions, ITextModelData } from "./Tab";
-import Worker, { Message, ProgressMessage, StartMessage } from "./Worker";
+import Worker, { AssertsUpdateMessage, Message, ProgressMessage, StartMessage } from "./Worker";
 
 export class Editor {
     public monacoEditor: monaco.editor.IStandaloneCodeEditor;
@@ -86,6 +86,8 @@ export class Editor {
         for (const msg of messages) {
             if (msg.type === "progress") {
                 this.renderProgress(msg);
+            } else if(msg.type === "asserts") {
+                this.renderAsserts(msg);
             } else if (msg.type === "clear-lines") {
                 for (const tab of this.tabs) {
                     tab.linesInfo = {};
@@ -149,6 +151,10 @@ export class Editor {
         }
     }
     
+    renderAsserts(asserts: AssertsUpdateMessage) {
+        const elem = document.querySelector(".asserts")!;
+        elem.innerHTML = asserts.total === 0 ? `-` : `ASSERTS ✔️${asserts.success}/${asserts.total} ❌${asserts.fail}/${asserts.total}`;
+    }
 }
 
 // si la fuente se carga después de iniciar el editor, se rompe
