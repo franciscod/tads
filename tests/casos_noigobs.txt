@@ -197,8 +197,8 @@
 -- (linea que no es un caso de tipo "noigobs")
 -- (linea que no es un caso de tipo "noigobs")
 -- (linea que no es un caso de tipo "noigobs")
-false = true -> false
-true = false -> false
+false                                              = true -> false
+true                                               = false -> false
 -- (linea que no es un caso de tipo "noigobs")
 -- (linea que no es un caso de tipo "noigobs")
 -- (linea que no es un caso de tipo "noigobs")

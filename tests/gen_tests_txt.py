@@ -4,6 +4,8 @@ import hashlib
 import unicodedata
 import sys
 
+LEFT_JUST_SIZE = 50
+
 filtro_tipo = sys.argv[1]
 del sys.argv[1]
 
@@ -38,8 +40,8 @@ for row in reader:
                 "noigobs": " -> false",
              }
 
-    print("".join([expresion.strip(),
+    print(("".join([expresion.strip().ljust(LEFT_JUST_SIZE),
                    joiner.get(tipoTest, ""),
                    deberiaEvaluarA.strip()]) +
           trailer.get(tipoTest, "") +
-          ((" --" + comentario) if comentario else ""))
+          ((" --" + comentario) if comentario else "")).rstrip())

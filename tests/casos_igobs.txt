@@ -195,8 +195,8 @@
 -- (linea que no es un caso de tipo "igobs")
 -- (linea que no es un caso de tipo "igobs")
 -- (linea que no es un caso de tipo "igobs")
-false = false -> true
-true = true -> true
+false                                              = false -> true
+true                                               = true -> true
 -- (linea que no es un caso de tipo "igobs")
 -- (linea que no es un caso de tipo "igobs")
 -- (linea que no es un caso de tipo "igobs")
