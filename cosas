@@ -1,3 +1,6 @@
+alias:
+    TAD Persona es Nat
+
 al evaluar, si no hay axiomas disponibles tirar un warning y cancelar la evaluacion
 
 snippets
