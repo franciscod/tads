@@ -6,7 +6,7 @@
     "build": "cross-env MODE=production webpack",
     "build:profile": "cross-env MODE=production webpack --profile --json > stats.json",
     "test": "jest --config config/jest.config.js --rootDir .",
-    "test:watch": "jest --config config/jest.config.js --root . --watchAll",
+    "test:watch": "jest --config config/jest.config.js --rootDir . --watchAll",
     "format": "prettier --config config/prettierrc --ignore-path config/prettierignore --write app/ parser/ tests/",
     "lint": "eslint --config config/eslintrc.js --ignore-path config/eslintignore --ext .js,.ts --fix app/ parser/ tests/"
   },
