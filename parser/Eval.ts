@@ -51,7 +51,7 @@ export function evalStepGrammar(expr: Expr, grammar: Grammar): [boolean, Expr] {
 
         // TODO: deberian chequearse los tipos
 
-        if (JSON.stringify(expr) === JSON.stringify(left)) {
+        if (sonExactamenteLoMismo(left, expr)) {
             return [true, right];
         }
 
@@ -180,4 +180,20 @@ function contieneVariables(expr: Expr): boolean {
     }
 
     return false;
+}
+
+
+function sonExactamenteLoMismo(a: Expr, b: Expr): boolean {
+
+    if (a.type != b.type) return false;
+    if (a.nombre != b.nombre) return false;
+    if (a.genero.base != b.genero.base) return false;
+
+    // TODO: genero?
+
+    for (const child in a.operandos) {
+        if (!sonExactamenteLoMismo(a.operandos[child], b.operandos[child])) return false;
+    }
+
+    return true;
 }
