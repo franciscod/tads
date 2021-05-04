@@ -36,7 +36,7 @@ export function evalStepGrammar(expr: Expr, grammar: Grammar): [boolean, Expr] {
             type: "fijo",
             nombre: "" + igobs,
             genero: { base: "bool", parametros: {} },
-            operandos: {}
+            operandos: []
         };
 
         return [true, ret];
@@ -93,15 +93,14 @@ export function evalStepGrammar(expr: Expr, grammar: Grammar): [boolean, Expr] {
         type: expr.type,
         nombre: expr.nombre,
         genero: expr.genero,
-        operandos: Object.assign(expr.operandos, { })
+        operandos: [ ...expr.operandos ]
     };
-
-    const keys = Object.keys(expr.operandos);
-    for(let i = 0; i < keys.length; i++) {
-        const child = keys[i] as unknown as number;
-        const [evaluoAlgo, sub] = evalStepGrammar(expr.operandos[child], grammar);
+ 
+    for(let i = 0; i < expr.operandos.length; i++) {
+        if(expr.operandos[i] === null) continue;
+        const [evaluoAlgo, sub] = evalStepGrammar(expr.operandos[i]!, grammar);
         if (evaluoAlgo) {
-            ret.operandos[child] = sub;
+            ret.operandos[i] = sub;
             return [true, ret];
         }
     }
@@ -119,13 +118,16 @@ function reemplazar(expr: Expr, bindings: Map<string, Expr>): [boolean, Expr] {
         type: expr.type,
         nombre: expr.nombre,
         genero: expr.genero,
-        operandos: {}
+        operandos: []
     };
     let hizoAlgo = false;
 
-    for (const child in expr.operandos) {
-        const [seReemplazo, sub] = reemplazar(expr.operandos[child], bindings);
-        ret.operandos[child] = sub;
+    for(let i = 0; i < expr.operandos.length; i++) {
+        if(expr.operandos[i] === null) continue;
+        const [seReemplazo, sub] = reemplazar(expr.operandos[i]!, bindings);
+        while(ret.operandos.length < +i)
+            ret.operandos.push(null);
+        ret.operandos[i] = sub;
         hizoAlgo = hizoAlgo || seReemplazo;
     }
 
@@ -150,8 +152,9 @@ function tienenLaMismaFormaSalvoVariables(template: Expr, expr: Expr): boolean {
     // son el mismo tipo, tienen la misma forma en la raiz
     // tienen los mismos hijos
 
-    for (const child in template.operandos) {
-        if (!tienenLaMismaFormaSalvoVariables(template.operandos[child], expr.operandos[child])) return false;
+    for(let i = 0; i < template.operandos.length; i++) {
+        if(template.operandos[i] === null) continue;
+        if (!tienenLaMismaFormaSalvoVariables(template.operandos[i]!, expr.operandos[i]!)) return false;
     }
 
     return true;
@@ -163,8 +166,9 @@ function conseguirBindings(template: Expr, expr: Expr, bindings: Map<string, Exp
         return bindings;
     }
 
-    for (const child in expr.operandos) {
-        bindings = conseguirBindings(template.operandos[child], expr.operandos[child], bindings);
+    for(let i = 0; i < expr.operandos.length; i++) {
+        if(expr.operandos[i] === null) continue;
+        bindings = conseguirBindings(template.operandos[i]!, expr.operandos[i]!, bindings);
     }
 
     return bindings;
@@ -173,10 +177,9 @@ function conseguirBindings(template: Expr, expr: Expr, bindings: Map<string, Exp
 function contieneVariables(expr: Expr): boolean {
     if (expr.type === "variable") return true;
 
-    const keys = Object.keys(expr.operandos);
-    for(let i = 0; i < keys.length; i++) {
-        const child = keys[i] as unknown as number;
-        if (contieneVariables(expr.operandos[child])) return true;
+    for(let i = 0; i < expr.operandos.length; i++) {
+        if(expr.operandos[i] === null) continue;
+        if (contieneVariables(expr.operandos[i]!)) return true;
     }
 
     return false;
@@ -191,8 +194,9 @@ function sonExactamenteLoMismo(a: Expr, b: Expr): boolean {
 
     // TODO: genero?
 
-    for (const child in a.operandos) {
-        if (!sonExactamenteLoMismo(a.operandos[child], b.operandos[child])) return false;
+    for(let i = 0; i < a.operandos.length; i++) {
+        if(a.operandos[i] === null) continue;
+        if (!sonExactamenteLoMismo(a.operandos[i]!, b.operandos[i]!)) return false;
     }
 
     return true;

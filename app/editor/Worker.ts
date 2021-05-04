@@ -223,8 +223,8 @@ function* fullLoop(start: StartMessage): Generator {
     report.markers = [];
 
     // --------------- EVAL ---------------
-    const MAX_STEPS_PER_EVAL = 500;
-    const MAX_STEPS_PER_CYCLE = 500;
+    const MAX_STEPS_PER_EVAL = 1000;
+    const MAX_STEPS_PER_CYCLE = 1000;
 
     let totalSteps = 0;
     let succeededEvals = 0, failedEvals = 0;

@@ -8,9 +8,7 @@ import { Grammar } from "./Grammar";
  * Operandos de una expresión
  * `key` coincide con el índice del slot en la operación
  */
-export type Operandos = {
-    [key: number]: Expr;
-};
+export type Operandos = (null | Expr)[];
 
 /**
  * Nodo en un árbol de expresiones tipadas y con sentido
@@ -42,18 +40,20 @@ export function astToExpr(input: AST, vars: VariablesLibres, grammar: Grammar, r
             type: "variable",
             nombre: input.nombre,
             genero,
-            operandos: {}
+            operandos: []
         };
     }
 
     // primero genero todos los Expr
     // de los operandos
-    const operandos: Operandos = {};
+    const operandos: Operandos = [];
     if (input.operandos) {
         for (const idx in input.operandos) {
             const subExpr = astToExpr(input.operandos[idx], vars, grammar, report);
             if (!subExpr) return null;
-            operandos[idx] = subExpr;
+            while(operandos.length < +idx)
+                operandos.push(null);
+            operandos.push(subExpr);
         }
     }
 
@@ -72,7 +72,7 @@ export function astToExpr(input: AST, vars: VariablesLibres, grammar: Grammar, r
                     const token = op.tokens[i];
                     if (token.type === "slot") {
                         const generoSlot = parseGenero(token.genero.base, grammar.tads)!;
-                        const generoOperando = operandos[i].genero;
+                        const generoOperando = operandos[i]!.genero;
 
                         // si no es un parámetro y el género no existe
                         // entonces puede ser un "bindeo local"
@@ -98,7 +98,7 @@ export function astToExpr(input: AST, vars: VariablesLibres, grammar: Grammar, r
                     type: "fijo",
                     nombre: input.nombre,
                     genero: bindearParametros(parseGenero(op.retorno.base, grammar.tads)!, parametros),
-                    operandos: operandos
+                    operandos
                 };
 
                 return expr;
@@ -140,7 +140,7 @@ function exprToStringRec(expr: Expr, grammar: Grammar): string {
             buffer += token.symbol;
             lastIsSlot = false;
         } else {
-            buffer += ` ${exprToStringRec(expr.operandos[i], grammar)} `;
+            buffer += ` ${exprToStringRec(expr.operandos[i]!, grammar)} `;
             lastIsSlot = true;
         }
     }
