@@ -65,3 +65,6 @@ mejorar errores de parsing
     que es "o"? no será 0?
         si le pongo el mouse encima a la o subrayada y me dice "no se reconoce o"
         estaria bueno que eso salga abajo junto a "no parsea"
+
+cuando se llega a una expr con nombre que no es un generador y esta axiomatizado decirlo explicitamente
+
