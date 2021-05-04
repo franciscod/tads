@@ -93,14 +93,12 @@ export function evalStepGrammar(expr: Expr, grammar: Grammar): [boolean, Expr] {
         type: expr.type,
         nombre: expr.nombre,
         genero: expr.genero,
-        operandos: {}
+        operandos: Object.assign(expr.operandos, { })
     };
 
-    for (const child in expr.operandos) {
-        ret.operandos[child] = expr.operandos[child];
-    }
-
-    for (const child in expr.operandos) {
+    const keys = Object.keys(expr.operandos);
+    for(let i = 0; i < keys.length; i++) {
+        const child = keys[i] as unknown as number;
         const [evaluoAlgo, sub] = evalStepGrammar(expr.operandos[child], grammar);
         if (evaluoAlgo) {
             ret.operandos[child] = sub;
@@ -175,7 +173,9 @@ function conseguirBindings(template: Expr, expr: Expr, bindings: Map<string, Exp
 function contieneVariables(expr: Expr): boolean {
     if (expr.type === "variable") return true;
 
-    for (const child in expr.operandos) {
+    const keys = Object.keys(expr.operandos);
+    for(let i = 0; i < keys.length; i++) {
+        const child = keys[i] as unknown as number;
         if (contieneVariables(expr.operandos[child])) return true;
     }
 
