@@ -12,6 +12,7 @@ export type Grammar = {
     operaciones: Operacion[];
     generosValidos: Genero[];
     axiomas: Axioma[];
+    axiomasPorNombre: Map<string, Axioma[]>;
 };
 
 /**
@@ -25,6 +26,7 @@ export function genGrammar(tads: TAD[], report?: Report): Grammar {
     const grammar: Grammar = {
         tads: [...tads],
         axiomas: [],
+        axiomasPorNombre: new Map(),
         operaciones,
         tokens,
         generosValidos
@@ -44,7 +46,13 @@ export function genGrammar(tads: TAD[], report?: Report): Grammar {
             const exprR = parseToExpr(rawAxioma.right.source, tad.variablesLibres, grammar, report);
             report?.pop();
 
-            if (exprL && exprR) grammar.axiomas.push([exprL, exprR]);
+            if (exprL && exprR) {
+                grammar.axiomas.push([exprL, exprR]);
+                const key = exprL.nombre;
+                let axs = grammar.axiomasPorNombre.get(key) || [];
+                axs.push([exprL, exprR]);
+                grammar.axiomasPorNombre.set(key, axs);
+            }
         }
     }
 

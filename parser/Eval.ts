@@ -42,7 +42,7 @@ export function evalStepGrammar(expr: Expr, grammar: Grammar): [boolean, Expr] {
         return [true, ret];
     }
 
-    const axiomasEnRaiz = grammar.axiomas.filter(a => a[0].nombre === expr.nombre);
+    const axiomasEnRaiz = grammar.axiomasPorNombre.get(expr.nombre) || [];
 
     forAxiomaEnRaiz: for (const [left, right] of axiomasEnRaiz) {
         // console.log("expr", expr)
