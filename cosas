@@ -7,13 +7,6 @@ snippets
 go to definition con ctrl+click
     (ctags para vim? no se en monaco como se implementa esto)
 
-generos mas complejos
-    una referencia a un tad no es suficiente, deberiamos poder representar:
-        secu<alpha>
-        secu<nat>
-        secu<secu<bool>>
-        dicc<nat,nat>
-
 parsear una expresion usando las secuencias de tokens conocidas
     hintear si te olvidaste del fi o del else
 
@@ -44,17 +37,16 @@ hacer que el evals.txt se genere con padding (como estaba al principio)
 
 quizas hacer un flamegraph para visualizar mejor el arbol de la expresion
 
-
 vs-services stuff:
     mensajes basicos:
         Se esperaba la definición de un TAD
         Nombre de TAD incompleto
         Se esperaba un FIN TAD
-    
+
     autocomplete: tokens (facil)
-    
+
     hover: te da info de lo que esté hovereado
-        - 
+        -
 
     definitions: control + click para navegar
 
@@ -64,9 +56,11 @@ mostar en algún lugar las cosas que asumimos:
     - los géneros de TADs con parámetros formales tienen que tener
       los parámetros entre paréntesis si o si
 
-hacer loader para la página
-
-assert keyword (eval pero que sea como un recuento de tests)
-
 grammar sanity checks
     - que no haya dos tads con el mismo nombre
+
+
+mejorar errores de parsing
+    que es "o"? no será 0?
+        si le pongo el mouse encima a la o subrayada y me dice "no se reconoce o"
+        estaria bueno que eso salga abajo junto a "no parsea"
