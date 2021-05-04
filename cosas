@@ -68,3 +68,4 @@ mejorar errores de parsing
 
 cuando se llega a una expr con nombre que no es un generador y esta axiomatizado decirlo explicitamente
 
+hacer tests de secu :P

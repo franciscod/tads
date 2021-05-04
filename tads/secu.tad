@@ -1,0 +1,44 @@
+TAD Secuencia(α)
+
+géneros secu(α)
+
+parámetros formales
+    géneros α
+
+exporta secu(α), generadores, observadores, &, ◦, ult, com, long, está?
+
+usa     Bool, Nat
+
+igualdad observacional
+    jaja saludos
+
+observadores básicos
+    vacía? : secu(α)   → bool
+    prim   : secu(α) s → α       {¬vacía?(s)}
+    fin    : secu(α) s → secu(α) {¬vacía?(s)}
+
+generadores
+    <>         :             → secu(α)
+    • • •      : α × secu(α) → secu(α)
+
+otras operaciones
+    • ◦ •      : secu(α) × α       → secu(α)
+    • & •      : secu(α) × secu(α) → secu(α)
+    ult        : secu(α) s         → α        {¬vacía?(s)}
+    com        : secu(α) s         → secu(α)  {¬vacía?(s)}
+    long       : secu(α)           → nat
+    está?      : α × secu(α)       → bool
+
+axiomas ∀ s, t: secu(α), ∀ e: α
+    vacía?(<>)        ≡ true
+    vacía?(e • s)     ≡ false
+    prim(e • s)       ≡ e
+    fin(e • s)        ≡ s
+    s ◦ e             ≡ if vacía?(s) then e • <> else prim(s) • (fin(s) ◦ e) fi
+    s & t             ≡ if vacía?(s) then t else prim(s) • (fin(s) & t) fi
+    ult(s)            ≡ if vacía?(fin(s)) then prim(s) else ult(fin(s)) fi
+    com(s)            ≡ if vacía?(fin(s)) then <> else prim(s) • com(fin(s)) fi
+    long(s)           ≡ if vacía?(s) then 0 else suc(0) + long(fin(s)) fi
+    está?(e, s)       ≡ (¬vacía?(s)) ∧L (e = prim(s) ∨ está?(e, fin(s)))
+
+Fin TAD

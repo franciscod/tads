@@ -70,28 +70,44 @@ export function parseOperacion(input: string, section: Section, report?: Report)
             .map(arg => arg.split(" ")[0]) // TODO: esto saca los nombres de las variables! ej: "nat n"
             .filter(arg => arg !== "");
         let ithSlot = 0;
-
         let hasSlots = false;
-        while (left !== "") {
-            const i = left.indexOf("•");
-            if (i == 0) {
-                const genName: string = args[ithSlot++];
-                const slot: Slot = { type: "slot", genero: { base: genName, parametros: {} } }; // TODO: PARAMETROS
-                op.tokens.push(slot);
-                hasSlots = true;
 
-                left = left.substr(1);
-            } else if (i == -1) {
-                op.tokens.push({ type: "literal", symbol: left.trim() });
-                left = "";
-            } else {
-                op.tokens.push({
-                    type: "literal",
-                    symbol: left.substr(0, i).trim()
-                });
-                left = left.substr(i);
+        if(op.nombre === "•••") {
+            // HACK: caso secu
+            hasSlots = true;
+            op.tokens = [
+                { type: 'slot', genero: { base: args[ithSlot++], parametros: {} } },
+                { type: 'literal', symbol: '•' },
+                { type: 'slot', genero: { base: args[ithSlot++], parametros: {} } }
+            ];
+        } else {
+            while (left !== "") {
+                const i = left.indexOf("•");
+                if (i == 0) {
+                    const genName: string = args[ithSlot++];
+                    const slot: Slot = { type: "slot", genero: { base: genName, parametros: {} } }; // TODO: PARAMETROS
+                    op.tokens.push(slot);
+                    hasSlots = true;
+    
+                    left = left.substr(1);
+                } else if (i == -1) {
+                    op.tokens.push({ type: "literal", symbol: left.trim() });
+                    left = "";
+                } else {
+                    // caso de • • •
+                    let symbol = left.substr(0, i).trim();
+                    if(symbol.length === 0)
+                        symbol = "•";
+    
+                    op.tokens.push({
+                        type: "literal",
+                        symbol
+                    });
+                    left = left.substr(i);
+                }
             }
         }
+
 
         if (!hasSlots && args.length > 0) {
             const functionStyleArgs: Token[] = args.map(gen => ({

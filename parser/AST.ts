@@ -24,7 +24,7 @@ export function extractTokens(tads: TAD[]): string[] {
     for (const tad of tads) {
         for (const op of tad.operaciones) {
             for (const token of op.tokens) {
-                if (token.type === "literal") {
+                if (token.type === "literal" && token.symbol.length > 0) {
                     tokensSet.add(token.symbol);
                 }
             }
