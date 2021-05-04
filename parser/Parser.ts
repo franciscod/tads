@@ -43,76 +43,83 @@ export function parseOperacion(input: string, section: Section, report?: Report)
 
     let [left, right] = input.split(":");
 
-    left = left.trim();
-    right = right.split("{")[0];
+    // TODO: FIXME
+    // hack horrible para evitar que crashee mientras se escribe (por ahora)
+    try {
+        left = left.trim();
+        right = right.split("{")[0];
 
-    const sectionToOpType = (section: Section) => {
-        if (section === "observadores") return "observador";
-        if (section === "generadores") return "generador";
-        return "otra";
-    };
+        const sectionToOpType = (section: Section) => {
+            if (section === "observadores") return "observador";
+            if (section === "generadores") return "generador";
+            return "otra";
+        };
 
-    const op: Operacion = {
-        nombre: left.replace(/ /g, "").trim(),
-        type: sectionToOpType(section),
-        tokens: [],
-        retorno: { base: "<bad>", parametros: {} }
-        // restriccion: []
-    };
+        const op: Operacion = {
+            nombre: left.replace(/ /g, "").trim(),
+            type: sectionToOpType(section),
+            tokens: [],
+            retorno: { base: "<bad>", parametros: {} }
+            // restriccion: []
+        };
 
-    const [_args, retorno] = right.split(/->|→/);
-    const args = _args
-        .split(/×|✕/)
-        .map(arg => arg.trim())
-        .map(arg => arg.split(" ")[0]) // TODO: esto saca los nombres de las variables! ej: "nat n"
-        .filter(arg => arg !== "");
-    let ithSlot = 0;
+        const [_args, retorno] = right.split(/->|→/);
+        const args = _args
+            .split(/×|✕/)
+            .map(arg => arg.trim())
+            .map(arg => arg.split(" ")[0]) // TODO: esto saca los nombres de las variables! ej: "nat n"
+            .filter(arg => arg !== "");
+        let ithSlot = 0;
 
-    let hasSlots = false;
-    while (left !== "") {
-        const i = left.indexOf("•");
-        if (i == 0) {
-            const genName: string = args[ithSlot++];
-            const slot: Slot = { type: "slot", genero: { base: genName, parametros: {} } }; // TODO: PARAMETROS
-            op.tokens.push(slot);
-            hasSlots = true;
+        let hasSlots = false;
+        while (left !== "") {
+            const i = left.indexOf("•");
+            if (i == 0) {
+                const genName: string = args[ithSlot++];
+                const slot: Slot = { type: "slot", genero: { base: genName, parametros: {} } }; // TODO: PARAMETROS
+                op.tokens.push(slot);
+                hasSlots = true;
 
-            left = left.substr(1);
-        } else if (i == -1) {
-            op.tokens.push({ type: "literal", symbol: left.trim() });
-            left = "";
-        } else {
-            op.tokens.push({
-                type: "literal",
-                symbol: left.substr(0, i).trim()
-            });
-            left = left.substr(i);
+                left = left.substr(1);
+            } else if (i == -1) {
+                op.tokens.push({ type: "literal", symbol: left.trim() });
+                left = "";
+            } else {
+                op.tokens.push({
+                    type: "literal",
+                    symbol: left.substr(0, i).trim()
+                });
+                left = left.substr(i);
+            }
         }
+
+        if (!hasSlots && args.length > 0) {
+            const functionStyleArgs: Token[] = args.map(gen => ({
+                type: "slot",
+                genero: { base: gen, parametros: {} } // TODO: PARAMETROS
+            }));
+
+            const parenLeft: Token = { type: "literal", symbol: "(" };
+            const comma: Token = { type: "literal", symbol: "," };
+            const parenRight: Token = { type: "literal", symbol: ")" };
+
+            op.tokens.push(parenLeft);
+
+            functionStyleArgs.forEach((t, i) => {
+                if (i > 0) op.tokens.push(comma);
+                op.tokens.push(t);
+            });
+
+            op.tokens.push(parenRight);
+        }
+
+        op.retorno = { base: retorno.trim(), parametros: {} }; // TODO: parametros
+
+        return op;
+    } catch(ex) {
+        console.log("FALLA PARSE OP", ex);
+        return null;
     }
-
-    if (!hasSlots && args.length > 0) {
-        const functionStyleArgs: Token[] = args.map(gen => ({
-            type: "slot",
-            genero: { base: gen, parametros: {} } // TODO: PARAMETROS
-        }));
-
-        const parenLeft: Token = { type: "literal", symbol: "(" };
-        const comma: Token = { type: "literal", symbol: "," };
-        const parenRight: Token = { type: "literal", symbol: ")" };
-
-        op.tokens.push(parenLeft);
-
-        functionStyleArgs.forEach((t, i) => {
-            if (i > 0) op.tokens.push(comma);
-            op.tokens.push(t);
-        });
-
-        op.tokens.push(parenRight);
-    }
-
-    op.retorno = { base: retorno.trim(), parametros: {} }; // TODO: parametros
-
-    return op;
 }
 
 type Section =
