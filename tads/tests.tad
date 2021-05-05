@@ -1,0 +1,27 @@
+-- Este tad no está incluído en la página, solo se usa para testing
+
+TAD Tests
+generos test
+
+otras operaciones
+duplicar      : secu(α) → secu(α)
+reverso       : secu(α) → secu(α)
+capicúa       : secu(α) → bool
+esPrefijo?    : secu(α) ✕ secu(α) → bool
+
+axiomas ∀ e, f: α, ∀ s, t: secu(α)
+duplicar(<>)         ≡ <>
+duplicar(e • s)      ≡ e • (e • duplicar(s))
+reverso(<>)          ≡ <>
+reverso(e • s)       ≡ reverso(s) ◦ e
+capicúa(s)           ≡ s = reverso(s)
+esPrefijo?(<>, t)    ≡ true
+esPrefijo?(e • s, t) ≡ if vacía?(t) then false else
+                            if e = prim(t) then
+                                esPrefijo?(s, fin(t))
+                            else
+                                false
+                            fi
+                        fi
+
+FIN TAD

@@ -204,3 +204,32 @@ suc(suc(suc(suc(suc(0))))) + suc(suc(suc(0))) × suc(suc(0)) -> suc(suc(suc(suc(
 -- (linea que no es un caso de tipo "eval")
 -- (linea que no es un caso de tipo "eval")
 -- (linea que no es un caso de tipo "eval")
+
+
+
+
+-- ∅ ∪ Ag(0, ∅) ∪ ∅ ∪ ∅ ∪ Ag(suc(0), Ag(0, ∅)) -> Ag(0, Ag(suc(0), Ag(0, ∅)))
+
+
+<>                                  -> <>
+0 • <>                              -> 0 • <>
+vacía?(<>)                          -> true
+vacía?(0 • <>)                      -> false
+está?(0, <>)                        -> false
+-- está?(0, 0 • <>)                    -> true
+0 • (suc(0) • <>)                   -> 0 • (suc(0) • <>)
+0 • (0 • (suc(0) • <>))             -> 0 • (0 • (suc(0) • <>))
+long(0 • (0 • (suc(0) • <>)))       -> suc(suc(suc(0)))
+-- (0 • (0 • (suc(0) • <>))) & (suc(0) • <>) & (0 • <>) -> 0 • (0 • (suc(0) • (suc(0) • (0 • <>))))
+-- long((0 • (0 • (suc(0) • <>))) & (suc(0) • <>) & (0 • <>)) -> suc(suc(suc(suc(suc(0)))))
+
+
+duplicar(<>)                        -> <>
+-- duplicar(0 • (0 • <>))             -> 0 • (0 • (0 • (0 • <>)))
+reverso(<>)                         -> <>
+-- reverso(0 • <>)                     -> 0 • <>
+-- reverso(0 • (0 • <>))               -> 0 • (0 • <>)
+-- reverso(suc(0) • (0 • <>))          -> 0 • (suc(0) • <>)
+-- capicúa(<>)                            -> true
+-- capicúa(0 • <>)                        -> true
+-- capicúa(0 • (0 • <>))                  -> true
