@@ -148,5 +148,6 @@ export function exprToString(expr: Expr, grammar: Grammar): string {
             .replace(/\s+/g, " ")
             .replace(/\( /g, "(")
             .replace(/ \)/g, ")")
+            .replace(/ ,/g, ",")
     );
 }
