@@ -153,7 +153,7 @@ export class Editor {
     
     renderAsserts(asserts: AssertsUpdateMessage) {
         const elem = document.querySelector(".asserts")!;
-        elem.innerHTML = asserts.total === 0 ? `-` : `ASSERTS ✔️${asserts.success}/${asserts.total} ❌${asserts.fail}/${asserts.total}`;
+        elem.innerHTML = asserts.total === 0 ? `-` : `ASSERTS ✅${asserts.success}/${asserts.total} ❌${asserts.fail}/${asserts.total}`;
     }
 }
 

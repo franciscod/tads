@@ -4,6 +4,7 @@ import { genGrammar, Grammar } from "../../parser/Grammar";
 import { parseTADs } from "../../parser/Parser";
 import { Marker, Report, ReportDoc } from "../../parser/Reporting";
 import { RawEval, TAD } from "../../parser/Types";
+import { renderGeneroTag } from "../views/RenderHelpers";
 
 export default null as any;
 
@@ -223,8 +224,8 @@ function* fullLoop(start: StartMessage): Generator {
     report.markers = [];
 
     // --------------- EVAL ---------------
-    const MAX_STEPS_PER_EVAL = 1000;
-    const MAX_STEPS_PER_CYCLE = 1000;
+    const MAX_STEPS_PER_EVAL = 50000;
+    const MAX_STEPS_PER_CYCLE = 100;
 
     let totalSteps = 0;
     let succeededEvals = 0, failedEvals = 0;
@@ -263,11 +264,15 @@ function* fullLoop(start: StartMessage): Generator {
 
             if (stepExpr) {
                 const lastExprAsString = exprToString(stepExpr, grammar);
+                const exprRender = `
+                ${renderGeneroTag(stepExpr.genero, grammar)}
+                <code>${lastExprAsString}</code>
+                `;
 
                 if(shouldContinue) {
                     // no terminó de computar
                     lineInfo.glyphDecoration = "eval-timeout";
-                    lineInfo.details = `La expresión no llegó a resolverse en menos de ${MAX_STEPS_PER_EVAL} pasos. La última expresión fue:<br> <code>${lastExprAsString}</code>`;
+                    lineInfo.details = `La expresión no llegó a resolverse en menos de ${MAX_STEPS_PER_EVAL} pasos. La última expresión fue:<br>${exprRender}`;
                 } else {
                     if (eval_.kind === "assert") {
                         if (stepExpr.nombre === "true") {
@@ -276,11 +281,11 @@ function* fullLoop(start: StartMessage): Generator {
                             succeededEvals++;
                         } else {
                             lineInfo.glyphDecoration = "assert-fail";
-                            lineInfo.details = `La expresión debería resolver a <code>true</code>, pero resuelve a (${pasos}):<br><code>${lastExprAsString}</code>`;
+                            lineInfo.details = `La expresión debería resolver a <code>true</code>, pero resuelve a (${pasos}):<br>${exprRender}`;
                             failedEvals++;
                         }
                     } else {
-                        lineInfo.details = `La expresión resuelve en ${pasos} a:<br><code>${lastExprAsString}</code>`;
+                        lineInfo.details = `La expresión resuelve en ${pasos} a:<br>${exprRender}`;
                         lineInfo.glyphDecoration = "eval-success";
                     }
                 }
