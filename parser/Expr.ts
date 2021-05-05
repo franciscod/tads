@@ -34,12 +34,12 @@ export type Expr = {
 export function astToExpr(input: AST, vars: VariablesLibres, grammar: Grammar, report?: Report): Expr | null {
     if (input.type === "variable") {
         // no se necesita hacer nada más
-        const genero = parseGenero(vars[input.nombre].base, grammar.tads, report);
-        if (genero === null) return null;
+        if(!(input.nombre in vars))
+            return null;
         return {
             type: "variable",
             nombre: input.nombre,
-            genero,
+            genero: vars[input.nombre],
             operandos: []
         };
     }

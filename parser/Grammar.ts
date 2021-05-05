@@ -1,8 +1,8 @@
 import { Report } from "./Reporting";
-import { Operacion, TAD } from "./Types";
+import { Operacion, TAD, VariablesLibres } from "./Types";
 import { extractTokens } from "./AST";
 import { Expr, parseToExpr } from "./Expr";
-import { Genero } from "./Genero";
+import { Genero, parseGenero } from "./Genero";
 
 export type Axioma = [Expr, Expr];
 
@@ -33,17 +33,22 @@ export function genGrammar(tads: TAD[], report?: Report): Grammar {
     };
 
     for (const tad of tads) {
+        let vars: VariablesLibres = { };
+        for(const varName in tad.variablesLibres) {
+            vars[varName] = parseGenero(tad.variablesLibres[varName].base, tads)!;
+        }
+
         for (const rawAxioma of tad.rawAxiomas) {
             if (report && rawAxioma.left.range) {
                 report.activeDocument = rawAxioma.left.location.document;
             }
 
             report?.push(rawAxioma.left.location.offset);
-            const exprL = parseToExpr(rawAxioma.left.source, tad.variablesLibres, grammar, report);
+            const exprL = parseToExpr(rawAxioma.left.source, vars, grammar, report);
             report?.pop();
 
             report?.push(rawAxioma.right.location.offset);
-            const exprR = parseToExpr(rawAxioma.right.source, tad.variablesLibres, grammar, report);
+            const exprR = parseToExpr(rawAxioma.right.source, vars, grammar, report);
             report?.pop();
 
             if (exprL && exprR) {
