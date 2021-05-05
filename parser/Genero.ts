@@ -154,53 +154,96 @@ export function parseGenero(rawGenero: string, tads: TAD[], report?: Report): Ge
 }
 
 /**
- * Devuelve true si se puede calzar el target en el template.
- * `parametros` se va modificando para reflejar los bindings
+ * Devuelve true si se puede calzar el target en el template
+ * `parametros` se va modificando para reflejar los bindings de los parámetros en template
  */
 export function calzarGeneros(
     template: GeneroParametrizado,
     target: GeneroParametrizado,
-    parametros: Parametros
+    parametros: Parametros,
+    tads: TAD[]
 ): boolean {
     // DEF: que un genero sea concreto significa que el genero base NO es un parámetro,
     //      por ej. es nat, conj(α), par(α1, α2) y NO α, α1, clave
 
-    // caso especial: esto ocurre cuando al genero no le importa el tipo yet
-    //                por ejemplo, a ∅ no le importa el alpha
-    if (target.base in parametros) {
-        // TODO: ver si nos estamos comiendo algo acá que no vi?
+    // NOTA: los parámetros en `parametros` hacen referencia a los del TEMPLATE
+    //       los del target no afectan a `parametros` !!!!
+
+    if(template.base === target.base) {
+        // los géneros base coinciden
+        // nat === nat
+        // α === α
+        // conj(α) === conj(α)
+
+        // como el género base coincide, lo único que puede hacer que el género no calce es
+        // que alguno de los parámetros de del template no sea compatible
+        // lo hacemos recursivamente
+
+        // sabemos que template y target tienen los mismos parámetros, podemos iterar uno solo
+        for(const paramName in template.parametros) {
+            const genA = template.parametros[paramName];
+            const genB = target.parametros[paramName];
+
+            if(!calzarGeneros(genA, genB, parametros, tads)) {
+                return false;
+            }
+        }
+
+        // todos los parámetros son compatibles, los géneros son compatibles
+        return true;
+    } else {
+        // los géneros base no coinciden
+        // nat !== int
+        // bool !== α
+
+        const tadA = tads.find(t => t.genero === template.base);
+        const tadB = tads.find(t => t.genero === target.base);
+    
+        if(tadA && tadB) {
+            // ambos son géneros concretos y su base no coincidía
+            // nat !== int
+            // bool !== conj(α)
+            // no calzan
+            return false;
+        }
+
+        if(!tadA && !tadB) {
+            // ninguno es concreto
+            // α === α
+            // NO SE
+            console.log("idk");
+            return false;
+        }
+
+        // uno es concreto y el otro no
+
+        if(tadA && !tadB) {
+            // el target es menos explicito que el template, calza
+            // nat === α
+            // conj(α) === α
+            return true;
+        }
+
+        // !tadA && tadB
+        // el target está pidiendo que un parámetro del template tenga un tipo,
+        // hay que ver que sea compatible con el anterior o agregarlo si es nuevo
+
+        if(template.base in parametros) {
+            // estaba, hay que ver que calce con el parámetro que ya estaba
+            if(calzarGeneros(target, parametros[template.base], parametros, tads)) {
+                // TODO: quizás hay que elegir dejar el que está o poner el target
+                //       "combinarlos" para tener el más genérico posible?
+                parametros[template.base] = target;
+            } else {
+                return false;
+            }
+        } else {
+            // no estaba, lo puedo agregar directamente
+            parametros[template.base] = target;
+        }
+
         return true;
     }
-
-    // vemos si el genero no es concreto
-    if (template.base in parametros) {
-        // vemos si el slot está libre
-        // (es decir, el parametro del template tiene de género a sí mismo)
-        // ej: template = { base: 'conj(α)', parametros: { 'α': { base: 'α' } } }
-        //                                                  ↑            ↑
-        if (parametros[template.base].base === template.base) {
-            // este parámetro pasa a tener un tipo concreto
-            parametros[template.base] = target;
-            return true;
-        } else {
-            // ya estaba, así que tiene que calzar con el anterior
-            return calzarGeneros(parametros[template.base], target, parametros);
-        }
-    }
-
-    // sabemos que es un tipo concreto
-    // vemos si coincide en ambos lados
-    if (template.base !== target.base) return false;
-
-    // como son el mismo tipo concreto
-    // sabemos que tienen los mismos parámetros
-    // recursivamente calzamos los géneros
-    for (const paramName in template.parametros) {
-        if (!calzarGeneros(template.parametros[paramName], target.parametros[paramName], parametros)) return false;
-    }
-
-    // calzó todo
-    return true;
 }
 
 /**

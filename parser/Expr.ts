@@ -64,9 +64,6 @@ export function astToExpr(input: AST, vars: VariablesLibres, grammar: Grammar, r
         forOp: for (const op of tad.operaciones) {
             if (op.nombre === input.nombre) {
                 const parametros: Parametros = {};
-                for (const paramName of tad.parametros) {
-                    parametros[paramName] = parseGenero(paramName, grammar.tads)!;
-                }
 
                 for (let i = 0; i < op.tokens.length; i++) {
                     const token = op.tokens[i];
@@ -74,21 +71,7 @@ export function astToExpr(input: AST, vars: VariablesLibres, grammar: Grammar, r
                         const generoSlot = parseGenero(token.genero.base, grammar.tads)!;
                         const generoOperando = operandos[i]!.genero;
 
-                        // si no es un parámetro y el género no existe
-                        // entonces puede ser un "bindeo local"
-                        // ejemplos:
-                        // if • then • else • fi : bool × α × α → α
-                        //                                ↑   ↑
-                        // • = •                : α × α → bool
-                        //                        ↑   ↑
-                        if (!(generoSlot.base in parametros) && !grammar.generosValidos.includes(generoSlot.base)) {
-                            // ok, no es un género válido, asumimos que es un "bindeo local"
-                            // agregamos a parámetros este param fantasma
-                            parametros[generoSlot.base] = parseGenero(generoSlot.base, grammar.tads)!;
-                            // seguimos como si nada
-                        }
-
-                        if (!calzarGeneros(generoSlot, generoOperando, parametros)) {
+                        if (!calzarGeneros(generoSlot, generoOperando, parametros, grammar.tads)) {
                             continue forOp;
                         }
                     }

@@ -79,9 +79,7 @@ test.each(GENEROS_VALIDOS)("valido %s", input => expect(parseGenero(input, tads)
 test.each(GENEROS_INVALIDOS)("invalido %s", input => expect(parseGenero(input, tads)).toBeNull());
 test.each(GENEROS_COMPARAR)("arbol %s", (input, expected) => expect(parseGenero(input, tads)).toStrictEqual(expected));
 
-const GENEROS_CALZAR: [Genero, Genero, { [key: string]: Genero }, boolean][] = [
-    ["bool", "bool", {}, true],
-    ["bool", "nat", {}, false],
+const GENEROS_COMPATIBLES: [Genero, Genero, { [key: string]: Genero }, boolean][] = [
     ["α", "α", {}, true],
     ["α", "α", { α: "α" }, true],
     ["α", "α", { α: "nat" }, true],
@@ -93,10 +91,11 @@ const GENEROS_CALZAR: [Genero, Genero, { [key: string]: Genero }, boolean][] = [
     ["conj(α)", "conj(α)", { α: "α" }, true],
     ["conj(α)", "conj(nat)", { α: "α" }, true],
     ["conj(α)", "conj(nat)", { α: "nat" }, true],
-    ["conj(α)", "conj(nat)", { α: "bool" }, false]
+    ["conj(α)", "conj(nat)", { α: "bool" }, false],
+    ["conj(α)", "conj(nat)", { }, true]
 ];
 
-test.each(GENEROS_CALZAR)("calzar %s con %s %s -> %b", (template, target, parametros, expected) => {
+test.each(GENEROS_COMPATIBLES)("compatibles %s con %s %s -> %s", (template, target, parametros, expected) => {
     const generoTemplate = parseGenero(template, tads);
     const generoTarget = parseGenero(target, tads);
     const generoParams: Parametros = {};
@@ -108,7 +107,7 @@ test.each(GENEROS_CALZAR)("calzar %s con %s %s -> %b", (template, target, parame
 
     expect(generoTemplate).not.toBeNull();
     expect(generoTarget).not.toBeNull();
-    expect(calzarGeneros(generoTemplate!, generoTarget!, generoParams)).toStrictEqual(expected);
+    expect(calzarGeneros(generoTemplate!, generoTarget!, generoParams, tads)).toStrictEqual(expected);
 });
 
 const BINDEAR_PARAMETROS: [Genero, { [key: string]: Genero }, Genero][] = [

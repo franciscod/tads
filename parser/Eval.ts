@@ -56,7 +56,7 @@ export function evalStepGrammar(expr: Expr, grammar: Grammar): [boolean, Expr] {
         }
 
         // si expr no entra en la izq del axioma, skip
-        if (!tienenLaMismaFormaSalvoVariables(left, expr)) {
+        if (!tienenLaMismaFormaSalvoVariables(left, expr, grammar)) {
             debuglog("tienen otra forma");
             debuglog(left);
             debuglog(expr);
@@ -134,16 +134,9 @@ function reemplazar(expr: Expr, bindings: Map<string, Expr>): [boolean, Expr] {
     return [hizoAlgo, ret];
 }
 
-function tienenLaMismaFormaSalvoVariables(template: Expr, expr: Expr): boolean {
+function tienenLaMismaFormaSalvoVariables(template: Expr, expr: Expr, grammar: Grammar): boolean {
     if (template.type === "variable") {
-        // TODO: detectarlas correctamente. esto se va a romper para diccionario(clave, significado)
-        const variablesDeGenero: Parametros = {
-            α: {base: "α", parametros: {}},
-            α1: {base: "α1", parametros: {}},
-            α2: {base: "α2", parametros: {}},
-        };
-
-        return calzarGeneros(template.genero, expr.genero, variablesDeGenero);
+        return calzarGeneros(template.genero, expr.genero, { }, grammar.tads);
     }
 
     // TODO: ver también el genero
@@ -154,7 +147,7 @@ function tienenLaMismaFormaSalvoVariables(template: Expr, expr: Expr): boolean {
 
     for(let i = 0; i < template.operandos.length; i++) {
         if(template.operandos[i] === null) continue;
-        if (!tienenLaMismaFormaSalvoVariables(template.operandos[i]!, expr.operandos[i]!)) return false;
+        if (!tienenLaMismaFormaSalvoVariables(template.operandos[i]!, expr.operandos[i]!, grammar)) return false;
     }
 
     return true;
