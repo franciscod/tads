@@ -1,0 +1,30 @@
+TAD Arreglo dimensionable(α)
+
+igualdad observacional
+    jaja saludos
+
+parámetros formales
+    géneros α
+
+géneros ad(α)
+
+exporta ad(α), generadores, observadores
+usa bool, nat
+
+observadores básicos
+tam       : ad(α)           → nat
+definido? : ad(α) × nat     → bool
+• [ • ]   : ad(α) a × nat n → α {definido?(a, n)}
+
+generadores
+crearArreglo : nat                 → ad(α)
+• [ • ] ← •  : ad(α) a × nat n × α → ad(α) {n < tam(a)}
+
+axiomas ∀ a: ad(α), ∀ e: α, ∀ n, m: nat
+    tam(crearArreglo(n))          ≡ n
+    tam(a [ n ] ← e)              ≡ tam(a)
+    definido(crearArreglo(n), m)) ≡ false
+    definido(a [ n ] ← e, m)      ≡ n = m ∨ definido?(a, m)
+    (a [ n ] ← e) [ m ]           ≡ if n = m then e else a [ m ] f
+
+FIN TAD

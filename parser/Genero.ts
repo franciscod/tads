@@ -166,6 +166,10 @@ export function calzarGeneros(
     // DEF: que un genero sea concreto significa que el genero base NO es un parámetro,
     //      por ej. es nat, conj(α), par(α1, α2) y NO α, α1, clave
 
+    if(!template || !target) {
+        return false;
+    }
+
     // NOTA: los parámetros en `parametros` hacen referencia a los del TEMPLATE
     //       los del target no afectan a `parametros` !!!!
 

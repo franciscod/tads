@@ -1,0 +1,45 @@
+TAD Árbol Binario(α)
+
+igualdad observacional
+    jaja saludos
+
+parámetros formales
+    géneros α
+
+géneros ab(α)
+
+exporta ab(α), generadores, observadores, altura, tamaño, inorder, preorder, postorder
+usa bool, nat, secu(α)
+
+observadores básicos
+nil? : ab(α)   → bool
+raiz : ab(α) a → α     {¬ nil?(a)}
+izq  : ab(α) a → ab(α) {¬ nil?(a)}
+der  : ab(α) a → ab(α) {¬ nil?(a)}
+
+generadores
+nil :                   → ab(α)
+bin : ab(α) × α × ab(α) → ab(α)
+
+otras operaciones
+altura    : ab(α) → nat
+tamaño    : ab(α) → nat
+inorder   : ab(α) → secu(α)
+preorder  : ab(α) → secu(α)
+postorder : ab(α) → secu(α)
+esHoja?   : ab(α) → bool
+
+axiomas ∀ a, b: ab(α), ∀ e: α
+    nil?(nil)        ≡ true
+    nil?(bin(a,e,b)) ≡ false
+    raiz(bin(a,e,b)) ≡ e
+    izq(bin(a,e,b))  ≡ a
+    der(bin(a,e,b))  ≡ b
+    altura(a)        ≡ if nil?(a) then 0 else 1 + máx(altura(izq(a)), altura(der(a))) fi
+    tamaño(a)        ≡ if nil?(a) then 0 else 1 + tamaño(izq(a)) + tamaño(der(a)) fi
+    inorder(a)       ≡ if nil?(a) then <> else inorder(izq(a)) & (raiz(a) • inorder(der(a))) fi
+    preorder(a)      ≡ if nil?(a) then <> else (raiz(a) • preorder(izq(a))) & preorder(der(a)) fi
+    postorder(a)     ≡ if nil?(a) then <> else postorder(izq(a)) & (postorder(der(a)) ◦ raiz(a)) fi
+    esHoja?(a)       ≡ if nil?(a) then false else (nil?(izq(a)) ∧ nil?(der(a))) fi
+
+FIN TAD

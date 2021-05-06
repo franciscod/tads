@@ -1,0 +1,33 @@
+TAD Cola de prioridad(α)
+
+igualdad observacional
+    jaja saludos
+
+parámetros formales
+    géneros α
+    -- operaciones • < • : α × α → bool Relación de orden total estricto1
+
+géneros colaPrior(α)
+
+exporta colaPrior(α), generadores, observadores
+usa bool
+
+observadores básicos
+vacía?     : colaPrior(α)   → bool
+próximo    : colaPrior(α) c → α {¬ vacía?(c)}
+desencolar : colaPrior(α) c → colaPrior(α) {¬ vacía?(c)}
+
+generadores
+vacía   :                  → colaPrior(α)
+encolar : α × colaPrior(α) → colaPrior(α)
+
+otras operaciones
+tamaño : cola(α) → nat
+
+axiomas ∀ c: colaPrior(α), ∀ e: α
+    vacía?(vacía)             ≡ true
+    vacía?(encolar(e, c))     ≡ false
+    próximo(encolar(e, c))    ≡ if vacía?(c) ∨L proximo(c) < e then e else próximo(c) fi
+    desencolar(encolar(e, c)) ≡ if vacía?(c) ∨L proximo(c) < e then c else encolar(e, desencolar(c)) fi
+
+FIN TAD

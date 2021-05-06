@@ -12,9 +12,30 @@ export const INT_TAD = fs.readFileSync("tads/int.tad", "utf-8");
 export const PAR_TAD = fs.readFileSync("tads/par.tad", "utf-8");
 export const CONJ_TAD = fs.readFileSync("tads/conj.tad", "utf-8");
 export const SECU_TAD = fs.readFileSync("tads/secu.tad", "utf-8");
+export const ARBOL_BINARIO_TAD = fs.readFileSync("tads/arbolbinario.tad", "utf-8");
+export const ARREGLO_TAD = fs.readFileSync("tads/arreglo.tad", "utf-8");
+export const COLA_TAD = fs.readFileSync("tads/cola.tad", "utf-8");
+export const COLA_PRIORIDAD_TAD = fs.readFileSync("tads/colaprioridad.tad", "utf-8");
+export const DICCIONARIO_TAD = fs.readFileSync("tads/diccionario.tad", "utf-8");
+export const PILA_TAD = fs.readFileSync("tads/pila.tad", "utf-8");
 export const TESTS_TAD = fs.readFileSync("tads/tests.tad", "utf-8");
 
-export const TADS = [BOOL_TAD, NAT_TAD, INT_TAD, PAR_TAD, CONJ_TAD, SECU_TAD, TESTS_TAD];
+export const TADS = [
+    BOOL_TAD,
+    NAT_TAD,
+    INT_TAD,
+    PAR_TAD,
+    CONJ_TAD,
+    SECU_TAD,
+    ARBOL_BINARIO_TAD,
+    ARREGLO_TAD,
+    COLA_TAD,
+    COLA_PRIORIDAD_TAD,
+    DICCIONARIO_TAD,
+    PILA_TAD,
+    
+    TESTS_TAD
+];
 
 function parsePares(input: string, sep: string): { left: string; right: string; line: number }[] {
     return input

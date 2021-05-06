@@ -1,0 +1,38 @@
+TAD Diccionario(clave,significado)
+
+igualdad observacional
+    jaja saludos
+
+parámetros formales
+    géneros clave,significado
+
+géneros dicc(clave,significado)
+
+exporta dicc(clave,significado), generadores, observadores, borrar, claves
+usa bool, nat, conj(clave)
+
+observadores básicos
+def?    : clave × dicc(clave,significado)     → bool
+obtener : clave c × dicc(clave,significado) d → significado {def?(c, d)}
+
+generadores
+vacío   :                                                → dicc(clave,significado)
+definir : clave × significado × dicc(clave,significado) → dicc(clave,significado)
+
+otras operaciones
+borrar : clave c × dicc(clave,significado) d → dicc(clave,significado) {def?(c,d)}
+claves : dicc(clave,significado)             → conj(clave)
+
+axiomas ∀ d: dicc(clave,significado), ∀ c, k: clave, ∀ s: significado
+    def?(c,vacío)                ≡ false
+    def?(c, definir(k, s, d)     ≡ c = k ∨ def?(c, d)
+    obtener(c, definir(k, s, d)) ≡ if c = k then s else obtener(c, d) fi
+    borrar(c, definir(k, s, d))  ≡ if c = k then
+                                      if def?(c,d) then borrar(c,d) else d fi
+                                    else
+                                      definir(k, s, borrar(c, d))
+                                   fi
+    claves(vacío)                ≡ ∅
+    claves(definir(c,s,d))       ≡ Ag(c, claves(d))
+
+FIN TAD

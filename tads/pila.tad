@@ -1,0 +1,33 @@
+TAD Pila(α)
+
+igualdad observacional
+    jaja saludos
+
+parámetros formales
+    géneros α
+
+géneros pila(α)
+
+exporta pila(α), generadores, observadores, tamaño
+usa bool, nat
+
+observadores básicos
+vacía?    : pila(α)   → bool
+tope      : pila(α) p → α       {¬ vacía?(p)}
+desapilar : pila(α) p → pila(α) {¬ vacía?(p)}
+
+generadores
+vacía  :             → pila(α)
+apilar : α × pila(α) → pila(α)
+
+otras operaciones
+tamaño : pila(α) → nat
+
+axiomas ∀ p: pila(α), ∀ e: α
+    vacía?(vacía)          ≡ true
+    vacía?(apilar(e,p))    ≡ false
+    tope(apilar(e,p))      ≡ e
+    desapilar(apilar(e,p)) ≡ p
+    tamaño(p)              ≡ if vacía?(p) then 0 else 1 + tamaño(desapilar(p)) fi
+
+FIN TAD

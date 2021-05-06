@@ -1,0 +1,33 @@
+TAD Cola(α)
+
+igualdad observacional
+    jaja saludos
+
+parámetros formales
+    géneros α
+
+géneros cola(α)
+
+exporta cola(α), generadores, observadores, tamaño
+usa bool, nat
+
+observadores básicos
+vacía?     : cola(α)   → bool
+próximo    : cola(α) c → α       {¬ vacía?(c)}
+desencolar : cola(α) c → cola(α) {¬ vacía?(c)}
+
+generadores
+vacía   :             → cola(α)
+encolar : α × cola(α) → cola(α)
+
+otras operaciones
+tamaño : cola(α) → nat
+
+axiomas ∀ c: cola(α), ∀ e: α
+    vacía?(vacía)            ≡ true
+    vacía?(encolar(e,c))     ≡ false
+    próximo(encolar(e,c))    ≡ if vacia?(c) then e else próximo(c) fi
+    desencolar(encolar(e,c)) ≡ if vacía?(c) then vacía else encolar(e, desencolar(c)) fi
+    tamaño(c)                ≡ if vacía?(c) then 0 else 1 + tamaño(desencolar(c)) fi
+
+FIN TAD
