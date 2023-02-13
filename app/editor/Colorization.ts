@@ -13,7 +13,7 @@ monaco.languages.setMonarchTokensProvider("tad", {
             [/(•|×)/, "tad-dot"],
             [/(≡|:|→)/, "tad-separators"],
             [/(∀|∃)/, "tad-quantifiers"],
-            [/(if|then|else|fi)/, "tad-if"],
+            [/[^a-zA-Z0-9](if|then|else|fi)[^a-zA-Z0-9]/, "tad-if"],
             [/^eval /, "tad-eval"],
             [/^assert /, "tad-assert"]
         ]
